@@ -6,6 +6,7 @@
   <title>学习曲线与模型诊断 · 第 4 天</title>
   <link rel="stylesheet" href="../assets/lesson.css">
   <script defer src="../assets/quiz.js"></script>
+  <script defer src="../assets/study.js"></script>
 </head>
 <body>
 <div class="sitebar"><nav aria-label="课程导航">
@@ -17,25 +18,49 @@
   <header class="lesson-intro">
     <a class="day-label" href="../index.html#day-4">第 4 天</a>
     <h1>学习曲线与模型诊断</h1>
-    <p class="lede">一个模型在旧照片上表现很好，到了新照片上却经常猜错。要加数据、换特征，还是调正则化？先看它在哪些数据上出错。</p>
-    <nav class="lesson-nav" aria-label="本课内容"><a href="#concepts">知识点</a><a href="#example">带做例题</a><a href="#practice">动手练习</a><a href="#original">原题 46–50</a></nav>
+    <p class="lede"><strong>比较训练误差和验证误差，判断该强化模型还是增加数据。</strong></p>
+    <p>一种模型连训练照片也认不准，另一种只在新照片上表现差。它们都需要更多照片吗？</p>
+    <p class="prerequisite">接上之前学过的<a href="0006-regularization.html">正则化强度</a>。</p>
+    <div class="depth-picker" hidden>
+      <label for="study-depth">学习深度</label>
+      <select id="study-depth" aria-describedby="depth-hint">
+        <option value="quick">极速模式</option>
+        <option value="standard" selected>标准模式</option>
+        <option value="deep">深入模式</option>
+      </select>
+      <p class="depth-hint small" id="depth-hint"></p>
+    </div>
+    <nav class="lesson-nav" aria-label="本课内容"><a href="#concepts">图解</a><a href="#example" data-study="standard">带做例题</a><a href="#practice" data-study="standard">动手练习</a><a href="#essential">必记</a><a href="#recall">易错点</a><a href="#original">原题 46–50</a></nav>
   </header>
   <section id="concepts" aria-labelledby="concepts-heading">
-    <h2 id="concepts-heading">知识点</h2>
-    <div class="concept"><h3>训练、验证、测试各有用途</h3><p><strong>训练集</strong>用来学系数。<strong>验证集</strong>用来选模型、特征或 λ。<strong>测试集</strong>留到方案确定后，用于估计最终表现。题目常把验证集叫交叉验证集。</p><p>比较模型时应使用同一误差定义和有代表性的数据。如果训练和验证来自不同环境，误差差距也可能由数据分布不同造成。</p></div>
-    <div class="concept"><h3>学习曲线怎么读</h3><p>横轴放训练样本数，纵轴放误差。每个点都用该规模的数据重新训练，然后分别算训练误差和验证误差。先看样本数较大的右侧，再比较两条曲线。</p><p>训练误差与验证误差都高而且接近，通常是<strong>高偏差</strong>，说明模型没有学到主要规律。训练误差低，验证误差高、差距持续，通常是<strong>高方差</strong>，说明模型过度适应了训练样本。</p></div>
-    <div class="concept"><h3>按诊断挑下一步</h3><p>高偏差优先尝试有信息的新特征、更有表达力的模型或较弱的正则化。高方差可以尝试更多有代表性的训练样本、简化特征或较强的正则化。</p><p>训练和验证误差接近也可能都很低。判断「高」要结合任务目标或可达到的基准，不能只看有没有差距。</p></div>
+    <h2 id="concepts-heading">先看现象，再写规则</h2>
+    <div class="demo" data-demo="diagnostics">
+      <h3>多给一点数据，误差会怎样</h3>
+      <p>分别把三条示意学习曲线拖到样本最多处。先比验证误差和训练误差的差距，再比它们与 5% 基准的距离。</p>
+      <p class="demo-caption">曲线一右端仍有明显差距，曲线二的两条线都高，曲线三的两条线都接近低误差基准。</p>
+    </div>
+    <div class="concept" data-study="standard"><h3>训练、验证、测试各有用途</h3><p><strong>训练集</strong>用来学系数。<strong>验证集</strong>用来选模型、特征或 λ。<strong>测试集</strong>留到方案确定后，用于估计最终表现。题目常把验证集叫交叉验证集。</p><p>比较模型时应使用同一误差定义和有代表性的数据。如果训练和验证来自不同环境，误差差距也可能由数据分布不同造成。</p></div>
+    <div class="concept" data-study="standard"><h3>学习曲线怎么读</h3><p>横轴放训练样本数，纵轴放误差。每个点都用该规模的数据重新训练，然后分别算训练误差和验证误差。先看样本数较大的右侧，再比较两条曲线。</p><p>训练误差与验证误差都高而且接近，通常是<strong>高偏差</strong>，说明模型没有学到主要规律。训练误差低，验证误差高、差距持续，通常是<strong>高方差</strong>，说明模型过度适应了训练样本。</p></div>
+    <div class="concept" data-study="standard"><h3>按诊断挑下一步</h3><p>高偏差优先尝试有信息的新特征、更有表达力的模型或较弱的正则化。高方差可以尝试更多有代表性的训练样本、简化特征或较强的正则化。</p><p>训练和验证误差接近也可能都很低。判断「高」要结合任务目标或可达到的基准，不能只看有没有差距。</p></div>
+    <aside class="quick-reference" id="essential" aria-labelledby="essential-heading">
+      <h3 id="essential-heading">必记</h3>
+      <p class="formula">右侧两条误差曲线都高且近，先排查高偏差；训练低、验证高且差距持续，先排查高方差。用明确的基准判断「高」。</p>
+    </aside>
   </section>
-  <section id="example" class="example" aria-labelledby="example-heading">
+  <section id="example" data-study="standard" class="example" aria-labelledby="example-heading">
     <h2 id="example-heading">跟着算一遍</h2>
     <ol><li>假定任务目标的合理误差在 5% 左右。甲用大量样本后训练误差 18%，验证误差 20%。两条曲线都高且接近，优先排查高偏差。</li><li>乙在同样数量下训练误差 2%，验证误差 19%。差距 17 个百分点，若数据分布相近，优先排查高方差。</li><li>如果要比较两组 λ，用相同验证集比较。确定 λ 后再到独立测试集做一次最终评估。</li></ol>
   </section>
-  <section id="practice" class="try" aria-labelledby="practice-heading">
+  <section id="practice" data-study="standard" class="try" aria-labelledby="practice-heading">
     <h2 id="practice-heading">自己试一题</h2>
     <p>训练误差 3%、验证误差 17%，同时增加样本时差距缩小。下一步优先尝试什么？</p>
     <details class="solution"><summary>核对练习思路</summary><div><p>同分布前提下，表现更像高方差。可优先加有代表性的样本，或比较更强的正则化。</p></div></details>
   </section>
-  <section id="original" aria-labelledby="questions-heading">
+  <details class="solution" data-study="standard" data-advanced>
+    <summary>深入理解</summary>
+    <div><p>画学习曲线时，每一种训练规模都需重新训练。为了减少抽样波动，可以在相同规模下抽多份子集，画误差均值并标注波动范围。图解用示意数据，训练与验证来自不同分布时，应先排查分布差异。</p></div>
+  </details>
+  <section id="original" data-study="standard" aria-labelledby="questions-heading">
     <h2 id="questions-heading">原题练习</h2>
     <nav class="question-jump" aria-label="跳到本课原题"><a href="#q46">46</a><a href="#q47">47</a><a href="#q48">48</a><a href="#q49">49</a><a href="#q50">50</a></nav>
     <p class="small">先独立作答，再展开解析核对。计算题可以在纸上列式。</p>
@@ -46,11 +71,11 @@
     <form class="exercise choice-exercise" data-quiz data-answer="A">
       <fieldset>
         <legend>单选题</legend>
-        <label><input type="radio" name="q46-1" value="A"><span class="choice-letter">A.</span><span>高偏差</span></label>
-        <label><input type="radio" name="q46-1" value="B"><span class="choice-letter">B.</span><span>高方差</span></label>
-        <label><input type="radio" name="q46-1" value="C"><span class="choice-letter">C.</span><span>两者都不</span></label>
+        <label><input type="radio" name="q46-1" value="A" data-reason="样本多时训练与验证曲线都较高且接近，训练本身就有困难。"><span class="choice-letter">A.</span><span>高偏差</span></label>
+        <label><input type="radio" name="q46-1" value="B" data-reason="高方差通常表现为训练误差低、验证误差高、两者差距仍大。"><span class="choice-letter">B.</span><span>高方差</span></label>
+        <label><input type="radio" name="q46-1" value="C" data-reason="曲线接近不等于表现好，两条误差曲线都停在高位。"><span class="choice-letter">C.</span><span>两者都不</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -63,12 +88,12 @@
     <form class="exercise choice-exercise" data-quiz data-answer="BC">
       <fieldset>
         <legend>多选题 · 选全后检查</legend>
-        <label><input type="checkbox" name="q47-1" value="A"><span class="choice-letter">A.</span><span>尝试添加多项式特征</span></label>
-        <label><input type="checkbox" name="q47-1" value="B"><span class="choice-letter">B.</span><span>获取更多训练示例</span></label>
-        <label><input type="checkbox" name="q47-1" value="C"><span class="choice-letter">C.</span><span>尝试使用较少的特征</span></label>
-        <label><input type="checkbox" name="q47-1" value="D"><span class="choice-letter">D.</span><span>少用训练的例子</span></label>
+        <label><input type="checkbox" name="q47-1" value="A" data-reason="模型已很贴合训练集，更复杂的特征可能放大泛化差距。"><span class="choice-letter">A.</span><span>尝试添加多项式特征</span></label>
+        <label><input type="checkbox" name="q47-1" value="B" data-reason="更多有代表性的训练样本可减少对少数旧样本的依赖。"><span class="choice-letter">B.</span><span>获取更多训练示例</span></label>
+        <label><input type="checkbox" name="q47-1" value="C" data-reason="减少无用特征可以降低模型对训练噪声的敏感度。"><span class="choice-letter">C.</span><span>尝试使用较少的特征</span></label>
+        <label><input type="checkbox" name="q47-1" value="D" data-reason="训练集更小可能让模型更依赖每个样本，反而放大高方差。"><span class="choice-letter">D.</span><span>少用训练的例子</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -81,12 +106,12 @@
     <form class="exercise choice-exercise" data-quiz data-answer="AB">
       <fieldset>
         <legend>多选题 · 选全后检查</legend>
-        <label><input type="checkbox" name="q48-1" value="A"><span class="choice-letter">A.</span><span>尝试获取并使用其他特征</span></label>
-        <label><input type="checkbox" name="q48-1" value="B"><span class="choice-letter">B.</span><span>尝试添加多项式特征</span></label>
-        <label><input type="checkbox" name="q48-1" value="C"><span class="choice-letter">C.</span><span>尝试使用较少的特征</span></label>
-        <label><input type="checkbox" name="q48-1" value="D"><span class="choice-letter">D.</span><span>尝试增加正则化参数λ</span></label>
+        <label><input type="checkbox" name="q48-1" value="A" data-reason="连训练集也拟合不佳，可以增加有预测信息的特征。"><span class="choice-letter">A.</span><span>尝试获取并使用其他特征</span></label>
+        <label><input type="checkbox" name="q48-1" value="B" data-reason="多项式特征能让模型表达原先画不出的非线性关系。"><span class="choice-letter">B.</span><span>尝试添加多项式特征</span></label>
+        <label><input type="checkbox" name="q48-1" value="C" data-reason="若缺少表达能力，进一步删掉有用特征通常会加重欠拟合。"><span class="choice-letter">C.</span><span>尝试使用较少的特征</span></label>
+        <label><input type="checkbox" name="q48-1" value="D" data-reason="较大的 λ 让模型更受限制。先考虑当前约束是否已太强。"><span class="choice-letter">D.</span><span>尝试增加正则化参数λ</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -99,12 +124,12 @@
     <form class="exercise choice-exercise" data-quiz data-answer="AD">
       <fieldset>
         <legend>多选题 · 选全后检查</legend>
-        <label><input type="checkbox" name="q49-1" value="A"><span class="choice-letter">A.</span><span>假设您正在训练一个正则化的线性回归模型。选择正则化参数λ值的推荐方法是选择交叉验证误差最小的λ值。</span></label>
-        <label><input type="checkbox" name="q49-1" value="B"><span class="choice-letter">B.</span><span>假设您正在训练一个正则化的线性回归模型。选择正则化参数λ值的推荐方法是选择给出最小测试集误差的λ值。</span></label>
-        <label><input type="checkbox" name="q49-1" value="C"><span class="choice-letter">C.</span><span>假设你正在训练一个正则化线性回归模型，推荐的选择正则化参数λ值的方法是选择给出最小训练集误差的λ值。</span></label>
-        <label><input type="checkbox" name="q49-1" value="D"><span class="choice-letter">D.</span><span>学习算法在训练集上的性能通常比在测试集上的性能要好。</span></label>
+        <label><input type="checkbox" name="q49-1" value="A" data-reason="用验证集比较 λ，再把测试集留给最终选定的模型。"><span class="choice-letter">A.</span><span>假设您正在训练一个正则化的线性回归模型。选择正则化参数λ值的推荐方法是选择交叉验证误差最小的λ值。</span></label>
+        <label><input type="checkbox" name="q49-1" value="B" data-reason="反复用测试集挑 λ 会把测试信息间接带入选择，评估可能过于乐观。"><span class="choice-letter">B.</span><span>假设您正在训练一个正则化的线性回归模型。选择正则化参数λ值的推荐方法是选择给出最小测试集误差的λ值。</span></label>
+        <label><input type="checkbox" name="q49-1" value="C" data-reason="训练误差容易偏向过弱的惩罚，无法直接衡量泛化。"><span class="choice-letter">C.</span><span>假设你正在训练一个正则化线性回归模型，推荐的选择正则化参数λ值的方法是选择给出最小训练集误差的λ值。</span></label>
+        <label><input type="checkbox" name="q49-1" value="D" data-reason="训练集参与了拟合，表现通常比真正未见过的数据更好。"><span class="choice-letter">D.</span><span>学习算法在训练集上的性能通常比在测试集上的性能要好。</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -117,12 +142,12 @@
     <form class="exercise choice-exercise" data-quiz data-answer="ABD">
       <fieldset>
         <legend>多选题 · 选全后检查</legend>
-        <label><input type="checkbox" name="q50-1" value="A"><span class="choice-letter">A.</span><span>在调试学习算法时，绘制学习曲线有助于了解是否存在高偏差或高方差问题。</span></label>
-        <label><input type="checkbox" name="q50-1" value="B"><span class="choice-letter">B.</span><span>如果一个学习算法受到高方差的影响，增加更多的训练实例可能会改善测试误差。</span></label>
-        <label><input type="checkbox" name="q50-1" value="C"><span class="choice-letter">C.</span><span>我们总是喜欢高方差的模型（而不是高偏差的模型），因为它们能够更好地适应训练集。</span></label>
-        <label><input type="checkbox" name="q50-1" value="D"><span class="choice-letter">D.</span><span>如果一个学习算法有很高的偏差，仅仅增加更多的训练实例可能不会显著改善测试误差。</span></label>
+        <label><input type="checkbox" name="q50-1" value="A" data-reason="样本规模的变化能显示训练与验证误差的高度和差距。"><span class="choice-letter">A.</span><span>在调试学习算法时，绘制学习曲线有助于了解是否存在高偏差或高方差问题。</span></label>
+        <label><input type="checkbox" name="q50-1" value="B" data-reason="更多有代表性的样本可能缩小高方差带来的泛化差距。"><span class="choice-letter">B.</span><span>如果一个学习算法受到高方差的影响，增加更多的训练实例可能会改善测试误差。</span></label>
+        <label><input type="checkbox" name="q50-1" value="C" data-reason="训练拟合好仍可能在新数据上表现差，要比较验证结果。"><span class="choice-letter">C.</span><span>我们总是喜欢高方差的模型（而不是高偏差的模型），因为它们能够更好地适应训练集。</span></label>
+        <label><input type="checkbox" name="q50-1" value="D" data-reason="高偏差时模型本身学不到主要规律，单纯加样本常难改善。"><span class="choice-letter">D.</span><span>如果一个学习算法有很高的偏差，仅仅增加更多的训练实例可能不会显著改善测试误差。</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -130,7 +155,12 @@
     </details>
   </article>
   </section>
-  <section class="lesson-recall" aria-labelledby="recall-heading"><h2 id="recall-heading">考前回忆</h2><p>右侧两条学习曲线都高而接近，通常是高偏差。训练低验证高且持续有间距，通常是高方差。</p></section>
+  <section class="lesson-recall" id="recall" aria-labelledby="recall-heading"><h2 id="recall-heading">易错点与快速判断</h2><p>右侧两条学习曲线都高而接近，通常是高偏差。训练低验证高且持续有间距，通常是高方差。</p></section>
+  <section aria-labelledby="retrieval-heading">
+    <h2 id="retrieval-heading">跨课回顾</h2>
+    <p>训练误差与验证误差一起升高，可能是 λ 调得过强还是过弱？</p>
+    <details class="solution"><summary>核对你的判断</summary><div><p>可能惩罚过强，模型难以拟合主要规律。应结合误差曲线与基准判断。</p><p><a href="0006-regularization.html#concepts">回看正则化强度</a></p></div></details>
+  </section>
   <footer>
     <p>遇到疑问，可以把题号和你卡住的步骤发给我。</p>
     <p class="small">参考资料 <a href="https://developers.google.com/machine-learning/crash-course/overfitting/dividing-datasets">Google 数据划分课程</a> · <a href="https://home-wordpress.deeplearning.ai/wp-content/uploads/2022/03/andrew-ng-machine-learning-yearning.pdf">吴恩达《Machine Learning Yearning》</a></p>

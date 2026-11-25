@@ -6,6 +6,7 @@
   <title>K-means 如何把样本分组 · 第 7 天</title>
   <link rel="stylesheet" href="../assets/lesson.css">
   <script defer src="../assets/quiz.js"></script>
+  <script defer src="../assets/study.js"></script>
 </head>
 <body>
 <div class="sitebar"><nav aria-label="课程导航">
@@ -17,25 +18,49 @@
   <header class="lesson-intro">
     <a class="day-label" href="../index.html#day-7">第 7 天</a>
     <h1>K-means 如何把样本分组</h1>
-    <p class="lede">手上只有顾客的访问次数和购买次数，没人告诉你顾客类型。怎样根据相似性把他们分成几组？</p>
-    <nav class="lesson-nav" aria-label="本课内容"><a href="#concepts">知识点</a><a href="#example">带做例题</a><a href="#practice">动手练习</a><a href="#original">原题 61–65</a></nav>
+    <p class="lede"><strong>K-means 交替做两件事，让样本找最近的中心，再让每个中心搬到组内平均位置。</strong></p>
+    <p>顾客表只有访问次数和购买次数，没有人提前划分顾客类型。能否让相近的顾客自己聚到一起？</p>
+    <p class="prerequisite">接上之前学过的<a href="0001-learning-task-types.html">未知分组与已有标签</a>。</p>
+    <div class="depth-picker" hidden>
+      <label for="study-depth">学习深度</label>
+      <select id="study-depth" aria-describedby="depth-hint">
+        <option value="quick">极速模式</option>
+        <option value="standard" selected>标准模式</option>
+        <option value="deep">深入模式</option>
+      </select>
+      <p class="depth-hint small" id="depth-hint"></p>
+    </div>
+    <nav class="lesson-nav" aria-label="本课内容"><a href="#concepts">图解</a><a href="#example" data-study="standard">带做例题</a><a href="#practice" data-study="standard">动手练习</a><a href="#essential">必记</a><a href="#recall">易错点</a><a href="#original">原题 61–65</a></nav>
   </header>
   <section id="concepts" aria-labelledby="concepts-heading">
-    <h2 id="concepts-heading">知识点</h2>
-    <div class="concept"><h3>簇、中心与距离</h3><p>一组相似的样本叫一个<strong>簇</strong>，K 是想分出的簇数，μₖ 是第 k 组中心，c<sup>(i)</sup> 是第 i 条样本分到的组号。K-means 用特征空间中的距离来衡量相似。</p><p>二维点 (a,b) 与 (c,d) 的平方距离为 (a−c)²+(b−d)²。比较最近中心时可以省去开平方，排序不变。若各特征尺度相差大，先考虑缩放。</p></div>
-    <div class="concept"><h3>两步反复做</h3><p>先<strong>分配</strong>，给每个样本选最近中心。再<strong>更新</strong>，对每个组内的样本逐个坐标求平均，作为新中心。下一轮样本可以换组。</p><p><span class="formula">J = (1/m) ∑<sub>i=1</sub><sup>m</sup> ‖x<sup>(i)</sup> − μ<sub>c(i)</sub>‖²</span>J 是每个样本到所属中心的平均平方距离，也叫失真。固定中心时选最近点不会让 J 增加，固定分组时用均值更新也不会让 J 增加。</p></div>
-    <div class="concept"><h3>中心从哪里来</h3><p>常从数据中随机取 K 个不同样本作初始中心。初值会影响结果，固定 K 时可以多跑几次，选 J 最小的一次。</p><p>改变 K 时不能只选 J 最小的方案，因为 K 多了通常就更能贴近训练点。还要结合目标、组间差距和曲线趋势。对新闻做聚类前，需要先把文字变成可比较的数值特征。</p></div>
+    <h2 id="concepts-heading">先看现象，再写规则</h2>
+    <div class="demo" data-demo="clustering">
+      <h3>分一次，再挪一次</h3>
+      <p>两个中心先都放在左边。每按一次完成一种操作。观察第二次分配时有没有点换组，再换个初始位置重跑。</p>
+      <p class="demo-caption">实心点是样本，空心点是中心，虚线连着样本和目前所属的中心。</p>
+    </div>
+    <div class="concept" data-study="standard"><h3>簇、中心与距离</h3><p>一组相似的样本叫一个<strong>簇</strong>，K 是想分出的簇数，μₖ 是第 k 组中心，c<sup>(i)</sup> 是第 i 条样本分到的组号。K-means 用特征空间中的距离来衡量相似。</p><p>二维点 (a,b) 与 (c,d) 的平方距离为 (a−c)²+(b−d)²。比较最近中心时可以省去开平方，排序不变。若各特征尺度相差大，先考虑缩放。</p></div>
+    <div class="concept" data-study="standard"><h3>两步反复做</h3><p>先<strong>分配</strong>，给每个样本选最近中心。再<strong>更新</strong>，对每个组内的样本逐个坐标求平均，作为新中心。下一轮样本可以换组。</p><p><span class="formula">J = (1/m) ∑<sub>i=1</sub><sup>m</sup> ‖x<sup>(i)</sup> − μ<sub>c(i)</sub>‖²</span>J 是每个样本到所属中心的平均平方距离，也叫失真。固定中心时选最近点不会让 J 增加，固定分组时用均值更新也不会让 J 增加。</p></div>
+    <div class="concept" data-study="standard"><h3>中心从哪里来</h3><p>常从数据中随机取 K 个不同样本作初始中心。初值会影响结果，固定 K 时可以多跑几次，选 J 最小的一次。</p><p>改变 K 时不能只选 J 最小的方案，因为 K 多了通常就更能贴近训练点。还要结合目标、组间差距和曲线趋势。对新闻做聚类前，需要先把文字变成可比较的数值特征。</p></div>
+    <aside class="quick-reference" id="essential" aria-labelledby="essential-heading">
+      <h3 id="essential-heading">必记</h3>
+      <p class="formula">先将每个点分配给最近中心，再更新为每组坐标的均值。失真 J = 样本到所属中心的平方距离之和 / 样本数。</p>
+    </aside>
   </section>
-  <section id="example" class="example" aria-labelledby="example-heading">
+  <section id="example" data-study="standard" class="example" aria-labelledby="example-heading">
     <h2 id="example-heading">跟着算一遍</h2>
     <ol><li>用一维数据 1、2、8、9，令 K=2，初始中心为 1 和 8。</li><li>1、2 更接近中心 1，8、9 更接近中心 8。此时代价 J=(0+1+0+1)/4=0.5。</li><li>更新中心为 (1+2)/2=1.5 和 (8+9)/2=8.5。每个样本离所属中心 0.5，J=4×0.5²/4=0.25。</li></ol>
   </section>
-  <section id="practice" class="try" aria-labelledby="practice-heading">
+  <section id="practice" data-study="standard" class="try" aria-labelledby="practice-heading">
     <h2 id="practice-heading">自己试一题</h2>
     <p>点 (1,2) 要在中心 (0,0) 和 (2,2) 之间选择。分去哪个组？</p>
     <details class="solution"><summary>核对练习思路</summary><div><p>平方距离分别为 1²+2²=5 与 (−1)²+0²=1，因此选中心 (2,2) 所在的组。</p></div></details>
   </section>
-  <section id="original" aria-labelledby="questions-heading">
+  <details class="solution" data-study="standard" data-advanced>
+    <summary>深入理解</summary>
+    <div><p>分配步骤逐点选距离最小的中心，更新步骤用均值最小化组内平方距离，两步都不会增加目标值。不同初值可能到达不同局部最优。固定 K 可比较多次初始化中的最小失真；选择 K 还需结合业务解释和聚类结构。</p></div>
+  </details>
+  <section id="original" data-study="standard" aria-labelledby="questions-heading">
     <h2 id="questions-heading">原题练习</h2>
     <nav class="question-jump" aria-label="跳到本课原题"><a href="#q61">61</a><a href="#q62">62</a><a href="#q63">63</a><a href="#q64">64</a><a href="#q65">65</a></nav>
     <p class="small">先独立作答，再展开解析核对。计算题可以在纸上列式。</p>
@@ -46,16 +71,16 @@
     <form class="exercise choice-exercise" data-quiz data-answer="ABEG">
       <fieldset>
         <legend>多选题 · 选全后检查</legend>
-        <label><input type="checkbox" name="q61-1" value="A"><span class="choice-letter">A.</span><span>给定一个关于用户信息的数据库，自动将用户分组到不同的市场细分中。</span></label>
-        <label><input type="checkbox" name="q61-1" value="B"><span class="choice-letter">B.</span><span>根据超市中大量产品的销售数据，找出哪些产品可以组成组合（比如经常一起购买），因此应该放在同一个货架上。</span></label>
-        <label><input type="checkbox" name="q61-1" value="C"><span class="choice-letter">C.</span><span>根据历史天气记录，预测明天的降雨量</span></label>
-        <label><input type="checkbox" name="q61-1" value="D"><span class="choice-letter">D.</span><span>给定超市中大量产品的销售数据，估计这些产品的未来销售额。</span></label>
-        <label><input type="checkbox" name="q61-1" value="E"><span class="choice-letter">E.</span><span>给出一组来自许多不同新闻网站的新闻文章，找出所涉及的主要主题。</span></label>
-        <label><input type="checkbox" name="q61-1" value="F"><span class="choice-letter">F.</span><span>基于许多电子邮件，确定它们是垃圾邮件还是非垃圾邮件。</span></label>
-        <label><input type="checkbox" name="q61-1" value="G"><span class="choice-letter">G.</span><span>从网站上的用户使用模式，找出哪些不同的用户群体存在。</span></label>
-        <label><input type="checkbox" name="q61-1" value="H"><span class="choice-letter">H.</span><span>根据历史天气记录，预测明天的天气是晴还是雨。</span></label>
+        <label><input type="checkbox" name="q61-1" value="A" data-reason="顾客细分的目标是发现未知群组，可尝试用聚类。"><span class="choice-letter">A.</span><span>给定一个关于用户信息的数据库，自动将用户分组到不同的市场细分中。</span></label>
+        <label><input type="checkbox" name="q61-1" value="B" data-reason="按共同购买行为构造成可比较特征后，可以聚出相似商品。"><span class="choice-letter">B.</span><span>根据超市中大量产品的销售数据，找出哪些产品可以组成组合（比如经常一起购买），因此应该放在同一个货架上。</span></label>
+        <label><input type="checkbox" name="q61-1" value="C" data-reason="明天的降雨量是数值目标，属于回归。"><span class="choice-letter">C.</span><span>根据历史天气记录，预测明天的降雨量</span></label>
+        <label><input type="checkbox" name="q61-1" value="D" data-reason="未来销售量是数值目标，属于回归。"><span class="choice-letter">D.</span><span>给定超市中大量产品的销售数据，估计这些产品的未来销售额。</span></label>
+        <label><input type="checkbox" name="q61-1" value="E" data-reason="把文章转成数值特征后，可按内容相似度找未知主题。"><span class="choice-letter">E.</span><span>给出一组来自许多不同新闻网站的新闻文章，找出所涉及的主要主题。</span></label>
+        <label><input type="checkbox" name="q61-1" value="F" data-reason="题目要判断预先指定的垃圾与非垃圾两类，属于分类。"><span class="choice-letter">F.</span><span>基于许多电子邮件，确定它们是垃圾邮件还是非垃圾邮件。</span></label>
+        <label><input type="checkbox" name="q61-1" value="G" data-reason="用户群体尚未命名，可以用行为相似度发现分组。"><span class="choice-letter">G.</span><span>从网站上的用户使用模式，找出哪些不同的用户群体存在。</span></label>
+        <label><input type="checkbox" name="q61-1" value="H" data-reason="晴或雨是预先定义的类别，属于分类。"><span class="choice-letter">H.</span><span>根据历史天气记录，预测明天的天气是晴还是雨。</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -68,12 +93,12 @@
     <form class="exercise choice-exercise" data-quiz data-answer="A">
       <fieldset>
         <legend>单选题</legend>
-        <label><input type="radio" name="q62-1" value="A"><span class="choice-letter">A.</span><span>c⁽ⁱ⁾=2。</span></label>
-        <label><input type="radio" name="q62-1" value="B"><span class="choice-letter">B.</span><span>c⁽ⁱ⁾ 未被分配。</span></label>
-        <label><input type="radio" name="q62-1" value="C"><span class="choice-letter">C.</span><span>c⁽ⁱ⁾=1。</span></label>
-        <label><input type="radio" name="q62-1" value="D"><span class="choice-letter">D.</span><span>c⁽ⁱ⁾=3。</span></label>
+        <label><input type="radio" name="q62-1" value="A" data-reason="三个平方距离是 10、2、37，最小的是第二个中心。"><span class="choice-letter">A.</span><span>c⁽ⁱ⁾=2。</span></label>
+        <label><input type="radio" name="q62-1" value="B" data-reason="标准分配会为每个样本选择一个最近中心，此处最近中心唯一。"><span class="choice-letter">B.</span><span>c⁽ⁱ⁾ 未被分配。</span></label>
+        <label><input type="radio" name="q62-1" value="C" data-reason="到第一中心的平方距离为 10，到第二中心只要 2。"><span class="choice-letter">C.</span><span>c⁽ⁱ⁾=1。</span></label>
+        <label><input type="radio" name="q62-1" value="D" data-reason="第三中心横坐标差 6，平方距离已经很大。对照第二中心的距离。"><span class="choice-letter">D.</span><span>c⁽ⁱ⁾=3。</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -86,12 +111,12 @@
     <form class="exercise choice-exercise" data-quiz data-answer="AB">
       <fieldset>
         <legend>多选题 · 选全后检查</legend>
-        <label><input type="checkbox" name="q63-1" value="A"><span class="choice-letter">A.</span><span>移动簇中心，更新簇中心μₖ。</span></label>
-        <label><input type="checkbox" name="q63-1" value="B"><span class="choice-letter">B.</span><span>分配簇，其中参数c⁽ⁱ⁾被更新。</span></label>
-        <label><input type="checkbox" name="q63-1" value="C"><span class="choice-letter">C.</span><span>移动簇中心μₖ，将其设置为等于最近的训练示例c⁽ⁱ⁾</span></label>
-        <label><input type="checkbox" name="q63-1" value="D"><span class="choice-letter">D.</span><span>簇中心分配步骤，其中每个簇质心μi被分配（通过设置c⁽ⁱ⁾）到最近的训练示例x⁽ⁱ⁾。</span></label>
+        <label><input type="checkbox" name="q63-1" value="A" data-reason="各簇的中心移到簇内样本坐标的均值。"><span class="choice-letter">A.</span><span>移动簇中心，更新簇中心μₖ。</span></label>
+        <label><input type="checkbox" name="q63-1" value="B" data-reason="各样本更新组号，选择离自己最近的中心。"><span class="choice-letter">B.</span><span>分配簇，其中参数c⁽ⁱ⁾被更新。</span></label>
+        <label><input type="checkbox" name="q63-1" value="C" data-reason="中心更新是求均值，均值可落在任意数据点之间。"><span class="choice-letter">C.</span><span>移动簇中心μₖ，将其设置为等于最近的训练示例c⁽ⁱ⁾</span></label>
+        <label><input type="checkbox" name="q63-1" value="D" data-reason="每个样本选中心，方向反过来就无法为所有样本分组。"><span class="choice-letter">D.</span><span>簇中心分配步骤，其中每个簇质心μi被分配（通过设置c⁽ⁱ⁾）到最近的训练示例x⁽ⁱ⁾。</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -104,12 +129,12 @@
     <form class="exercise choice-exercise" data-quiz data-answer="B">
       <fieldset>
         <legend>单选题</legend>
-        <label><input type="radio" name="q64-1" value="A"><span class="choice-letter">A.</span><span>唯一的方法是我们需要数据标签y⁽ⁱ⁾。</span></label>
-        <label><input type="radio" name="q64-1" value="B"><span class="choice-letter">B.</span><span>对于每一个分类，计算(1/m)∑ᵢ₌₁ᵐ ‖x⁽ⁱ⁾−μ[c⁽ⁱ⁾]‖²，并选择这个值最小的一个。</span></label>
-        <label><input type="radio" name="q64-1" value="C"><span class="choice-letter">C.</span><span>答案模棱两可，没有好的选择方法。</span></label>
-        <label><input type="radio" name="q64-1" value="D"><span class="choice-letter">D.</span><span>总是选择找到的最后一个（第50个）聚类，因为它更有可能收敛到一个好的解决方案。</span></label>
+        <label><input type="radio" name="q64-1" value="A" data-reason="聚类是无监督任务，固定 K 时可以按数据与中心的大致距离比较。"><span class="choice-letter">A.</span><span>唯一的方法是我们需要数据标签y⁽ⁱ⁾。</span></label>
+        <label><input type="radio" name="q64-1" value="B" data-reason="同一个 K 下，平均平方距离较小的聚类更符合训练目标。"><span class="choice-letter">B.</span><span>对于每一个分类，计算(1/m)∑ᵢ₌₁ᵐ ‖x⁽ⁱ⁾−μ[c⁽ⁱ⁾]‖²，并选择这个值最小的一个。</span></label>
+        <label><input type="radio" name="q64-1" value="C" data-reason="可以算题目给出的失真函数，选目标值最小的结果。"><span class="choice-letter">C.</span><span>答案模棱两可，没有好的选择方法。</span></label>
+        <label><input type="radio" name="q64-1" value="D" data-reason="K-means 的结果取决于初始中心，运行顺序不会给末次优势。"><span class="choice-letter">D.</span><span>总是选择找到的最后一个（第50个）聚类，因为它更有可能收敛到一个好的解决方案。</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -122,16 +147,16 @@
     <form class="exercise choice-exercise" data-quiz data-answer="ADFG">
       <fieldset>
         <legend>多选题 · 选全后检查</legend>
-        <label><input type="checkbox" name="q65-1" value="A"><span class="choice-letter">A.</span><span>如果我们担心K-means陷入局部最优解，一种改善（减少）这个问题的方法是尝试使用多个随机初始化。</span></label>
-        <label><input type="checkbox" name="q65-1" value="B"><span class="choice-letter">B.</span><span>初始化K-均值的标准方法是将μ₁=...=μₖ设置为等于零的向量。</span></label>
-        <label><input type="checkbox" name="q65-1" value="C"><span class="choice-letter">C.</span><span>由于K-Means是一种无监督的学习算法，它不能对数据进行过度拟合，因此最好在计算上尽可能多的聚类。</span></label>
-        <label><input type="checkbox" name="q65-1" value="D"><span class="choice-letter">D.</span><span>对于某些数据集，K（集群数量）的“正确”值可能是不明确的，甚至对于仔细查看数据的人类专家来说也很难做出决定。</span></label>
-        <label><input type="checkbox" name="q65-1" value="E"><span class="choice-letter">E.</span><span>无论簇中心的初始化如何，K-均值都会给出相同的结果。</span></label>
-        <label><input type="checkbox" name="q65-1" value="F"><span class="choice-letter">F.</span><span>初始化K-means的一个好方法是从训练集中选择K个（不同的）示例，并设置与这些选定示例相等的簇质心。</span></label>
-        <label><input type="checkbox" name="q65-1" value="G"><span class="choice-letter">G.</span><span>在K-均值的每次迭代中，代价函数J(c(1),…,c(m),μ₁,…,μₖ)（失真函数）要么保持不变，要么减小，特别是不应增加。</span></label>
-        <label><input type="checkbox" name="q65-1" value="H"><span class="choice-letter">H.</span><span>一旦一个例子被分配到一个特定的簇中心，它将永远不会被重新分配到另一个不同的簇中心。</span></label>
+        <label><input type="checkbox" name="q65-1" value="A" data-reason="多次初始化给了算法机会从不同起点找到较低的失真。"><span class="choice-letter">A.</span><span>如果我们担心K-means陷入局部最优解，一种改善（减少）这个问题的方法是尝试使用多个随机初始化。</span></label>
+        <label><input type="checkbox" name="q65-1" value="B" data-reason="中心全部重合会让距离比较失去区分，部分簇可能为空。"><span class="choice-letter">B.</span><span>初始化K-均值的标准方法是将μ₁=...=μₖ设置为等于零的向量。</span></label>
+        <label><input type="checkbox" name="q65-1" value="C" data-reason="K 过大可以把噪声也拆成小组，不能只靠失真下降选 K。"><span class="choice-letter">C.</span><span>由于K-Means是一种无监督的学习算法，它不能对数据进行过度拟合，因此最好在计算上尽可能多的聚类。</span></label>
+        <label><input type="checkbox" name="q65-1" value="D" data-reason="相同数据可能在不同尺度上有合理分组，K 依赖使用目的。"><span class="choice-letter">D.</span><span>对于某些数据集，K（集群数量）的“正确”值可能是不明确的，甚至对于仔细查看数据的人类专家来说也很难做出决定。</span></label>
+        <label><input type="checkbox" name="q65-1" value="E" data-reason="中心起点不同，算法可能收敛到不同的局部最优。"><span class="choice-letter">E.</span><span>无论簇中心的初始化如何，K-均值都会给出相同的结果。</span></label>
+        <label><input type="checkbox" name="q65-1" value="F" data-reason="选 K 个不同训练样本是常见的初始设置。"><span class="choice-letter">F.</span><span>初始化K-means的一个好方法是从训练集中选择K个（不同的）示例，并设置与这些选定示例相等的簇质心。</span></label>
+        <label><input type="checkbox" name="q65-1" value="G" data-reason="最近中心分配和组内均值各自都不会提高失真。"><span class="choice-letter">G.</span><span>在K-均值的每次迭代中，代价函数J(c(1),…,c(m),μ₁,…,μₖ)（失真函数）要么保持不变，要么减小，特别是不应增加。</span></label>
+        <label><input type="checkbox" name="q65-1" value="H" data-reason="中心更新后相对距离会变化，样本可能在下一轮换组。"><span class="choice-letter">H.</span><span>一旦一个例子被分配到一个特定的簇中心，它将永远不会被重新分配到另一个不同的簇中心。</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -139,7 +164,12 @@
     </details>
   </article>
   </section>
-  <section class="lesson-recall" aria-labelledby="recall-heading"><h2 id="recall-heading">考前回忆</h2><p>先选最近中心，再把组内样本求均值。固定 K 比较多次运行时，选平均平方距离较小的方案。</p></section>
+  <section class="lesson-recall" id="recall" aria-labelledby="recall-heading"><h2 id="recall-heading">易错点与快速判断</h2><p>先选最近中心，再把组内样本求均值。固定 K 比较多次运行时，选平均平方距离较小的方案。</p></section>
+  <section aria-labelledby="retrieval-heading">
+    <h2 id="retrieval-heading">跨课回顾</h2>
+    <p>顾客类型已经标好，要预测新顾客的类型。还应把它当作找未知分组吗？</p>
+    <details class="solution"><summary>核对你的判断</summary><div><p>这是监督分类。已知类别可以用作训练标签。</p><p><a href="0001-learning-task-types.html#concepts">回看未知分组与已有标签</a></p></div></details>
+  </section>
   <footer>
     <p>遇到疑问，可以把题号和你卡住的步骤发给我。</p>
     <p class="small">参考资料 <a href="https://see.stanford.edu/materials/aimlcs229/cs229-notes7a.pdf">斯坦福 CS229 K-means 讲义</a></p>

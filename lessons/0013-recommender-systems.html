@@ -6,6 +6,7 @@
   <title>协同过滤怎样预测未打分的物品 · 第 9 天</title>
   <link rel="stylesheet" href="../assets/lesson.css">
   <script defer src="../assets/quiz.js"></script>
+  <script defer src="../assets/study.js"></script>
 </head>
 <body>
 <div class="sitebar"><nav aria-label="课程导航">
@@ -17,25 +18,49 @@
   <header class="lesson-intro">
     <a class="day-label" href="../index.html#day-9">第 9 天</a>
     <h1>协同过滤怎样预测未打分的物品</h1>
-    <p class="lede">你只给三部电影打过分，其他人也只看过其中一部分。网站怎样利用这些零零散散的评分推荐你没看过的电影？</p>
-    <nav class="lesson-nav" aria-label="本课内容"><a href="#concepts">知识点</a><a href="#example">带做例题</a><a href="#practice">动手练习</a><a href="#original">原题 76–80</a></nav>
+    <p class="lede"><strong>用已打过的评分学出用户偏好和物品特征，再估计空着的评分。</strong></p>
+    <p>两位用户都看过同样的两部电影，第三部只有一位打过分。能否用共同评分看出两位用户的偏好关系，并估计最后那一格？</p>
+    <p class="prerequisite">接上之前学过的<a href="0002-matrix-operations.html">行和列的内积</a>。</p>
+    <div class="depth-picker" hidden>
+      <label for="study-depth">学习深度</label>
+      <select id="study-depth" aria-describedby="depth-hint">
+        <option value="quick">极速模式</option>
+        <option value="standard" selected>标准模式</option>
+        <option value="deep">深入模式</option>
+      </select>
+      <p class="depth-hint small" id="depth-hint"></p>
+    </div>
+    <nav class="lesson-nav" aria-label="本课内容"><a href="#concepts">图解</a><a href="#example" data-study="standard">带做例题</a><a href="#practice" data-study="standard">动手练习</a><a href="#essential">必记</a><a href="#recall">易错点</a><a href="#original">原题 76–80</a></nav>
   </header>
   <section id="concepts" aria-labelledby="concepts-heading">
-    <h2 id="concepts-heading">知识点</h2>
-    <div class="concept"><h3>把评分排成一张表</h3><p>行是物品 i，列是用户 j。y<sup>(i,j)</sup> 是实际评分，r(i,j)=1 表示这一格有评分，r(i,j)=0 表示没观察到。r 这张只含 0 和 1 的表叫<strong>掩码</strong>，用来指定哪些格参与计算。</p></div>
-    <div class="concept"><h3>用用户和物品的向量预测</h3><p>给物品 i 一个向量 x<sup>(i)</sup>，给用户 j 一个向量 θ<sup>(j)</sup>。每个向量可以理解为几种偏好方向上的数值。预测评分是内积 (θ<sup>(j)</sup>)ᵀx<sup>(i)</sup>。内容推荐可事先给物品选特征；协同过滤可以从各用户的共同评分中同时学出两组向量。</p><p>评分误差只在 r=1 的格子里计算。先把每格的预测减去实际评分，再平方，最后对已评分格子求平均。若训练目标另有正则化，它会惩罚过大的向量。两组向量同时从全零出发会使梯度为零，需要其他初始化。</p></div>
-    <div class="concept"><h3>处理不同量表与代码掩码</h3><p>1–5 星和 1–10 分应分别换到共同尺度，例如转成 0–1。「最低分」映成 0，「最高分」映成 1。再对齐用户和物品，未打分的格子可以空着。</p><p>在题库的 MATLAB / Octave 写法中，A*B 是矩阵乘法，C.*R 是对应位置相乘。R 为 0 的格子被抹掉，R 为 1 的原值保留。也可以用 C(R==1) 直接选出要加的格子。</p></div>
+    <h2 id="concepts-heading">先看现象，再写规则</h2>
+    <div class="demo" data-demo="recommendation">
+      <h3>看着一个空格被逐步估计</h3>
+      <p>先猜用户 B 给电影 3 的分数可能偏高还是偏低。点几轮更新，比较已评分误差和空格预测的变化。</p>
+      <p class="demo-caption">高亮格的数字始终是预测。更新只使用其他 5 个已评分格。</p>
+    </div>
+    <div class="concept" data-study="standard"><h3>把评分排成一张表</h3><p>行是物品 i，列是用户 j。y<sup>(i,j)</sup> 是实际评分，r(i,j)=1 表示这一格有评分，r(i,j)=0 表示没观察到。r 这张只含 0 和 1 的表叫<strong>掩码</strong>，用来指定哪些格参与计算。</p></div>
+    <div class="concept" data-study="standard"><h3>用用户和物品的向量预测</h3><p>给物品 i 一个向量 x<sup>(i)</sup>，给用户 j 一个向量 θ<sup>(j)</sup>。每个向量可以理解为几种偏好方向上的数值。预测评分是内积 (θ<sup>(j)</sup>)ᵀx<sup>(i)</sup>。内容推荐可事先给物品选特征；协同过滤可以从各用户的共同评分中同时学出两组向量。</p><p>评分误差只在 r=1 的格子里计算。先把每格的预测减去实际评分，再平方，最后对已评分格子求平均。若训练目标另有正则化，它会惩罚过大的向量。两组向量同时从全零出发会使梯度为零，需要其他初始化。</p></div>
+    <div class="concept" data-study="standard"><h3>处理不同量表与代码掩码</h3><p>1–5 星和 1–10 分应分别换到共同尺度，例如转成 0–1。「最低分」映成 0，「最高分」映成 1。再对齐用户和物品，未打分的格子可以空着。</p><p>在题库的 MATLAB / Octave 写法中，A*B 是矩阵乘法，C.*R 是对应位置相乘。R 为 0 的格子被抹掉，R 为 1 的原值保留。也可以用 C(R==1) 直接选出要加的格子。</p></div>
+    <aside class="quick-reference" id="essential" aria-labelledby="essential-heading">
+      <h3 id="essential-heading">必记</h3>
+      <p class="formula">预测评分 = 用户向量与物品向量的内积。训练误差只在 r(i,j)=1 的已评分位置计算。</p>
+    </aside>
   </section>
-  <section id="example" class="example" aria-labelledby="example-heading">
+  <section id="example" data-study="standard" class="example" aria-labelledby="example-heading">
     <h2 id="example-heading">跟着算一遍</h2>
-    <ol><li>给用户两个偏好系数 θ=(2,1)ᵀ，给电影两个特征 x=(1,0.5)ᵀ。预测分为 2×1+1×0.5=2.5。</li><li>该用户实际给了 4 分，这一格的平方误差是 (2.5−4)²=2.25。</li><li>另一个用户没有给这部电影评分。可以预测该格的值，但训练时这一格不参加评分误差。</li></ol>
+    <ol><li>沿用表格的一维偏好。初始时电影 1 的系数是 2，用户 A、B 系数均为 1。A 的评分预测等于实际值 2，B 的预测为 2，实际是 4，误差为 −2。</li><li>对电影 1 的两个误差分别乘用户系数再相加，得到 0×1+(−2)×1=−2。用五个已评分格取平均，并乘学习率 0.12，电影 1 的新系数为 2−0.12×(−2/5)=2.048。</li><li>用户 B 的已知评分还有电影 2。误差是 3−2=1，因此用户系数梯度为 [(−2)×2+1×3]/5=−0.2，新系数为 1.024。电影 3 的新系数也是 1.024，空格预测升到 1.024²≈1.049。此格继续保留为空的训练标签。</li></ol>
   </section>
-  <section id="practice" class="try" aria-labelledby="practice-heading">
+  <section id="practice" data-study="standard" class="try" aria-labelledby="practice-heading">
     <h2 id="practice-heading">自己试一题</h2>
-    <p>某平台最低 1 分、最高 10 分。7 分映射到 0–1 后是多少？</p>
-    <details class="solution"><summary>核对练习思路</summary><div><p>先减最低分，再除以全量程，(7−1)/(10−1)=2/3。</p></div></details>
+    <p>若把空格误填为实际评分 0，初始预测为 1 的空格会对训练产生什么影响？</p>
+    <details class="solution"><summary>核对练习思路</summary><div><p>会虚构一个 +1 的预测误差，让梯度把该用户与物品的预测往 0 拉。缺失评分应排除在训练误差外。</p></div></details>
   </section>
-  <section id="original" aria-labelledby="questions-heading">
+  <details class="solution" data-study="standard" data-advanced>
+    <summary>深入理解</summary>
+    <div><p>每个已评分格的误差 e 同时为两组参数提供梯度。对物品向量的贡献为 e·用户向量，对用户向量的贡献为 e·物品向量。使用同一轮旧参数计算两个梯度。所有参数同时置零会使两组梯度都是零。用户或物品完全没有评分时，还需要内容特征、基准评分或其他冷启动信息。</p></div>
+  </details>
+  <section id="original" data-study="standard" aria-labelledby="questions-heading">
     <h2 id="questions-heading">原题练习</h2>
     <nav class="question-jump" aria-label="跳到本课原题"><a href="#q76">76</a><a href="#q77">77</a><a href="#q78">78</a><a href="#q79">79</a><a href="#q80">80</a></nav>
     <p class="small">先独立作答，再展开解析核对。计算题可以在纸上列式。</p>
@@ -46,12 +71,12 @@
     <form class="exercise choice-exercise" data-quiz data-answer="BD">
       <fieldset>
         <legend>多选题 · 选全后检查</legend>
-        <label><input type="checkbox" name="q76-1" value="A"><span class="choice-letter">A.</span><span>(1/m)∑ⱼ∑ᵢ:r(i,j)=1 [(θ⁽ʲ⁾)ᵢxⱼ⁽ⁱ⁾−y⁽ⁱ,ʲ⁾]²。</span></label>
-        <label><input type="checkbox" name="q76-1" value="B"><span class="choice-letter">B.</span><span>(1/m)∑ⱼ∑ᵢ:r(i,j)=1 [∑ₖ (θ⁽ʲ⁾)ₖxₖ⁽ⁱ⁾−y⁽ⁱ,ʲ⁾]²。</span></label>
-        <label><input type="checkbox" name="q76-1" value="C"><span class="choice-letter">C.</span><span>(1/m)∑(ᵢ,ⱼ):r(i,j)=1 ∑ₖ [(θ⁽ʲ⁾)ₖxₖ⁽ⁱ⁾−y⁽ⁱ,ʲ⁾]²。</span></label>
-        <label><input type="checkbox" name="q76-1" value="D"><span class="choice-letter">D.</span><span>(1/m)∑(ᵢ,ⱼ):r(i,j)=1 [∑ₖ (θ⁽ʲ⁾)ₖxₖ⁽ⁱ⁾−y⁽ⁱ,ʲ⁾]²。</span></label>
+        <label><input type="checkbox" name="q76-1" value="A" data-reason="i 和 j 是物品与用户编号，内积还要对共同的向量下标 k 求和。"><span class="choice-letter">A.</span><span>(1/m)∑ⱼ∑ᵢ:r(i,j)=1 [(θ⁽ʲ⁾)ᵢxⱼ⁽ⁱ⁾−y⁽ⁱ,ʲ⁾]²。</span></label>
+        <label><input type="checkbox" name="q76-1" value="B" data-reason="先做整条向量内积，再减评分、平方，且只对 r=1 的格取平均。"><span class="choice-letter">B.</span><span>(1/m)∑ⱼ∑ᵢ:r(i,j)=1 [∑ₖ (θ⁽ʲ⁾)ₖxₖ⁽ⁱ⁾−y⁽ⁱ,ʲ⁾]²。</span></label>
+        <label><input type="checkbox" name="q76-1" value="C" data-reason="先逐维减去同一个评分再平方，改变了每个评分的误差计算。"><span class="choice-letter">C.</span><span>(1/m)∑(ᵢ,ⱼ):r(i,j)=1 ∑ₖ [(θ⁽ʲ⁾)ₖxₖ⁽ⁱ⁾−y⁽ⁱ,ʲ⁾]²。</span></label>
+        <label><input type="checkbox" name="q76-1" value="D" data-reason="遍历全部已评分格，又对每格先做完整内积，和 B 等价。"><span class="choice-letter">D.</span><span>(1/m)∑(ᵢ,ⱼ):r(i,j)=1 [∑ₖ (θ⁽ʲ⁾)ₖxₖ⁽ⁱ⁾−y⁽ⁱ,ʲ⁾]²。</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -64,12 +89,12 @@
     <form class="exercise choice-exercise" data-quiz data-answer="AD">
       <fieldset>
         <legend>多选题 · 选全后检查</legend>
-        <label><input type="checkbox" name="q77-1" value="A"><span class="choice-letter">A.</span><span>你经营一家在线书店，收集许多用户的评价。你想用它来识别哪些书彼此“相似”（即，如果一个用户喜欢某本书，那么她可能也喜欢哪些书？）</span></label>
-        <label><input type="checkbox" name="q77-1" value="B"><span class="choice-letter">B.</span><span>你管理一个在线书店，你有许多用户的书评。你想根据一本书的平均评分来预测预期的销售量（售出的书的数量）。</span></label>
-        <label><input type="checkbox" name="q77-1" value="C"><span class="choice-letter">C.</span><span>你是个艺术家，为你的客户手绘肖像。每个客户都会得到不同的肖像（他们自己）并给你1-5星级的评价反馈，每个客户最多购买1幅肖像。你想预测下一个客户会给你什么样的评分。</span></label>
-        <label><input type="checkbox" name="q77-1" value="D"><span class="choice-letter">D.</span><span>你开了一家服装店，出售许多款式和品牌的牛仔裤。你已经收集了经常购物者对不同款式和品牌的评论，你想用这些评论为那些购物者提供你认为他们最有可能购买的牛仔裤的折扣</span></label>
+        <label><input type="checkbox" name="q77-1" value="A" data-reason="相同用户给多本书的评分可以提供物品之间的偏好关系。"><span class="choice-letter">A.</span><span>你经营一家在线书店，收集许多用户的评价。你想用它来识别哪些书彼此“相似”（即，如果一个用户喜欢某本书，那么她可能也喜欢哪些书？）</span></label>
+        <label><input type="checkbox" name="q77-1" value="B" data-reason="目标是预测未来销售数量，可用回归。"><span class="choice-letter">B.</span><span>你管理一个在线书店，你有许多用户的书评。你想根据一本书的平均评分来预测预期的销售量（售出的书的数量）。</span></label>
+        <label><input type="checkbox" name="q77-1" value="C" data-reason="每人只买一幅不同肖像，缺少用户和物品之间的交叉评分。"><span class="choice-letter">C.</span><span>你是个艺术家，为你的客户手绘肖像。每个客户都会得到不同的肖像（他们自己）并给你1-5星级的评价反馈，每个客户最多购买1幅肖像。你想预测下一个客户会给你什么样的评分。</span></label>
+        <label><input type="checkbox" name="q77-1" value="D" data-reason="常客对多个款式的评价可以补足个人对未尝试款式的偏好。"><span class="choice-letter">D.</span><span>你开了一家服装店，出售许多款式和品牌的牛仔裤。你已经收集了经常购物者对不同款式和品牌的评论，你想用这些评论为那些购物者提供你认为他们最有可能购买的牛仔裤的折扣</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -82,12 +107,12 @@
     <form class="exercise choice-exercise" data-quiz data-answer="A">
       <fieldset>
         <legend>单选题</legend>
-        <label><input type="radio" name="q78-1" value="A"><span class="choice-letter">A.</span><span>您可以将三个数据集合并为一个数据集，但是您应该首先规范化每个数据集的评级（比如将每个数据集的评级重新调整为0-1范围）。</span></label>
-        <label><input type="radio" name="q78-1" value="B"><span class="choice-letter">B.</span><span>只要在合并数据后执行平均规格化和特征缩放，就可以将所有三个训练集合并为一个。</span></label>
-        <label><input type="radio" name="q78-1" value="C"><span class="choice-letter">C.</span><span>假设在一个数据库中至少有一个电影/用户没有出现在第二个数据库中，那么就没有合并这些数据集的合理方法，因为缺少数据。</span></label>
-        <label><input type="radio" name="q78-1" value="D"><span class="choice-letter">D.</span><span>无法合并这些网站的数据。你必须建立三个独立的推荐系统。</span></label>
+        <label><input type="radio" name="q78-1" value="A" data-reason="先分别统一各站评分尺度，再匹配用户与物品。"><span class="choice-letter">A.</span><span>您可以将三个数据集合并为一个数据集，但是您应该首先规范化每个数据集的评级（比如将每个数据集的评级重新调整为0-1范围）。</span></label>
+        <label><input type="radio" name="q78-1" value="B" data-reason="合并后统一缩放无法抹去各站原先满分不同的差异。"><span class="choice-letter">B.</span><span>只要在合并数据后执行平均规格化和特征缩放，就可以将所有三个训练集合并为一个。</span></label>
+        <label><input type="radio" name="q78-1" value="C" data-reason="可以保留没观察到的空格，用掩码指定哪些位置参与训练。"><span class="choice-letter">C.</span><span>假设在一个数据库中至少有一个电影/用户没有出现在第二个数据库中，那么就没有合并这些数据集的合理方法，因为缺少数据。</span></label>
+        <label><input type="radio" name="q78-1" value="D" data-reason="对齐实体和量表后，数据可以合并；单站缺失允许保留。"><span class="choice-letter">D.</span><span>无法合并这些网站的数据。你必须建立三个独立的推荐系统。</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -100,12 +125,12 @@
     <form class="exercise choice-exercise" data-quiz data-answer="AC">
       <fieldset>
         <legend>多选题 · 选全后检查</legend>
-        <label><input type="checkbox" name="q79-1" value="A"><span class="choice-letter">A.</span><span>基于内容的推荐算法的代价函数是<img class="question-image" src="../assets/questions/image38.png" width="551" height="41" alt="基于内容的推荐目标函数，包含已评分位置的平方误差和 L2 正则化。" loading="lazy" decoding="async">假设只有一个用户，他对训练集中的每一部电影都进行了分级。这意味着对于每个i,j，有nu=1和r(i,j)=1。在这种情况下，成本函数J(θ)等价于用于正则化线性回归的函数。</span></label>
-        <label><input type="checkbox" name="q79-1" value="B"><span class="choice-letter">B.</span><span>利用梯度下降训练协同过滤系统时，可以将所有参数（x⁽ⁱ⁾,θ(i)）初始化为零。</span></label>
-        <label><input type="checkbox" name="q79-1" value="C"><span class="choice-letter">C.</span><span>如果你有一个用户对某些产品的评级数据集，你可以使用这些数据来预测他对没有评级的产品的偏好。</span></label>
-        <label><input type="checkbox" name="q79-1" value="D"><span class="choice-letter">D.</span><span>要使用协作过滤，您需要为数据集中的每个项目（例如，电影）手动设计一个特征向量，该向量描述该项目最重要的属性。</span></label>
+        <label><input type="checkbox" name="q79-1" value="A" data-reason="只有一个用户且物品特征固定时，相当于用物品特征做正则化线性回归。"><span class="choice-letter">A.</span><span>基于内容的推荐算法的代价函数是<img class="question-image" src="../assets/questions/image38.png" width="551" height="41" alt="基于内容的推荐目标函数，包含已评分位置的平方误差和 L2 正则化。" loading="lazy" decoding="async">假设只有一个用户，他对训练集中的每一部电影都进行了分级。这意味着对于每个i,j，有nu=1和r(i,j)=1。在这种情况下，成本函数J(θ)等价于用于正则化线性回归的函数。</span></label>
+        <label><input type="checkbox" name="q79-1" value="B" data-reason="两组向量同时为 0 时，评分梯度也为 0，会停在初值。"><span class="choice-letter">B.</span><span>利用梯度下降训练协同过滤系统时，可以将所有参数（x⁽ⁱ⁾,θ(i)）初始化为零。</span></label>
+        <label><input type="checkbox" name="q79-1" value="C" data-reason="已知评分提供学习线索，内积可估计没有实际评分的格子。"><span class="choice-letter">C.</span><span>如果你有一个用户对某些产品的评级数据集，你可以使用这些数据来预测他对没有评级的产品的偏好。</span></label>
+        <label><input type="checkbox" name="q79-1" value="D" data-reason="协同过滤可以从评分直接学习物品向量。人工定义物品特征更像内容推荐。"><span class="choice-letter">D.</span><span>要使用协作过滤，您需要为数据集中的每个项目（例如，电影）手动设计一个特征向量，该向量描述该项目最重要的属性。</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -119,12 +144,12 @@
     <form class="exercise choice-exercise" data-quiz data-answer="AB">
       <fieldset>
         <legend>多选题 · 选全后检查</legend>
-        <label><input type="checkbox" name="q80-1" value="A"><span class="choice-letter">A.</span><span>total = sum(sum((A * B) .* R))</span></label>
-        <label><input type="checkbox" name="q80-1" value="B"><span class="choice-letter">B.</span><span>C = A * B; total = sum(sum(C(R == 1)));</span></label>
-        <label><input type="checkbox" name="q80-1" value="C"><span class="choice-letter">C.</span><span>C = (A * B) * R; total = sum(C(:));</span></label>
-        <label><input type="checkbox" name="q80-1" value="D"><span class="choice-letter">D.</span><span>total = sum(sum(A(R == 1) * B(R == 1)));</span></label>
+        <label><input type="checkbox" name="q80-1" value="A" data-reason="先用矩阵乘法得到 C，之后用逐位置乘法把 R=0 的格清零。"><span class="choice-letter">A.</span><span>total = sum(sum((A * B) .* R))</span></label>
+        <label><input type="checkbox" name="q80-1" value="B" data-reason="先得到 C，再用逻辑索引提取 R=1 的所有位置并求和。"><span class="choice-letter">B.</span><span>C = A * B; total = sum(sum(C(R == 1)));</span></label>
+        <label><input type="checkbox" name="q80-1" value="C" data-reason="矩阵乘法会混合不同位置的元素。掩码需要逐位置运算。"><span class="choice-letter">C.</span><span>C = (A * B) * R; total = sum(C(:));</span></label>
+        <label><input type="checkbox" name="q80-1" value="D" data-reason="R 的形状与乘积 C 一致，与原来的 A 和 B 不一致。"><span class="choice-letter">D.</span><span>total = sum(sum(A(R == 1) * B(R == 1)));</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -132,7 +157,12 @@
     </details>
   </article>
   </section>
-  <section class="lesson-recall" aria-labelledby="recall-heading"><h2 id="recall-heading">考前回忆</h2><p>预测是用户和物品向量的内积。误差只在已评分处计入，缺评分不填成零。</p></section>
+  <section class="lesson-recall" id="recall" aria-labelledby="recall-heading"><h2 id="recall-heading">易错点与快速判断</h2><p>预测是用户和物品向量的内积。误差只在已评分处计入，缺评分不填成零。</p></section>
+  <section aria-labelledby="retrieval-heading">
+    <h2 id="retrieval-heading">跨课回顾</h2>
+    <p>用户有两个偏好系数，物品也有两个特征。一次内积得到几个评分？</p>
+    <details class="solution"><summary>核对你的判断</summary><div><p>一个用户和一个物品得到一个分数。改变用户时，用新用户的两个系数再算一次。</p><p><a href="0002-matrix-operations.html#concepts">回看行和列的内积</a></p></div></details>
+  </section>
   <footer>
     <p>遇到疑问，可以把题号和你卡住的步骤发给我。</p>
     <p class="small">参考资料 <a href="https://developers.google.com/machine-learning/recommendation/collaborative/basics">Google 协同过滤课程</a> · <a href="https://developers.google.com/machine-learning/recommendation/collaborative/matrix">Google 矩阵分解课程</a></p>

@@ -6,6 +6,7 @@
   <title>异常检测从常见模式找异常 · 第 8 天</title>
   <link rel="stylesheet" href="../assets/lesson.css">
   <script defer src="../assets/quiz.js"></script>
+  <script defer src="../assets/study.js"></script>
 </head>
 <body>
 <div class="sitebar"><nav aria-label="课程导航">
@@ -17,25 +18,49 @@
   <header class="lesson-intro">
     <a class="day-label" href="../index.html#day-8">第 8 天</a>
     <h1>异常检测从常见模式找异常</h1>
-    <p class="lede">机器通常温度和振动都在一段范围里波动。没有足够多的故障样本时，怎样先把不常见的记录挑出来检查？</p>
-    <nav class="lesson-nav" aria-label="本课内容"><a href="#concepts">知识点</a><a href="#example">带做例题</a><a href="#practice">动手练习</a><a href="#original">原题 71–75</a></nav>
+    <p class="lede"><strong>先学正常数据的分布，再把落在低密度区域的读数交给人核查。</strong></p>
+    <p>手里有成千上万条正常传感器记录，故障样本却只有几个。与其要求模型认出每种故障，可以先学机器平时怎样波动。</p>
+    <p class="prerequisite">接上之前学过的<a href="0008-classification-metrics.html">阈值、误报和漏报</a>。</p>
+    <div class="depth-picker" hidden>
+      <label for="study-depth">学习深度</label>
+      <select id="study-depth" aria-describedby="depth-hint">
+        <option value="quick">极速模式</option>
+        <option value="standard" selected>标准模式</option>
+        <option value="deep">深入模式</option>
+      </select>
+      <p class="depth-hint small" id="depth-hint"></p>
+    </div>
+    <nav class="lesson-nav" aria-label="本课内容"><a href="#concepts">图解</a><a href="#example" data-study="standard">带做例题</a><a href="#practice" data-study="standard">动手练习</a><a href="#essential">必记</a><a href="#recall">易错点</a><a href="#original">原题 71–75</a></nav>
   </header>
   <section id="concepts" aria-labelledby="concepts-heading">
-    <h2 id="concepts-heading">知识点</h2>
-    <div class="concept"><h3>先描述多数正常样本</h3><p>异常检测可以先用大量常规样本估计正常数据的分布，再把很少见的记录挑出来。少量已知异常可以用来挑阈值并衡量误报和漏报。有大量已标记的各类异常时，也可以用监督分类做比较。</p></div>
-    <div class="concept"><h3>均值、方差与密度</h3><p>均值 μ 表示中心。先求每个数与均值之差的平方，再求平均，可估算本课模型用的方差 σ²；σ 是标准差。高斯分布是一种钟形分布，均值控制中心，方差控制宽度。</p><p><span class="formula">p(x) = ∏<sub>j=1</sub><sup>n</sup> N(xⱼ; μⱼ, σⱼ²)</span>这里 xⱼ 是第 j 个特征，N 表示该特征的高斯密度，∏ 表示把各项相乘。这是把特征近似看作独立时的模型。p(x) 是密度得分，用来比较样本位置的常见程度。</p></div>
-    <div class="concept"><h3>调阈值与构造特征</h3><p>规则 p(x)&lt;ε 时标异常，ε（epsilon）是阈值。调小 ε，要求密度更低才标异常，误报通常会减少，也可能增加漏报。</p><p>单看两项都正常，组合起来可能不常见。若正常温度和振动总是差不多，而异常时振动远高于温度，可以构造二者的比值或差值。比值要求除数不为 0。</p></div>
+    <h2 id="concepts-heading">先看现象，再写规则</h2>
+    <div class="demo" data-demo="anomaly">
+      <h3>正常范围和异常阈值</h3>
+      <p>先把读数从 14 拖向 10，再固定读数 14，只降低阈值。比较两次操作到底改变了密度还是判定标准。</p>
+      <p class="demo-caption">蓝线是正常密度，红色虚线是阈值，淡红区域会被标记待查。</p>
+    </div>
+    <div class="concept" data-study="standard"><h3>先描述多数正常样本</h3><p>异常检测可以先用大量常规样本估计正常数据的分布，再把很少见的记录挑出来。少量已知异常可以用来挑阈值并衡量误报和漏报。有大量已标记的各类异常时，也可以用监督分类做比较。</p></div>
+    <div class="concept" data-study="standard"><h3>均值、方差与密度</h3><p>均值 μ 表示中心。先求每个数与均值之差的平方，再求平均，可估算本课模型用的方差 σ²；σ 是标准差。高斯分布是一种钟形分布，均值控制中心，方差控制宽度。</p><p><span class="formula">N(x; μ, σ²) = exp(−(x−μ)²/(2σ²)) / √(2πσ²)</span><span class="formula">p(x) = ∏<sub>j=1</sub><sup>n</sup> N(xⱼ; μⱼ, σⱼ²)</span>这里 xⱼ 是第 j 个特征，N 表示该特征的高斯密度，∏ 表示把各项相乘。这是把特征近似看作独立时的模型。p(x) 是密度得分，用来比较样本位置的常见程度。</p></div>
+    <div class="concept" data-study="standard"><h3>调阈值与构造特征</h3><p>规则 p(x)&lt;ε 时标异常，ε（epsilon）是阈值。调小 ε，要求密度更低才标异常，误报通常会减少，也可能增加漏报。</p><p>单看两项都正常，组合起来可能不常见。若正常温度和振动总是差不多，而异常时振动远高于温度，可以构造二者的比值或差值。比值要求除数不为 0。</p></div>
+    <aside class="quick-reference" id="essential" aria-labelledby="essential-heading">
+      <h3 id="essential-heading">必记</h3>
+      <p class="formula">均值 μ 决定中心，方差 σ² 决定宽度。独立特征模型把各维密度相乘；p(x) < ε 时标记待查。</p>
+    </aside>
   </section>
-  <section id="example" class="example" aria-labelledby="example-heading">
+  <section id="example" data-study="standard" class="example" aria-labelledby="example-heading">
     <h2 id="example-heading">跟着算一遍</h2>
-    <ol><li>三条正常读数是 8、10、12，均值 μ=(8+10+12)/3=10。</li><li>与均值的差分别为 −2、0、2，平方后求平均，模型估计方差 σ²=(4+0+4)/3=8/3。</li><li>如果某记录的模型得分是 0.03，ε=0.05 时会标异常；降到 ε=0.02 后，这条记录不会被标出。真实是否故障还需要核查。</li></ol>
+    <ol><li>用正常读数 8、10、12 拟合。均值为 10，方差为 (4+0+4)/3=8/3，标准差 √(8/3)≈1.633。</li><li>新读数 14 离均值 4，指数项是 −4²/[2×(8/3)]=−3。代入单变量高斯密度，p(14)=e<sup>−3</sup>/√(2π×8/3)≈0.0122。</li><li>若 ε=0.05，0.0122 更小，所以标记待查。若 ε=0.01，则不标记。能否确认故障还要核查。</li></ol>
   </section>
-  <section id="practice" class="try" aria-labelledby="practice-heading">
+  <section id="practice" data-study="standard" class="try" aria-labelledby="practice-heading">
     <h2 id="practice-heading">自己试一题</h2>
-    <p>正常时 x₁ 和 x₂ 都接近且大于 0。新记录中 x₁=0.8，x₂=0.2。用 x₁/x₂ 会得到什么？</p>
-    <details class="solution"><summary>核对练习思路</summary><div><p>比值是 4。正常时比值通常接近 1，因此这个特征能显出两项不匹配。</p></div></details>
+    <p>均值仍为 10，方差为 8/3。读数 10 的密度比读数 14 大多少倍？若 ε=0.05，哪条会被标记？</p>
+    <details class="solution"><summary>核对练习思路</summary><div><p>两者密度前面的系数相同。指数项为 e⁰ 和 e⁻³，因此约为 e³≈20.1 倍。10 的密度约为 0.2443，只有 14 会被标记。</p></div></details>
   </section>
-  <section id="original" aria-labelledby="questions-heading">
+  <details class="solution" data-study="standard" data-advanced>
+    <summary>深入理解</summary>
+    <div><p>密度有单位，可大于 1。连续变量恰好等于某个值的概率为 0，区间概率是曲线下面积。多维密度相乘可能下溢，可累加对数密度再与 log ε 比较。相关特征可用差值、比值或考虑协方差的模型建模。</p></div>
+  </details>
+  <section id="original" data-study="standard" aria-labelledby="questions-heading">
     <h2 id="questions-heading">原题练习</h2>
     <nav class="question-jump" aria-label="跳到本课原题"><a href="#q71">71</a><a href="#q72">72</a><a href="#q73">73</a><a href="#q74">74</a><a href="#q75">75</a></nav>
     <p class="small">先独立作答，再展开解析核对。计算题可以在纸上列式。</p>
@@ -46,12 +71,12 @@
     <form class="exercise choice-exercise" data-quiz data-answer="BD">
       <fieldset>
         <legend>多选题 · 选全后检查</legend>
-        <label><input type="checkbox" name="q71-1" value="A"><span class="choice-letter">A.</span><span>给定一张脸的图像，确定它是否是某个特定名人的脸。</span></label>
-        <label><input type="checkbox" name="q71-1" value="B"><span class="choice-letter">B.</span><span>给定信用卡交易的数据集，识别异常交易，将其标记为可能存在欺诈。</span></label>
-        <label><input type="checkbox" name="q71-1" value="C"><span class="choice-letter">C.</span><span>给定信用卡交易的数据，根据购买类型对每个交易进行分类（例如：食物、交通工具、衣服）。</span></label>
-        <label><input type="checkbox" name="q71-1" value="D"><span class="choice-letter">D.</span><span>从大量的初级保健患者记录中，找出可能有异常健康状况的个人。</span></label>
+        <label><input type="checkbox" name="q71-1" value="A" data-reason="题目已经指定了要识别的名人类别，有标注时更适合二分类。"><span class="choice-letter">A.</span><span>给定一张脸的图像，确定它是否是某个特定名人的脸。</span></label>
+        <label><input type="checkbox" name="q71-1" value="B" data-reason="可以先学正常交易的模式，找出与众不同的记录进行人工审核。"><span class="choice-letter">B.</span><span>给定信用卡交易的数据集，识别异常交易，将其标记为可能存在欺诈。</span></label>
+        <label><input type="checkbox" name="q71-1" value="C" data-reason="购物类型是预先定义的标签，预测它属于分类。"><span class="choice-letter">C.</span><span>给定信用卡交易的数据，根据购买类型对每个交易进行分类（例如：食物、交通工具、衣服）。</span></label>
+        <label><input type="checkbox" name="q71-1" value="D" data-reason="可用常规记录估计正常分布，再标记值得核查的少见个体。"><span class="choice-letter">D.</span><span>从大量的初级保健患者记录中，找出可能有异常健康状况的个人。</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -64,10 +89,10 @@
     <form class="exercise choice-exercise" data-quiz data-answer="B">
       <fieldset>
         <legend>单选题</legend>
-        <label><input type="radio" name="q72-1" value="A"><span class="choice-letter">A.</span><span>增大ϵ</span></label>
-        <label><input type="radio" name="q72-1" value="B"><span class="choice-letter">B.</span><span>减小ϵ</span></label>
+        <label><input type="radio" name="q72-1" value="A" data-reason="规则是密度低于阈值就标异常。阈值增大会纳入更多正常样本。"><span class="choice-letter">A.</span><span>增大ϵ</span></label>
+        <label><input type="radio" name="q72-1" value="B" data-reason="阈值降低后，需更低的密度才会触发标记，误报可能减少。"><span class="choice-letter">B.</span><span>减小ϵ</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -80,12 +105,12 @@
     <form class="exercise choice-exercise" data-quiz data-answer="B">
       <fieldset>
         <legend>单选题</legend>
-        <label><input type="radio" name="q73-1" value="A"><span class="choice-letter">A.</span><span>x₃=x₁^2×x₂</span></label>
-        <label><input type="radio" name="q73-1" value="B"><span class="choice-letter">B.</span><span>x₃=x₁/x₂</span></label>
-        <label><input type="radio" name="q73-1" value="C"><span class="choice-letter">C.</span><span>x₃=x₁+x₂</span></label>
-        <label><input type="radio" name="q73-1" value="D"><span class="choice-letter">D.</span><span>x₃=x₁×x₂</span></label>
+        <label><input type="radio" name="q73-1" value="A" data-reason="热量低时乘上热量会压低结果，难突出振动相对热量偏高。"><span class="choice-letter">A.</span><span>x₃=x₁^2×x₂</span></label>
+        <label><input type="radio" name="q73-1" value="B" data-reason="热量大于 0，同等振动下热量越小，比例越突出。"><span class="choice-letter">B.</span><span>x₃=x₁/x₂</span></label>
+        <label><input type="radio" name="q73-1" value="C" data-reason="较小的热量可能抵消较大振动带来的变化，和无法直接表达比例。"><span class="choice-letter">C.</span><span>x₃=x₁+x₂</span></label>
+        <label><input type="radio" name="q73-1" value="D" data-reason="乘积受较小因子压制，正好可能掩盖高振动、低热量。"><span class="choice-letter">D.</span><span>x₃=x₁×x₂</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -98,12 +123,12 @@
     <form class="exercise choice-exercise" data-quiz data-answer="AD">
       <fieldset>
         <legend>多选题 · 选全后检查</legend>
-        <label><input type="checkbox" name="q74-1" value="A"><span class="choice-letter">A.</span><span>如果没有任何标记的数据（或者如果所有数据都有标记y=0），则仍然可以学习p(x)，但可能更难评估系统或选择一个好的值。</span></label>
-        <label><input type="checkbox" name="q74-1" value="B"><span class="choice-letter">B.</span><span>如果你有一个带有许多正例子和许多负例子的训练集，那么异常检测算法的性能可能与有监督的学习算法（如支持向量机）一样好。</span></label>
-        <label><input type="checkbox" name="q74-1" value="C"><span class="choice-letter">C.</span><span>如果您正在开发异常检测系统，则无法使用标记的数据来改进您的系统。</span></label>
-        <label><input type="checkbox" name="q74-1" value="D"><span class="choice-letter">D.</span><span>在为异常检测系统选择特征时，最好为异常示例寻找具有异常大值或小值的特征。</span></label>
+        <label><input type="checkbox" name="q74-1" value="A" data-reason="正常数据就能拟合分布，缺少异常标签会让验证阈值更难。"><span class="choice-letter">A.</span><span>如果没有任何标记的数据（或者如果所有数据都有标记y=0），则仍然可以学习p(x)，但可能更难评估系统或选择一个好的值。</span></label>
+        <label><input type="checkbox" name="q74-1" value="B" data-reason="很多有代表性的异常标签可用于直接训练分类器，不能只凭数量断言异常检测表现相当。"><span class="choice-letter">B.</span><span>如果你有一个带有许多正例子和许多负例子的训练集，那么异常检测算法的性能可能与有监督的学习算法（如支持向量机）一样好。</span></label>
+        <label><input type="checkbox" name="q74-1" value="C" data-reason="已标记异常可以用来选阈值、估计漏报，并检查候选特征。"><span class="choice-letter">C.</span><span>如果您正在开发异常检测系统，则无法使用标记的数据来改进您的系统。</span></label>
+        <label><input type="checkbox" name="q74-1" value="D" data-reason="正常和异常的特征差异越显著，越有机会用密度区分。"><span class="choice-letter">D.</span><span>在为异常检测系统选择特征时，最好为异常示例寻找具有异常大值或小值的特征。</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -117,12 +142,12 @@
     <form class="exercise choice-exercise" data-quiz data-answer="A">
       <fieldset>
         <legend>单选题</legend>
-        <label><input type="radio" name="q75-1" value="A"><span class="choice-letter">A.</span><span>μ₁=−3，σ₁²=4。</span></label>
-        <label><input type="radio" name="q75-1" value="B"><span class="choice-letter">B.</span><span>μ₁=−6，σ₁²=4。</span></label>
-        <label><input type="radio" name="q75-1" value="C"><span class="choice-letter">C.</span><span>μ₁=−3，σ₁²=2。</span></label>
-        <label><input type="radio" name="q75-1" value="D"><span class="choice-letter">D.</span><span>μ₁=−6，σ₁²=4。</span></label>
+        <label><input type="radio" name="q75-1" value="A" data-reason="点大致围绕 −3 散开，扩散程度更接近方差 4 的选项。"><span class="choice-letter">A.</span><span>μ₁=−3，σ₁²=4。</span></label>
+        <label><input type="radio" name="q75-1" value="B" data-reason="−6 在散点左侧，不能代表数据的中心。"><span class="choice-letter">B.</span><span>μ₁=−6，σ₁²=4。</span></label>
+        <label><input type="radio" name="q75-1" value="C" data-reason="中心位置合适，但方差 2 对应的分布比图中更窄。"><span class="choice-letter">C.</span><span>μ₁=−3，σ₁²=2。</span></label>
+        <label><input type="radio" name="q75-1" value="D" data-reason="此项和 B 重复，均值 −6 与散点中心不符。"><span class="choice-letter">D.</span><span>μ₁=−6，σ₁²=4。</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -130,7 +155,12 @@
     </details>
   </article>
   </section>
-  <section class="lesson-recall" aria-labelledby="recall-heading"><h2 id="recall-heading">考前回忆</h2><p>均值看中心，方差看分散。降低密度阈值会让报警更严格，可用组合特征表示单列看不出的异常。</p></section>
+  <section class="lesson-recall" id="recall" aria-labelledby="recall-heading"><h2 id="recall-heading">易错点与快速判断</h2><p>均值看中心，方差看分散。降低密度阈值会让报警更严格，可用组合特征表示单列看不出的异常。</p></section>
+  <section aria-labelledby="retrieval-heading">
+    <h2 id="retrieval-heading">跨课回顾</h2>
+    <p>异常检测把低分标异常。阈值从 0.05 降到 0.02，得分 0.03 的正常读数会怎样？</p>
+    <details class="solution"><summary>核对你的判断</summary><div><p>由误报变成未标记。降低这个阈值会让标记条件更严格。</p><p><a href="0008-classification-metrics.html#concepts">回看阈值、误报和漏报</a></p></div></details>
+  </section>
   <footer>
     <p>遇到疑问，可以把题号和你卡住的步骤发给我。</p>
     <p class="small">参考资料 <a href="https://www.coursera.org/learn/unsupervised-learning-recommenders-reinforcement-learning">吴恩达机器学习专项课程的异常检测单元</a> · <a href="https://developers.google.com/machine-learning/crash-course/overfitting/data-characteristics">Google 数据特征课程</a></p>

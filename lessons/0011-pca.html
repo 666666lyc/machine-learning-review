@@ -6,6 +6,7 @@
   <title>PCA 用较少的坐标表示数据 · 第 7 天</title>
   <link rel="stylesheet" href="../assets/lesson.css">
   <script defer src="../assets/quiz.js"></script>
+  <script defer src="../assets/study.js"></script>
 </head>
 <body>
 <div class="sitebar"><nav aria-label="课程导航">
@@ -17,25 +18,49 @@
   <header class="lesson-intro">
     <a class="day-label" href="../index.html#day-7">第 7 天</a>
     <h1>PCA 用较少的坐标表示数据</h1>
-    <p class="lede">有一组二维点几乎排成一条斜线。若只能用一个数字记住每个点的位置，该沿哪个方向测量？</p>
-    <nav class="lesson-nav" aria-label="本课内容"><a href="#concepts">知识点</a><a href="#example">带做例题</a><a href="#practice">动手练习</a><a href="#original">原题 66–70</a></nav>
+    <p class="lede"><strong>PCA 找一条能保留最多变化的轴，用更少的坐标近似表示原来的点。</strong></p>
+    <p>同一批物品的长和宽通常一起变化。如果存储只够给每件物品记一个数字，该沿哪条轴量位置？会丢掉多少信息？</p>
+    <p class="prerequisite">接上之前学过的<a href="0002-matrix-operations.html">内积与形状</a>。</p>
+    <div class="depth-picker" hidden>
+      <label for="study-depth">学习深度</label>
+      <select id="study-depth" aria-describedby="depth-hint">
+        <option value="quick">极速模式</option>
+        <option value="standard" selected>标准模式</option>
+        <option value="deep">深入模式</option>
+      </select>
+      <p class="depth-hint small" id="depth-hint"></p>
+    </div>
+    <nav class="lesson-nav" aria-label="本课内容"><a href="#concepts">图解</a><a href="#example" data-study="standard">带做例题</a><a href="#practice" data-study="standard">动手练习</a><a href="#essential">必记</a><a href="#recall">易错点</a><a href="#original">原题 66–70</a></nav>
   </header>
   <section id="concepts" aria-labelledby="concepts-heading">
-    <h2 id="concepts-heading">知识点</h2>
-    <div class="concept"><h3>从中心看哪里伸展最远</h3><p>主成分分析（PCA）先给每一列减去均值，这一步叫<strong>中心化</strong>。<strong>方差</strong>度量数值围绕均值散开的程度。PCA 寻找投影后数据最分散的单位方向，叫第一主成分。方向反过来只会使坐标变号。</p><p>投影可以想成把点垂直落到一条轴上。原来记录两个坐标，现在用沿这条轴的一个坐标表示。第二个主成分与第一个垂直，并尽量解释剩余变化。特征量纲差异很大时，再考虑按列缩放。</p></div>
-    <div class="concept"><h3>投影和近似重建</h3><p>把保留的 k 个单位方向排成矩阵 U<sub>reduce</sub>，每列是一个方向。设 x 已减均值，z = U<sub>reduce</sub>ᵀx 是压缩后的坐标，x<sub>approx</sub> = U<sub>reduce</sub>z 是在原空间的近似点。</p><p>重建到原始坐标时，还需把之前减掉的均值加回去。如果舍弃了一些方向，就可能丢失细节。若保留 n 个方向，维度仍是 n。</p></div>
-    <div class="concept"><h3>选择要保留多少方差</h3><p><span class="formula">方差保留比例 = 1 − (重建残差平方和 / 中心化数据平方和)</span>比较时要用中心化的数据。比如要求保留至少 95%，就让右边的丢失比例至多 5%，然后选满足条件的最小 k。</p><p>PCA 可用于压缩、把高维数据投影到二维画图，或减少后续模型的输入数。它的目标是保留输入变化，没有用到实际标签 y，后续任务表现还要验证。</p></div>
+    <h2 id="concepts-heading">先看现象，再写规则</h2>
+    <div class="demo" data-demo="pca">
+      <h3>旋转轴，比较被保留的变化</h3>
+      <p>先比较 0° 和 90°，再试 45° 和 135°。预测哪里红线最短，然后看平均重建误差。</p>
+      <p class="demo-caption">蓝点是原位置，空心绿点是近似重建的位置，红色虚线是丢掉的那段距离。</p>
+    </div>
+    <div class="concept" data-study="standard"><h3>从中心看哪里伸展最远</h3><p>主成分分析（PCA）先给每一列减去均值，这一步叫<strong>中心化</strong>。<strong>方差</strong>度量数值围绕均值散开的程度。PCA 寻找投影后数据最分散的单位方向，叫第一主成分。方向反过来只会使坐标变号。</p><p>投影可以想成把点垂直落到一条轴上。原来记录两个坐标，现在用沿这条轴的一个坐标表示。第二个主成分与第一个垂直，并尽量解释剩余变化。特征量纲差异很大时，再考虑按列缩放。</p></div>
+    <div class="concept" data-study="standard"><h3>投影和近似重建</h3><p>把保留的 k 个单位方向排成矩阵 U<sub>reduce</sub>，每列是一个方向。设 x 已减均值，z = U<sub>reduce</sub>ᵀx 是压缩后的坐标，x<sub>approx</sub> = U<sub>reduce</sub>z 是在原空间的近似点。</p><p>重建到原始坐标时，还需把之前减掉的均值加回去。如果舍弃了一些方向，就可能丢失细节。若保留 n 个方向，维度仍是 n。</p></div>
+    <div class="concept" data-study="standard"><h3>选择要保留多少方差</h3><p><span class="formula">方差保留比例 = 1 − (重建残差平方和 / 中心化数据平方和)</span>比较时要用中心化的数据。比如要求保留至少 95%，就让右边的丢失比例至多 5%，然后选满足条件的最小 k。</p><p>PCA 可用于压缩、把高维数据投影到二维画图，或减少后续模型的输入数。它的目标是保留输入变化，没有用到实际标签 y，后续任务表现还要验证。</p></div>
+    <aside class="quick-reference" id="essential" aria-labelledby="essential-heading">
+      <h3 id="essential-heading">必记</h3>
+      <p class="formula">先按列减均值。单位方向 u 上的投影 z = uᵀx，中心化坐标的重建为 zu。方差保留率 = 1 − 残差平方和 / 中心化数据平方和。</p>
+    </aside>
   </section>
-  <section id="example" class="example" aria-labelledby="example-heading">
+  <section id="example" data-study="standard" class="example" aria-labelledby="example-heading">
     <h2 id="example-heading">跟着算一遍</h2>
-    <ol><li>中心化点是 (−2,−2)、(0,0)、(2,2)，都沿着 x₂=x₁ 这条斜线。用向量 u=(1/√2,1/√2) 指出这条线，其中 √2 约为 1.414。</li><li>最右上的点向 u 投影，做内积得 z=2/√2+2/√2=2√2。只需记录一个数。</li><li>用 z 乘回 u 得 (2,2)，精确复原。这组点沿垂直方向没有变化，所以保留一个主成分便保留了 100% 方差。</li></ol>
+    <ol><li>图中八个点已中心化。以 (3,2) 为例，沿 45° 的单位轴 u=(1/√2, 1/√2) 投影，只需记录 z=(3+2)/√2=5/√2。</li><li>用 z 乘回 u 得到 (2.5,2.5)。两维各差 0.5，重建残差平方和是 0.5²+0.5²=0.5。</li><li>八个点的残差平方和为 4，中心化数据平方和为 56。保留率为 1−4/56≈92.9%。旋转到 135° 时保留率约为 7.1%，大部分变化都被舍掉。</li></ol>
   </section>
-  <section id="practice" class="try" aria-labelledby="practice-heading">
+  <section id="practice" data-study="standard" class="try" aria-labelledby="practice-heading">
     <h2 id="practice-heading">自己试一题</h2>
-    <p>中心化数据平方和为 200，重建残差平方和为 8。保留比例是多少？达到 95% 了吗？</p>
-    <details class="solution"><summary>核对练习思路</summary><div><p>丢失比例 8/200=4%，保留比例 96%，达到至少 95% 的要求。</p></div></details>
+    <p>用 x₂=x₁ 的投影轴重建 (2,3)。它与 (3,2) 的重建结果有什么关系？</p>
+    <details class="solution"><summary>核对练习思路</summary><div><p>两者 x₁+x₂ 都等于 5，所以投影坐标同为 5/√2，重建点同为 (2.5,2.5)。压缩丢掉了区分它们的那部分变化。</p></div></details>
   </section>
-  <section id="original" aria-labelledby="questions-heading">
+  <details class="solution" data-study="standard" data-advanced>
+    <summary>深入理解</summary>
+    <div><p>把中心化样本写成矩阵 X，每行一个样本。投影方差可写为 uᵀ(XᵀX/m)u。将 u 限制为单位向量后，这个量在最大特征值对应的特征向量上最大。对于多条主轴，也可以对中心化矩阵做 SVD 并取最大的右奇异方向。沿主轴的正负号都可用。</p></div>
+  </details>
+  <section id="original" data-study="standard" aria-labelledby="questions-heading">
     <h2 id="questions-heading">原题练习</h2>
     <nav class="question-jump" aria-label="跳到本课原题"><a href="#q66">66</a><a href="#q67">67</a><a href="#q68">68</a><a href="#q69">69</a><a href="#q70">70</a></nav>
     <p class="small">先独立作答，再展开解析核对。计算题可以在纸上列式。</p>
@@ -47,12 +72,12 @@
     <form class="exercise choice-exercise" data-quiz data-answer="AB">
       <fieldset>
         <legend>多选题 · 选全后检查</legend>
-        <label><input type="checkbox" name="q66-1" value="A"><span class="choice-letter">A.</span><span><img class="question-image" src="../assets/questions/image31.png" width="740" height="551" alt="箭头从中心指向右上方。" loading="lazy" decoding="async"></span></label>
-        <label><input type="checkbox" name="q66-1" value="B"><span class="choice-letter">B.</span><span><img class="question-image" src="../assets/questions/image32.jpeg" width="740" height="551" alt="箭头从中心指向左下方。" loading="lazy" decoding="async"></span></label>
-        <label><input type="checkbox" name="q66-1" value="C"><span class="choice-letter">C.</span><span><img class="question-image" src="../assets/questions/image33.png" width="740" height="551" alt="箭头从中心指向左上方。" loading="lazy" decoding="async"></span></label>
-        <label><input type="checkbox" name="q66-1" value="D"><span class="choice-letter">D.</span><span><img class="question-image" src="../assets/questions/image34.png" width="740" height="551" alt="箭头从中心指向右下方。" loading="lazy" decoding="async"></span></label>
+        <label><input type="checkbox" name="q66-1" value="A" data-reason="A 顺着散点伸展最长的斜线，捕捉最大投影方差。"><span class="choice-letter">A.</span><span><img class="question-image" src="../assets/questions/image31.png" width="740" height="551" alt="箭头从中心指向右上方。" loading="lazy" decoding="async"></span></label>
+        <label><input type="checkbox" name="q66-1" value="B" data-reason="B 与 A 方向相反，但两者所在轴相同，方差一样。"><span class="choice-letter">B.</span><span><img class="question-image" src="../assets/questions/image32.jpeg" width="740" height="551" alt="箭头从中心指向左下方。" loading="lazy" decoding="async"></span></label>
+        <label><input type="checkbox" name="q66-1" value="C" data-reason="这张图的方向接近散点伸展较短的轴。"><span class="choice-letter">C.</span><span><img class="question-image" src="../assets/questions/image33.png" width="740" height="551" alt="箭头从中心指向左上方。" loading="lazy" decoding="async"></span></label>
+        <label><input type="checkbox" name="q66-1" value="D" data-reason="翻转符号仍在 C 所在的短轴上，无法取得最大方差。"><span class="choice-letter">D.</span><span><img class="question-image" src="../assets/questions/image34.png" width="740" height="551" alt="箭头从中心指向右下方。" loading="lazy" decoding="async"></span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -65,12 +90,12 @@
     <form class="exercise choice-exercise" data-quiz data-answer="A">
       <fieldset>
         <legend>单选题</legend>
-        <label><input type="radio" name="q67-1" value="A"><span class="choice-letter">A.</span><span>选择至少保留99%的方差的k的最小值</span></label>
-        <label><input type="radio" name="q67-1" value="B"><span class="choice-letter">B.</span><span>选择k，使逼近误差(1/m)∑ᵢ₌₁ᵐ ‖x⁽ⁱ⁾−xapprox⁽ⁱ⁾‖²。</span></label>
-        <label><input type="radio" name="q67-1" value="C"><span class="choice-letter">C.</span><span>选择至少保留1%的方差的k的最小值</span></label>
-        <label><input type="radio" name="q67-1" value="D"><span class="choice-letter">D.</span><span>选择k为99%的n（即k=0.99∗n四舍五入至最接近的整数）。</span></label>
+        <label><input type="radio" name="q67-1" value="A" data-reason="从方差最大方向开始累计，保留比例首次达到 99% 的 k 就够用。"><span class="choice-letter">A.</span><span>选择至少保留99%的方差的k的最小值</span></label>
+        <label><input type="radio" name="q67-1" value="B" data-reason="只有重建误差的公式。需要说明相对误差阈值或怎样根据它选最小 k。"><span class="choice-letter">B.</span><span>选择k，使逼近误差(1/m)∑ᵢ₌₁ᵐ ‖x⁽ⁱ⁾−xapprox⁽ⁱ⁾‖²。</span></label>
+        <label><input type="radio" name="q67-1" value="C" data-reason="99% 是保留目标，1% 是允许丢掉的比例。"><span class="choice-letter">C.</span><span>选择至少保留1%的方差的k的最小值</span></label>
+        <label><input type="radio" name="q67-1" value="D" data-reason="占原始维数 99% 不等于保留 99% 的方差，各方向方差不同。"><span class="choice-letter">D.</span><span>选择k为99%的n（即k=0.99∗n四舍五入至最接近的整数）。</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -83,12 +108,12 @@
     <form class="exercise choice-exercise" data-quiz data-answer="C">
       <fieldset>
         <legend>单选题</legend>
-        <label><input type="radio" name="q68-1" value="A"><span class="choice-letter">A.</span><span>数据平方均值 ÷ 重建误差 ≥ 0.05。</span></label>
-        <label><input type="radio" name="q68-1" value="B"><span class="choice-letter">B.</span><span>数据平方均值 ÷ 重建误差 ≤ 0.05。</span></label>
-        <label><input type="radio" name="q68-1" value="C"><span class="choice-letter">C.</span><span>重建误差 ÷ 数据平方均值 ≤ 0.05。</span></label>
-        <label><input type="radio" name="q68-1" value="D"><span class="choice-letter">D.</span><span>数据平方均值 ÷ 重建误差 ≤ 0.95。</span></label>
+        <label><input type="radio" name="q68-1" value="A" data-reason="先把误差作为分子、总变化作为分母，再用至多 5% 比较。"><span class="choice-letter">A.</span><span>数据平方均值 ÷ 重建误差 ≥ 0.05。</span></label>
+        <label><input type="radio" name="q68-1" value="B" data-reason="这个比值把总量放在了分子，应计算损失占原数据方差的比例。"><span class="choice-letter">B.</span><span>数据平方均值 ÷ 重建误差 ≤ 0.05。</span></label>
+        <label><input type="radio" name="q68-1" value="C" data-reason="保留至少 95% 意味着重建误差占总平方均值至多 5%。"><span class="choice-letter">C.</span><span>重建误差 ÷ 数据平方均值 ≤ 0.05。</span></label>
+        <label><input type="radio" name="q68-1" value="D" data-reason="0.95 是保留要求，残差比例的上界为 0.05，分子分母也需对调。"><span class="choice-letter">D.</span><span>数据平方均值 ÷ 重建误差 ≤ 0.95。</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -101,12 +126,12 @@
     <form class="exercise choice-exercise" data-quiz data-answer="BD">
       <fieldset>
         <legend>多选题 · 选全后检查</legend>
-        <label><input type="checkbox" name="q69-1" value="A"><span class="choice-letter">A.</span><span>仅给出z(i)和Ureduce，就没有办法重建x⁽ⁱ⁾的任何合理的近似。</span></label>
-        <label><input type="checkbox" name="q69-1" value="B"><span class="choice-letter">B.</span><span>即使所有的输入特征都在非常相似的尺度上，在运行PCA之前，我们仍然应该执行均值归一化（这样每个特征的均值为零）。</span></label>
-        <label><input type="checkbox" name="q69-1" value="C"><span class="choice-letter">C.</span><span>PCA易受局部最优解的影响；尝试多次随机初始化可能会有所帮助。</span></label>
-        <label><input type="checkbox" name="q69-1" value="D"><span class="choice-letter">D.</span><span>给定输入数据x∈ℝⁿ，仅用满足k≤n的k值运行PCA是有意义的（特别是，用k=n运行PCA是可能的，但没有帮助，k&gt;n没有意义）</span></label>
+        <label><input type="checkbox" name="q69-1" value="A" data-reason="用保留方向乘对应压缩坐标，再加起来，就能得到中心化点的近似。"><span class="choice-letter">A.</span><span>仅给出z(i)和Ureduce，就没有办法重建x⁽ⁱ⁾的任何合理的近似。</span></label>
+        <label><input type="checkbox" name="q69-1" value="B" data-reason="每列尺度相近时，仍需减均值，使投影描述围绕中心的变化。"><span class="choice-letter">B.</span><span>即使所有的输入特征都在非常相似的尺度上，在运行PCA之前，我们仍然应该执行均值归一化（这样每个特征的均值为零）。</span></label>
+        <label><input type="checkbox" name="q69-1" value="C" data-reason="标准 PCA 用特征分解或 SVD 得到方向，通常不用随机重启。"><span class="choice-letter">C.</span><span>PCA易受局部最优解的影响；尝试多次随机初始化可能会有所帮助。</span></label>
+        <label><input type="checkbox" name="q69-1" value="D" data-reason="n 维最多保留 n 个正交方向，全保留也就没有压缩。"><span class="choice-letter">D.</span><span>给定输入数据x∈ℝⁿ，仅用满足k≤n的k值运行PCA是有意义的（特别是，用k=n运行PCA是可能的，但没有帮助，k&gt;n没有意义）</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -119,12 +144,12 @@
     <form class="exercise choice-exercise" data-quiz data-answer="BD">
       <fieldset>
         <legend>多选题 · 选全后检查</legend>
-        <label><input type="checkbox" name="q70-1" value="A"><span class="choice-letter">A.</span><span>作为线性回归的替代：对于大多数模型应用，PCA和线性回归给出了基本相似的结果。</span></label>
-        <label><input type="checkbox" name="q70-1" value="B"><span class="choice-letter">B.</span><span>数据压缩：减少数据的维数，从而减少占用的内存/磁盘空间。</span></label>
-        <label><input type="checkbox" name="q70-1" value="C"><span class="choice-letter">C.</span><span>数据可视化：获取二维数据，并在二维中找到不同的绘制方法（使用k=2）。</span></label>
-        <label><input type="checkbox" name="q70-1" value="D"><span class="choice-letter">D.</span><span>数据压缩：减少输入数据x⁽ⁱ⁾的维数，该维数将用于监督学习算法（即，使用PCA以使监督学习算法运行更快）。</span></label>
+        <label><input type="checkbox" name="q70-1" value="A" data-reason="PCA 不使用目标 y，无法替代以预测 y 为目标的线性回归。"><span class="choice-letter">A.</span><span>作为线性回归的替代：对于大多数模型应用，PCA和线性回归给出了基本相似的结果。</span></label>
+        <label><input type="checkbox" name="q70-1" value="B" data-reason="把每个样本存成较少坐标，可以节约特征存储空间。"><span class="choice-letter">B.</span><span>数据压缩：减少数据的维数，从而减少占用的内存/磁盘空间。</span></label>
+        <label><input type="checkbox" name="q70-1" value="C" data-reason="从二维保留两轴只是换轴。常见可视化用法是把高维数据降到二维。"><span class="choice-letter">C.</span><span>数据可视化：获取二维数据，并在二维中找到不同的绘制方法（使用k=2）。</span></label>
+        <label><input type="checkbox" name="q70-1" value="D" data-reason="压缩后的输入可能减少后续计算，预测表现还需验证。"><span class="choice-letter">D.</span><span>数据压缩：减少输入数据x⁽ⁱ⁾的维数，该维数将用于监督学习算法（即，使用PCA以使监督学习算法运行更快）。</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -132,7 +157,12 @@
     </details>
   </article>
   </section>
-  <section class="lesson-recall" aria-labelledby="recall-heading"><h2 id="recall-heading">考前回忆</h2><p>主成分是方差最大的方向，正负都可。方差保留比例等于 1 减去残差平方占比。</p></section>
+  <section class="lesson-recall" id="recall" aria-labelledby="recall-heading"><h2 id="recall-heading">易错点与快速判断</h2><p>主成分是方差最大的方向，正负都可。方差保留比例等于 1 减去残差平方占比。</p></section>
+  <section aria-labelledby="retrieval-heading">
+    <h2 id="retrieval-heading">跨课回顾</h2>
+    <p>一个二维点和一个二维单位方向做内积，结果有几个数字？</p>
+    <details class="solution"><summary>核对你的判断</summary><div><p>只有 1 个。这个标量就是点沿所选轴的坐标。</p><p><a href="0002-matrix-operations.html#concepts">回看内积与形状</a></p></div></details>
+  </section>
   <footer>
     <p>遇到疑问，可以把题号和你卡住的步骤发给我。</p>
     <p class="small">参考资料 <a href="https://see.stanford.edu/materials/aimlcs229/cs229-notes10.pdf">斯坦福 CS229 主成分分析讲义</a></p>

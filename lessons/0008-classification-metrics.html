@@ -6,6 +6,7 @@
   <title>分类指标与阈值 · 第 5 天</title>
   <link rel="stylesheet" href="../assets/lesson.css">
   <script defer src="../assets/quiz.js"></script>
+  <script defer src="../assets/study.js"></script>
 </head>
 <body>
 <div class="sitebar"><nav aria-label="课程导航">
@@ -17,25 +18,49 @@
   <header class="lesson-intro">
     <a class="day-label" href="../index.html#day-5">第 5 天</a>
     <h1>分类指标与阈值</h1>
-    <p class="lede">100 封邮件里只有 1 封垃圾邮件。一个系统全都放进收件箱，也能猜对 99 封。怎样发现它漏掉了真正要找的东西？</p>
-    <nav class="lesson-nav" aria-label="本课内容"><a href="#concepts">知识点</a><a href="#example">带做例题</a><a href="#practice">动手练习</a><a href="#original">原题 51–55</a></nav>
+    <p class="lede"><strong>把误报和漏报单独数出来，再按任务要求选阈值。</strong></p>
+    <p>100 封邮件里只有 1 封垃圾邮件。把所有邮件放进收件箱能猜对 99 封，收件箱还是可能收到我们最想拦住的那一封。</p>
+    <p class="prerequisite">接上之前学过的<a href="0005-logistic-regression.html">概率和阈值</a>。</p>
+    <div class="depth-picker" hidden>
+      <label for="study-depth">学习深度</label>
+      <select id="study-depth" aria-describedby="depth-hint">
+        <option value="quick">极速模式</option>
+        <option value="standard" selected>标准模式</option>
+        <option value="deep">深入模式</option>
+      </select>
+      <p class="depth-hint small" id="depth-hint"></p>
+    </div>
+    <nav class="lesson-nav" aria-label="本课内容"><a href="#concepts">图解</a><a href="#example" data-study="standard">带做例题</a><a href="#practice" data-study="standard">动手练习</a><a href="#essential">必记</a><a href="#recall">易错点</a><a href="#original">原题 51–55</a></nav>
   </header>
   <section id="concepts" aria-labelledby="concepts-heading">
-    <h2 id="concepts-heading">知识点</h2>
-    <div class="concept"><h3>先规定谁是正类</h3><p>正类就是当前要找的类别，例如垃圾邮件。把实际类别与预测类别交叉记录，就得到<strong>混淆矩阵</strong>。TP（真阳性）是找对的正类，FP（假阳性）是误报，FN（假阴性）是漏报，TN（真阴性）是判对的负类。读图先看轴或行列标题。</p></div>
-    <div class="concept"><h3>同一张表回答四个不同的问题</h3><p><strong>准确率</strong> Accuracy = (TP+TN)/(TP+FP+FN+TN)，问「全部猜对多少」。<strong>精确率</strong> Precision = TP/(TP+FP)，问「我说是正类的里面，有多少真的是」。</p><p><strong>召回率</strong> Recall = TP/(TP+FN)，问「所有真实正类里面，我找到了多少」。<strong>F1</strong> = 2PR/(P+R)，P 和 R 分别是精确率和召回率，只有两者都高时 F1 才高。分母为 0 时要说明所用的约定，例如一个正类都没预测时，精确率按定义未定义。</p></div>
-    <div class="concept"><h3>阈值改变了哪些样本</h3><p>固定数据和分数时，提高阈值会从预测正类中删去一些样本。TP 不会变多，实际正类数不变，所以召回率只能下降或持平。降低阈值的情况相反。</p><p>精确率的分子和分母都可能变化，要看新增或移除的样本里有多少是真正类。数据量再大也要先看特征能否预测目标，以及模型是否能表达相关规律。</p></div>
+    <h2 id="concepts-heading">先看现象，再写规则</h2>
+    <div class="demo" data-demo="metrics">
+      <h3>移动阈值，重数四种结果</h3>
+      <p>从 0.50 拖到 0.85，找出哪些实心点变成空心点。先猜召回率会往哪个方向变，再看表格验证。</p>
+      <p class="demo-caption">实心表示预测为正，空心表示预测为负。上排是真实的垃圾邮件。</p>
+    </div>
+    <div class="concept" data-study="standard"><h3>先规定谁是正类</h3><p>正类就是当前要找的类别，例如垃圾邮件。把实际类别与预测类别交叉记录，就得到<strong>混淆矩阵</strong>。TP（真阳性）是找对的正类，FP（假阳性）是误报，FN（假阴性）是漏报，TN（真阴性）是判对的负类。读图先看轴或行列标题。</p></div>
+    <div class="concept" data-study="standard"><h3>同一张表回答四个不同的问题</h3><p><strong>准确率</strong> Accuracy = (TP+TN)/(TP+FP+FN+TN)，问「全部猜对多少」。<strong>精确率</strong> Precision = TP/(TP+FP)，问「我说是正类的里面，有多少真的是」。</p><p><strong>召回率</strong> Recall = TP/(TP+FN)，问「所有真实正类里面，我找到了多少」。<strong>F1</strong> = 2PR/(P+R)，P 和 R 分别是精确率和召回率，只有两者都高时 F1 才高。分母为 0 时要说明所用的约定，例如一个正类都没预测时，精确率按定义未定义。</p></div>
+    <div class="concept" data-study="standard"><h3>阈值改变了哪些样本</h3><p>固定数据和分数时，提高阈值会从预测正类中删去一些样本。TP 不会变多，实际正类数不变，所以召回率只能下降或持平。降低阈值的情况相反。</p><p>精确率的分子和分母都可能变化，要看新增或移除的样本里有多少是真正类。数据量再大也要先看特征能否预测目标，以及模型是否能表达相关规律。</p></div>
+    <aside class="quick-reference" id="essential" aria-labelledby="essential-heading">
+      <h3 id="essential-heading">必记</h3>
+      <p class="formula">精确率 = TP/(TP+FP)，看预测为正的那一列。召回率 = TP/(TP+FN)，看实际为正的那一行。F1 = 2TP/(2TP+FP+FN)。</p>
+    </aside>
   </section>
-  <section id="example" class="example" aria-labelledby="example-heading">
+  <section id="example" data-study="standard" class="example" aria-labelledby="example-heading">
     <h2 id="example-heading">跟着算一遍</h2>
     <ol><li>实际正类有 10 个，找对 8 个，所以 TP=8，FN=2。90 个实际负类里误报 4 个，所以 FP=4，TN=86。</li><li>准确率 = (8+86)/100=94%，精确率 = 8/(8+4)=2/3，召回率 = 8/(8+2)=0.8。</li><li>F1 = 2TP/(2TP+FP+FN)=16/22≈0.727。若只报 94% 的准确率，就看不到还有 2 个正类漏报。</li></ol>
   </section>
-  <section id="practice" class="try" aria-labelledby="practice-heading">
+  <section id="practice" data-study="standard" class="try" aria-labelledby="practice-heading">
     <h2 id="practice-heading">自己试一题</h2>
     <p>100 条样本中有 4 个正类。如果全预测负类，准确率和召回率各是多少？</p>
     <details class="solution"><summary>核对练习思路</summary><div><p>96 个负类猜对，准确率 96%。4 个实际正类都没找到，召回率 0%。</p></div></details>
   </section>
-  <section id="original" aria-labelledby="questions-heading">
+  <details class="solution" data-study="standard" data-advanced>
+    <summary>深入理解</summary>
+    <div><p>同一组固定打分上，提高阈值只会减少预测正类集合，所以 TP 和 FP 都不会增加。精确率由被移除的样本组成决定，有些区间会升，有些会降。决策阈值可结合验证集上的误报成本、漏报成本或业务约束选择。</p></div>
+  </details>
+  <section id="original" data-study="standard" aria-labelledby="questions-heading">
     <h2 id="questions-heading">原题练习</h2>
     <nav class="question-jump" aria-label="跳到本课原题"><a href="#q51">51</a><a href="#q52">52</a><a href="#q53">53</a><a href="#q54">54</a><a href="#q55">55</a></nav>
     <p class="small">先独立作答，再展开解析核对。计算题可以在纸上列式。</p>
@@ -55,12 +80,12 @@
     <form class="exercise choice-exercise" data-quiz data-answer="AC">
       <fieldset>
         <legend>多选题 · 选全后检查</legend>
-        <label><input type="checkbox" name="q52-1" value="A"><span class="choice-letter">A.</span><span>特征x包含足够的信息来精确地预测y。（例如，一个验证这一点的方法是，当只给x时，人类专家是否能够自信地预测y）。</span></label>
-        <label><input type="checkbox" name="q52-1" value="B"><span class="choice-letter">B.</span><span>我们训练一个具有少量参数的学习算法（因此不太可能过拟合）。</span></label>
-        <label><input type="checkbox" name="q52-1" value="C"><span class="choice-letter">C.</span><span>我们训练具有大量参数的学习算法（能够学习/表示相当复杂的函数）。</span></label>
-        <label><input type="checkbox" name="q52-1" value="D"><span class="choice-letter">D.</span><span>我们训练一个不使用正则化的模型。</span></label>
+        <label><input type="checkbox" name="q52-1" value="A" data-reason="输入确实提供目标信息，大量样本才有助于学到输入和目标的关系。"><span class="choice-letter">A.</span><span>特征x包含足够的信息来精确地预测y。（例如，一个验证这一点的方法是，当只给x时，人类专家是否能够自信地预测y）。</span></label>
+        <label><input type="checkbox" name="q52-1" value="B" data-reason="参数太少的模型可能连规律都表达不了，增样本难以弥补。"><span class="choice-letter">B.</span><span>我们训练一个具有少量参数的学习算法（因此不太可能过拟合）。</span></label>
+        <label><input type="checkbox" name="q52-1" value="C" data-reason="模型需有充分的表达能力，大样本可帮助稳定估计参数。"><span class="choice-letter">C.</span><span>我们训练具有大量参数的学习算法（能够学习/表示相当复杂的函数）。</span></label>
+        <label><input type="checkbox" name="q52-1" value="D" data-reason="数据多时仍可以用正则化控制复杂度，是否采用看验证表现。"><span class="choice-letter">D.</span><span>我们训练一个不使用正则化的模型。</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -73,22 +98,22 @@
     <form class="exercise choice-exercise" data-quiz data-answer="AD" data-alternate="D" data-alternate-text="你找到了原题册给出的召回率选项。请展开解析，再考虑精确率还有哪种可能。">
       <fieldset>
         <legend>1．如果把阈值提高到 0.9，哪些说法正确？</legend>
-        <label><input type="checkbox" name="q53-1" value="A"><span class="choice-letter">A.</span><span>现在分类器的精确率可能更低。</span></label>
-        <label><input type="checkbox" name="q53-1" value="B"><span class="choice-letter">B.</span><span>分类器的准确率和召回率可能不变，但准确率较低。</span></label>
-        <label><input type="checkbox" name="q53-1" value="C"><span class="choice-letter">C.</span><span>分类器的准确率和召回率可能不变，但精确率较高。</span></label>
-        <label><input type="checkbox" name="q53-1" value="D"><span class="choice-letter">D.</span><span>分类器现在可能具有较低的召回率。</span></label>
+        <label><input type="checkbox" name="q53-1" value="A" data-reason="如果提高阈值时剔除了真阳性、却保留了误报，精确率可能降低。"><span class="choice-letter">A.</span><span>现在分类器的精确率可能更低。</span></label>
+        <label><input type="checkbox" name="q53-1" value="B" data-reason="准确率在同一句里既说不变又说降低，两者冲突。"><span class="choice-letter">B.</span><span>分类器的准确率和召回率可能不变，但准确率较低。</span></label>
+        <label><input type="checkbox" name="q53-1" value="C" data-reason="固定样本上召回率与准确率都不变时，TP 与 TN 不变，精确率也不变。"><span class="choice-letter">C.</span><span>分类器的准确率和召回率可能不变，但精确率较高。</span></label>
+        <label><input type="checkbox" name="q53-1" value="D" data-reason="提高阈值可能漏掉原先找对的正类，使召回率下降。"><span class="choice-letter">D.</span><span>分类器现在可能具有较低的召回率。</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <form class="exercise choice-exercise" data-quiz data-answer="AC" data-alternate="A" data-alternate-text="你找到了原题册给出的召回率选项。请展开解析，再考虑精确率还有哪种可能。">
       <fieldset>
         <legend>2．如果把阈值降低到 0.3，哪些说法正确？</legend>
-        <label><input type="checkbox" name="q53-2" value="A"><span class="choice-letter">A.</span><span>分类器现在可能具有更高的召回率。</span></label>
-        <label><input type="checkbox" name="q53-2" value="B"><span class="choice-letter">B.</span><span>分类器的准确率和召回率可能不变，但精确率较高。</span></label>
-        <label><input type="checkbox" name="q53-2" value="C"><span class="choice-letter">C.</span><span>分类器现在可能具有更高的精确率。</span></label>
-        <label><input type="checkbox" name="q53-2" value="D"><span class="choice-letter">D.</span><span>分类器的准确率和召回率可能不变，但准确率较低。</span></label>
+        <label><input type="checkbox" name="q53-2" value="A" data-reason="阈值降低会纳入更多样本，其中若有此前漏掉的正类，召回率就上升。"><span class="choice-letter">A.</span><span>分类器现在可能具有更高的召回率。</span></label>
+        <label><input type="checkbox" name="q53-2" value="B" data-reason="若召回率和准确率都没变，TP 与 TN 均没变，精确率也不会提高。"><span class="choice-letter">B.</span><span>分类器的准确率和召回率可能不变，但精确率较高。</span></label>
+        <label><input type="checkbox" name="q53-2" value="C" data-reason="若新增预测正类中的真阳性比例更高，精确率可能上升。"><span class="choice-letter">C.</span><span>分类器现在可能具有更高的精确率。</span></label>
+        <label><input type="checkbox" name="q53-2" value="D" data-reason="这项同时说准确率不变、准确率较低，两种说法互相冲突。"><span class="choice-letter">D.</span><span>分类器的准确率和召回率可能不变，但准确率较低。</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -101,16 +126,16 @@
     <form class="exercise choice-exercise" data-quiz data-answer="BCFGH">
       <fieldset>
         <legend>多选题 · 选全后检查</legend>
-        <label><input type="checkbox" name="q54-1" value="A"><span class="choice-letter">A.</span><span>一个好的分类器应该在交叉验证集上同时具有高精度precision和高召回率recall。</span></label>
-        <label><input type="checkbox" name="q54-1" value="B"><span class="choice-letter">B.</span><span>如果您总是预测非垃圾邮件（输出y=0），那么您的分类器在训练集上的准确度accuracy将达到99%，而且它在交叉验证集上的性能可能类似。</span></label>
-        <label><input type="checkbox" name="q54-1" value="C"><span class="choice-letter">C.</span><span>如果您总是预测非垃圾邮件（输出y=0），那么您的分类器的准确度accuracy将达到99%。</span></label>
-        <label><input type="checkbox" name="q54-1" value="D"><span class="choice-letter">D.</span><span>如果您总是预测非垃圾邮件（输出y=0），那么您的分类器在训练集上的准确度accuracy将达到99%，但在交叉验证集上的准确率会更差，因为它过拟合训练数据。</span></label>
-        <label><input type="checkbox" name="q54-1" value="E"><span class="choice-letter">E.</span><span>如果总是预测垃圾邮件（输出y=1），则分类器的召回率recall为0%，精度precision为99%。</span></label>
-        <label><input type="checkbox" name="q54-1" value="F"><span class="choice-letter">F.</span><span>如果总是预测非垃圾邮件（输出y=0），则分类器的召回率recall为0%。</span></label>
-        <label><input type="checkbox" name="q54-1" value="G"><span class="choice-letter">G.</span><span>如果您总是预测垃圾邮件（输出y=1），那么您的分类器将具有召回率recall 100%和精度precision 1%。</span></label>
-        <label><input type="checkbox" name="q54-1" value="H"><span class="choice-letter">H.</span><span>如果您总是预测非垃圾邮件（输出y=0），那么您的分类器的准确度accuracy将达到99%。</span></label>
+        <label><input type="checkbox" name="q54-1" value="A" data-reason="精确率和召回率都重要，实际怎样取舍取决于误报与漏报的代价。"><span class="choice-letter">A.</span><span>一个好的分类器应该在交叉验证集上同时具有高精度precision和高召回率recall。</span></label>
+        <label><input type="checkbox" name="q54-1" value="B" data-reason="如果验证集类别比例相似，全猜非垃圾也可能保持约 99% 的准确率。"><span class="choice-letter">B.</span><span>如果您总是预测非垃圾邮件（输出y=0），那么您的分类器在训练集上的准确度accuracy将达到99%，而且它在交叉验证集上的性能可能类似。</span></label>
+        <label><input type="checkbox" name="q54-1" value="C" data-reason="在题给的训练集里，99% 的非垃圾邮件都会被判对。"><span class="choice-letter">C.</span><span>如果您总是预测非垃圾邮件（输出y=0），那么您的分类器的准确度accuracy将达到99%。</span></label>
+        <label><input type="checkbox" name="q54-1" value="D" data-reason="固定预测多数类并不能说明过拟合，验证准确率还取决于类别比例。"><span class="choice-letter">D.</span><span>如果您总是预测非垃圾邮件（输出y=0），那么您的分类器在训练集上的准确度accuracy将达到99%，但在交叉验证集上的准确率会更差，因为它过拟合训练数据。</span></label>
+        <label><input type="checkbox" name="q54-1" value="E" data-reason="全猜垃圾会找到全部真实垃圾，召回率为 100%，精确率为 1%。"><span class="choice-letter">E.</span><span>如果总是预测垃圾邮件（输出y=1），则分类器的召回率recall为0%，精度precision为99%。</span></label>
+        <label><input type="checkbox" name="q54-1" value="F" data-reason="没有任何一封垃圾邮件被找出，召回率是 0%。"><span class="choice-letter">F.</span><span>如果总是预测非垃圾邮件（输出y=0），则分类器的召回率recall为0%。</span></label>
+        <label><input type="checkbox" name="q54-1" value="G" data-reason="全猜垃圾时一封也没漏，所有预测正类中只有 1% 真是垃圾。"><span class="choice-letter">G.</span><span>如果您总是预测垃圾邮件（输出y=1），那么您的分类器将具有召回率recall 100%和精度precision 1%。</span></label>
+        <label><input type="checkbox" name="q54-1" value="H" data-reason="此项与 C 重复。准确率是在所有邮件中猜对的比例。"><span class="choice-letter">H.</span><span>如果您总是预测非垃圾邮件（输出y=0），那么您的分类器的准确度accuracy将达到99%。</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -123,13 +148,13 @@
     <form class="exercise choice-exercise" data-quiz data-answer="BD">
       <fieldset>
         <legend>多选题 · 选全后检查</legend>
-        <label><input type="checkbox" name="q55-1" value="A"><span class="choice-letter">A.</span><span>在构建学习算法的第一个版本之前，花大量时间收集大量数据是一个好主意。</span></label>
-        <label><input type="checkbox" name="q55-1" value="B"><span class="choice-letter">B.</span><span>在倾斜的数据集上（例如，当有更多的正面例子而不是负面例子时），准确度不是一个很好的性能度量，您应该根据精确率和召回率使用F1分数。</span></label>
-        <label><input type="checkbox" name="q55-1" value="C"><span class="choice-letter">C.</span><span>训练完逻辑回归分类器后，必须使用0.5作为预测示例是正是负的阈值。</span></label>
-        <label><input type="checkbox" name="q55-1" value="D"><span class="choice-letter">D.</span><span>使用一个非常大的训练集使得模型不太可能过度拟合训练数据。</span></label>
-        <label><input type="checkbox" name="q55-1" value="E"><span class="choice-letter">E.</span><span>如果您的模型不适合训练集，那么获取更多数据可能会有帮助。</span></label>
+        <label><input type="checkbox" name="q55-1" value="A" data-reason="先做可评估的基线，误差分析能告诉我们最该收集哪类数据。"><span class="choice-letter">A.</span><span>在构建学习算法的第一个版本之前，花大量时间收集大量数据是一个好主意。</span></label>
+        <label><input type="checkbox" name="q55-1" value="B" data-reason="类别倾斜时，F1 可同时反映精确率和召回率。"><span class="choice-letter">B.</span><span>在倾斜的数据集上（例如，当有更多的正面例子而不是负面例子时），准确度不是一个很好的性能度量，您应该根据精确率和召回率使用F1分数。</span></label>
+        <label><input type="checkbox" name="q55-1" value="C" data-reason="0.5 是常用起点，实际可按验证结果调整阈值。"><span class="choice-letter">C.</span><span>训练完逻辑回归分类器后，必须使用0.5作为预测示例是正是负的阈值。</span></label>
+        <label><input type="checkbox" name="q55-1" value="D" data-reason="模型复杂度相近时，增加有代表性的数据通常减少过拟合。"><span class="choice-letter">D.</span><span>使用一个非常大的训练集使得模型不太可能过度拟合训练数据。</span></label>
+        <label><input type="checkbox" name="q55-1" value="E" data-reason="连训练数据也拟合不好时，应先排查特征、容量与优化。"><span class="choice-letter">E.</span><span>如果您的模型不适合训练集，那么获取更多数据可能会有帮助。</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -137,7 +162,12 @@
     </details>
   </article>
   </section>
-  <section class="lesson-recall" aria-labelledby="recall-heading"><h2 id="recall-heading">考前回忆</h2><p>精确率的分母是预测正类，召回率的分母是实际正类。提高阈值不能提高固定样本集上的召回率。</p></section>
+  <section class="lesson-recall" id="recall" aria-labelledby="recall-heading"><h2 id="recall-heading">易错点与快速判断</h2><p>精确率的分母是预测正类，召回率的分母是实际正类。提高阈值不能提高固定样本集上的召回率。</p></section>
+  <section aria-labelledby="retrieval-heading">
+    <h2 id="retrieval-heading">跨课回顾</h2>
+    <p>模型给出 0.7 的正类概率。阈值从 0.5 改到 0.8，发生哪些变化？</p>
+    <details class="solution"><summary>核对你的判断</summary><div><p>概率仍是 0.7，预测从正类变成负类。实际为正时，这一条会从 TP 变成 FN。</p><p><a href="0005-logistic-regression.html#concepts">回看概率和阈值</a></p></div></details>
+  </section>
   <footer>
     <p>遇到疑问，可以把题号和你卡住的步骤发给我。</p>
     <p class="small">参考资料 <a href="https://developers.google.com/machine-learning/crash-course/classification/accuracy-precision-recall">Google 分类指标课程</a> · <a href="https://developers.google.com/machine-learning/crash-course/logistic-regression">Google 逻辑回归课程</a></p>

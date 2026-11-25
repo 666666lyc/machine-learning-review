@@ -64,6 +64,86 @@ nav, .small, .meta, footer { color: var(--muted); font-size: .94rem; }
 .day-label, .day-count { color: var(--accent); font-weight: 700; font-size: .91rem; }
 .day-count { margin: 0; }
 .lesson-nav { margin-top: 1rem; }
+.depth-picker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .3rem .65rem;
+  margin: 1rem 0 .25rem;
+  font-size: .94rem;
+}
+.depth-picker select, .demo select {
+  font: inherit;
+  color: var(--ink);
+  background: var(--white);
+  border: 1px solid var(--muted);
+  border-radius: .3rem;
+  padding: .25rem .5rem;
+}
+.depth-hint { margin: 0; }
+[hidden] { display: none !important; }
+.lesson[data-depth="quick"] [data-study="standard"],
+.lesson:not([data-depth="quick"]) [data-study="quick"] { display: none; }
+.lesson[data-depth="quick"]:has(#original:target, .question:target) #original { display: block; }
+.lesson[data-depth="quick"]:has(#example:target) #example,
+.lesson[data-depth="quick"]:has(#practice:target) #practice { display: block; }
+.prerequisite { font-size: .94rem; color: var(--muted); }
+.demo {
+  min-width: 0;
+  margin: 1rem 0;
+  padding: .85rem clamp(.65rem, 2vw, 1rem);
+  border: 1px solid var(--line);
+  border-radius: .6rem;
+  background: var(--white);
+}
+.demo h3, .demo h4 { margin: 0 0 .4rem; }
+.demo h4 { font-size: 1rem; }
+.demo + .concept, .demo + .insight { margin-top: 1rem; }
+.demo canvas {
+  display: block;
+  width: 100%;
+  height: 15rem;
+  background: #f4f8f7;
+  border-radius: .35rem;
+  margin: .6rem 0;
+}
+.demo-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .5rem .85rem;
+  margin: .55rem 0;
+}
+.demo-slider { display: flex; flex-wrap: wrap; align-items: center; gap: .35rem .65rem; }
+.demo-slider input { width: min(38vw, 12rem); accent-color: var(--accent); }
+.demo-result { display: block; font-variant-numeric: tabular-nums; }
+.demo-result:empty { display: none; }
+.demo-table-wrap { overflow-x: auto; }
+.demo table { border-collapse: collapse; font-variant-numeric: tabular-nums; text-align: center; }
+.demo th, .demo td { border: 1px solid var(--line); padding: .25rem .65rem; }
+.demo th { background: var(--paper); }
+.demo [data-highlight] { background: #d7ebe4; color: #163f34; font-weight: 700; }
+.matrix-pair { display: flex; flex-wrap: wrap; gap: .6rem 1.2rem; }
+.demo-caption { font-size: .91rem; color: var(--muted); }
+.insight { border-inline-start: .2rem solid var(--line); padding-inline-start: .8rem; }
+.quick-reference { margin: 1rem 0; }
+.course-map { display: grid; gap: .6rem; padding: 0; list-style: none; }
+.course-map li {
+  display: grid;
+  grid-template-columns: minmax(8rem, .6fr) minmax(0, 2fr);
+  gap: .35rem 1rem;
+  padding: .75rem 1rem;
+  border-inline-start: .22rem solid var(--accent);
+  background: var(--white);
+}
+.course-map nav { gap: .3rem .65rem; }
+.course-map small { display: block; color: var(--muted); }
+.review-list { padding-inline-start: 1.3rem; }
+.quiz-feedback-list { margin: 0; padding-inline-start: 1.2rem; }
+.quiz-actions .feedback { flex-basis: 100%; }
+.review-toggle { margin-top: .65rem; background: transparent; color: var(--accent); }
+.review-toggle:hover { background: var(--soft); }
+.demo button:disabled { opacity: .64; cursor: default; }
 button, input, summary { font: inherit; }
 a:focus-visible, button:focus-visible, input:focus-visible, summary:focus-visible {
   outline: 2px solid var(--accent);
@@ -176,6 +256,7 @@ dd { margin: .1rem 0 .6rem; }
   font-weight: 700;
 }
 .solution > div { padding: 0 .7rem .5rem; overflow-wrap: anywhere; }
+.solution pre { white-space: pre-wrap; }
 .solution-key { color: var(--accent); }
 .source-note {
   border-inline-start: .16rem solid #8a692e;
@@ -184,12 +265,17 @@ dd { margin: .1rem 0 .6rem; }
 }
 footer { border-top: 1px solid var(--line); margin-top: 2rem; padding-top: .8rem; }
 @media (max-width: 39rem) {
+  .course-map li { grid-template-columns: 1fr; }
+  .demo canvas { height: 13rem; }
   main { padding: 1.5rem 1rem 2rem; }
   .day-grid { grid-template-columns: minmax(0, 1fr); }
   .sitebar { padding-inline: 1rem; }
   .sitebar nav { column-gap: .7rem; }
 }
 @media print {
+  .depth-picker, .depth-hint, .demo-controls, .review-toggle { display: none !important; }
+  .lesson[data-depth="quick"] [data-study="standard"] { display: block; }
+  .lesson [data-study="quick"] { display: none; }
   :root { --ink: #000; --accent: #000; --paper: #fff; }
   main { max-width: none; padding: 0; }
   header { margin: .5rem 0 1rem; }

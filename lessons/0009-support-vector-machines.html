@@ -6,6 +6,7 @@
   <title>支持向量机的间隔与高斯核 · 第 6 天</title>
   <link rel="stylesheet" href="../assets/lesson.css">
   <script defer src="../assets/quiz.js"></script>
+  <script defer src="../assets/study.js"></script>
 </head>
 <body>
 <div class="sitebar"><nav aria-label="课程导航">
@@ -17,25 +18,55 @@
   <header class="lesson-intro">
     <a class="day-label" href="../index.html#day-6">第 6 天</a>
     <h1>支持向量机的间隔与高斯核</h1>
-    <p class="lede">如果能画好几条线把两类点分开，哪条更合适？支持向量机（SVM）希望边界离最近的点也有一定距离。</p>
-    <nav class="lesson-nav" aria-label="本课内容"><a href="#concepts">知识点</a><a href="#example">带做例题</a><a href="#practice">动手练习</a><a href="#original">原题 56–60</a></nav>
+    <p class="lede"><strong>SVM 既追求分对两类，也尽量让边界离最近的点远一点。</strong></p>
+    <p>两条直线都能分开两组样本，一条紧贴某个点，另一条离两边最近的点都较远。下次测量稍有抖动时，哪条边界更稳？</p>
+    <p class="prerequisite">接上之前学过的<a href="0005-logistic-regression.html">决策边界</a>。</p>
+    <div class="depth-picker" hidden>
+      <label for="study-depth">学习深度</label>
+      <select id="study-depth" aria-describedby="depth-hint">
+        <option value="quick">极速模式</option>
+        <option value="standard" selected>标准模式</option>
+        <option value="deep">深入模式</option>
+      </select>
+      <p class="depth-hint small" id="depth-hint"></p>
+    </div>
+    <nav class="lesson-nav" aria-label="本课内容"><a href="#concepts">图解</a><a href="#example" data-study="standard">带做例题</a><a href="#practice" data-study="standard">动手练习</a><a href="#essential">必记</a><a href="#recall">易错点</a><a href="#original">原题 56–60</a></nav>
   </header>
   <section id="concepts" aria-labelledby="concepts-heading">
-    <h2 id="concepts-heading">知识点</h2>
-    <div class="concept"><h3>分类对了还要留出间隔</h3><p>SVM 可用得分 z=θᵀx 判断哪一类。z=0 是分界。题目的标签用 1 表示正类、0 表示负类，正类得分达到 1、负类得分低至 −1 就不受间隔损失。</p><p><span class="formula">正类损失 = max(0, 1−z)　　负类损失 = max(0, 1+z)</span>这里 max 是取较大的数。即使正类得分 0.4 已在正确一侧，损失仍为 0.6，因为距离还不够。<strong>软间隔</strong>允许一些点进入间隔或分错，C 控制这些训练损失相对参数惩罚的重要性。</p></div>
-    <div class="concept"><h3>用距离衡量与参考点有多相似</h3><p><span class="formula">K(x, ℓ) = exp(−‖x−ℓ‖²/(2σ²))</span>x 是当前样本，ℓ 是参考点，‖x−ℓ‖² 是对应坐标差的平方和，exp(t) 是 e 的 t 次方，σ² 控制核宽度。x=ℓ 时相似度为 1；离参考点越远，相似度越小。</p><p>σ² 小时影响范围窄，边界可以更灵活。σ² 大时变化较平缓。某个特征若数值范围大，可能不合理地主导距离，所以常先缩放。</p></div>
-    <div class="concept"><h3>怎样处理欠拟合与多类</h3><p>高斯核 SVM 明显欠拟合时，可以在验证集上试更大的 C 或更小的 σ²。C 过大或 σ² 过小可能让模型过度贴合训练数据，所以要再检查验证集表现。</p><p>如果有 K 个类别，一对其余的方法为每个类别训练一个「本类对其余」分类器，共 K 个。逻辑回归已欠拟合时，也可考虑能表达非线性关系的特征或模型。</p></div>
+    <h2 id="concepts-heading">先看现象，再写规则</h2>
+    <div class="demo" data-demo="margin">
+      <h3>哪条边界留出的空地最宽</h3>
+      <p>把绿线左右移动，先找出最宽的绿色带，再加入越界点。看看能否通过小幅移动同时保持分类与间隔。</p>
+      <p class="demo-caption">图中只比较竖直边界。原始数据里，带边上的最近点决定可留出的间隔。</p>
+    </div>
+    <div class="concept" data-study="standard"><h3>先看距离和支持向量</h3><p>原始图中左右最近点的横坐标为 −1 和 1。边界放在中点时，两边各留 1 个单位。达到最宽安全带时，贴着带边的样本是这组硬间隔演示中的支持向量。</p></div>
+    <div class="concept" data-study="standard"><h3>分类正确也可能需要付代价</h3><p>把得分归一到边界 z=0、间隔边 z=±1。真实正类若得分 0.4，分类虽对，间隔损失仍是 1−0.4=0.6。软间隔允许样本落入带内或分错，C 越大越重视减少这类损失。</p></div>
+    <div class="demo" data-demo="kernel">
+      <h3>核宽度会怎样改变边界</h3>
+      <p>把 σ² 从 1 改到 0.25。猜红点更像还是更不像参考点，再看圆形边界往里还是往外移。</p>
+      <p class="demo-caption">示意分类器把核相似度至少 0.5 的点判为正类，所以一颗参考点就能围出圆形边界。</p>
+    </div>
+    <div class="concept" data-study="standard"><h3>一条直线分不开时，用相似度</h3><p>高斯核衡量样本离参考点有多近，同一点的相似度为 1。σ² 小时相似度下降较快。使用多个参考点的核相似度，分类边界可以弯曲；用距离前应注意特征尺度。</p></div>
+    <div class="concept" data-study="standard"><h3>诊断欠拟合，或扩展到多类</h3><p>高斯核 SVM 欠拟合时，可在验证集试更大的 C 或更小的 σ²。K 个类别做一对其余，需要训练 K 个分类器。</p></div>
+    <aside class="quick-reference" id="essential" aria-labelledby="essential-heading">
+      <h3 id="essential-heading">必记</h3>
+      <p class="formula">边界由 z=0 决定。正类间隔损失 max(0, 1−z)，负类 max(0, 1+z)。高斯核 K = exp(−距离平方/(2σ²))。</p>
+    </aside>
   </section>
-  <section id="example" class="example" aria-labelledby="example-heading">
+  <section id="example" data-study="standard" class="example" aria-labelledby="example-heading">
     <h2 id="example-heading">跟着算一遍</h2>
-    <ol><li>取一个点 x 离参考点 ℓ 的距离为 1。若 σ²=1，核相似度是 e^(−1/2)≈0.607。</li><li>把 σ² 改成 0.25，分母从 2 变成 0.5，同一位置相似度变为 e^(−2)≈0.135。</li><li>参考点处距离是 0，两种情况下都等于 e⁰=1。对比这两处就能看出，变化的是峰的宽度。</li></ol>
+    <ol><li>原始图中，两类最靠近竖直边界的样本横坐标为 −1 和 1。选边界 x₁=0，两边最近距离都是 1；移到 x₁=0.6 后，右侧只有 0.4，总安全带从 2 缩到 0.8。</li><li>若正类样本得分 z=0.4，已经判对，间隔损失仍为 1−0.4=0.6。软间隔允许模型为这样的样本付出损失，C 决定这笔损失相对于参数惩罚有多重要。</li><li>当直线难以表达形状时，可用高斯核。距参考点 1 单位处，σ²=1 时相似度为 e<sup>−0.5</sup>≈0.607，σ²=0.25 时变成 e<sup>−2</sup>≈0.135。参考点处两种设置的相似度都为 1。</li></ol>
   </section>
-  <section id="practice" class="try" aria-labelledby="practice-heading">
+  <section id="practice" data-study="standard" class="try" aria-labelledby="practice-heading">
     <h2 id="practice-heading">自己试一题</h2>
     <p>一个实际负类的得分是 z=−0.4。它分对了吗？间隔损失是多少？</p>
     <details class="solution"><summary>核对练习思路</summary><div><p>得分为负，判为负类，因此分类正确。损失为 max(0, 1−0.4)=0.6。</p></div></details>
   </section>
-  <section id="original" aria-labelledby="questions-heading">
+  <details class="solution" data-study="standard" data-advanced>
+    <summary>深入理解</summary>
+    <div><p>在规范化约束下，z=±1 两条平行线之间的几何宽度为 2/‖w‖。硬间隔最大化这段宽度。软间隔允许违反约束，通过 C 权衡违规损失与参数惩罚。核方法可把分类得分写成若干个核相似度的加权和加上偏置。</p></div>
+  </details>
+  <section id="original" data-study="standard" aria-labelledby="questions-heading">
     <h2 id="questions-heading">原题练习</h2>
     <nav class="question-jump" aria-label="跳到本课原题"><a href="#q56">56</a><a href="#q57">57</a><a href="#q58">58</a><a href="#q59">59</a><a href="#q60">60</a></nav>
     <p class="small">先独立作答，再展开解析核对。计算题可以在纸上列式。</p>
@@ -47,12 +78,12 @@
     <form class="exercise choice-exercise" data-quiz data-answer="D">
       <fieldset>
         <legend>单选题</legend>
-        <label><input type="radio" name="q56-1" value="A"><span class="choice-letter">A.</span><span>降低C，增加σ²</span></label>
-        <label><input type="radio" name="q56-1" value="B"><span class="choice-letter">B.</span><span>降低C，降低σ²</span></label>
-        <label><input type="radio" name="q56-1" value="C"><span class="choice-letter">C.</span><span>增加C，增加σ²</span></label>
-        <label><input type="radio" name="q56-1" value="D"><span class="choice-letter">D.</span><span>增加C，降低σ²</span></label>
+        <label><input type="radio" name="q56-1" value="A" data-reason="降 C 让模型更容忍训练损失，增 σ² 又让影响范围变宽，两者都可能加重欠拟合。"><span class="choice-letter">A.</span><span>降低C，增加σ²</span></label>
+        <label><input type="radio" name="q56-1" value="B" data-reason="减小 σ² 可细化边界，但降低 C 会让模型更容忍训练误差。"><span class="choice-letter">B.</span><span>降低C，降低σ²</span></label>
+        <label><input type="radio" name="q56-1" value="C" data-reason="增大 C 有助于贴近训练集，但增大 σ² 会让核更平缓。"><span class="choice-letter">C.</span><span>增加C，增加σ²</span></label>
+        <label><input type="radio" name="q56-1" value="D" data-reason="提高训练损失的相对权重，并缩窄核宽度，都是缓解该图欠拟合的尝试。"><span class="choice-letter">D.</span><span>增加C，降低σ²</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -66,12 +97,12 @@
     <form class="exercise choice-exercise" data-quiz data-answer="D">
       <fieldset>
         <legend>单选题</legend>
-        <label><input type="radio" name="q57-1" value="A"><span class="choice-letter">A.</span><span><img class="question-image" src="../assets/questions/image23.jpeg" width="560" height="420" alt="在原参考点附近的宽峰。" loading="lazy" decoding="async"></span></label>
-        <label><input type="radio" name="q57-1" value="B"><span class="choice-letter">B.</span><span><img class="question-image" src="../assets/questions/image24.png" width="560" height="420" alt="相对原图向后方移动的峰。" loading="lazy" decoding="async"></span></label>
-        <label><input type="radio" name="q57-1" value="C"><span class="choice-letter">C.</span><span><img class="question-image" src="../assets/questions/image25.jpeg" width="560" height="420" alt="在原参考点附近的宽而平缓的峰。" loading="lazy" decoding="async"></span></label>
-        <label><input type="radio" name="q57-1" value="D"><span class="choice-letter">D.</span><span><img class="question-image" src="../assets/questions/image26.jpeg" width="560" height="420" alt="在原参考点附近的窄峰。" loading="lazy" decoding="async"></span></label>
+        <label><input type="radio" name="q57-1" value="A" data-reason="峰中心位置合适，但缩小方差后，离中心同样距离处的相似度应更低。"><span class="choice-letter">A.</span><span><img class="question-image" src="../assets/questions/image23.jpeg" width="560" height="420" alt="在原参考点附近的宽峰。" loading="lazy" decoding="async"></span></label>
+        <label><input type="radio" name="q57-1" value="B" data-reason="改 σ² 只改变宽度，峰应一直留在参考点上。"><span class="choice-letter">B.</span><span><img class="question-image" src="../assets/questions/image24.png" width="560" height="420" alt="相对原图向后方移动的峰。" loading="lazy" decoding="async"></span></label>
+        <label><input type="radio" name="q57-1" value="C" data-reason="更宽更平缓符合增大 σ² 的趋势。题目把 σ² 缩小。"><span class="choice-letter">C.</span><span><img class="question-image" src="../assets/questions/image25.jpeg" width="560" height="420" alt="在原参考点附近的宽而平缓的峰。" loading="lazy" decoding="async"></span></label>
+        <label><input type="radio" name="q57-1" value="D" data-reason="同一参考点上的峰高保持 1，离开中心的下降速度变快。"><span class="choice-letter">D.</span><span><img class="question-image" src="../assets/questions/image26.jpeg" width="560" height="420" alt="在原参考点附近的窄峰。" loading="lazy" decoding="async"></span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -86,12 +117,12 @@
     <form class="exercise choice-exercise" data-quiz data-answer="AB">
       <fieldset>
         <legend>多选题 · 选全后检查</legend>
-        <label><input type="checkbox" name="q58-1" value="A"><span class="choice-letter">A.</span><span>对于y⁽ⁱ⁾=1的每个例子，有θᵀx⁽ⁱ⁾≥1</span></label>
-        <label><input type="checkbox" name="q58-1" value="B"><span class="choice-letter">B.</span><span>对于y⁽ⁱ⁾=0的每个例子，有θᵀx⁽ⁱ⁾≤−1</span></label>
-        <label><input type="checkbox" name="q58-1" value="C"><span class="choice-letter">C.</span><span>对于y⁽ⁱ⁾=1的每个例子，有θᵀx⁽ⁱ⁾≥0</span></label>
-        <label><input type="checkbox" name="q58-1" value="D"><span class="choice-letter">D.</span><span>对于y⁽ⁱ⁾=0的每个例子，有θᵀx⁽ⁱ⁾≤0</span></label>
+        <label><input type="checkbox" name="q58-1" value="A" data-reason="每个正样本得分至少为 1，正类间隔损失全部为 0。"><span class="choice-letter">A.</span><span>对于y⁽ⁱ⁾=1的每个例子，有θᵀx⁽ⁱ⁾≥1</span></label>
+        <label><input type="checkbox" name="q58-1" value="B" data-reason="每个负样本得分至多为 −1，负类间隔损失全部为 0。"><span class="choice-letter">B.</span><span>对于y⁽ⁱ⁾=0的每个例子，有θᵀx⁽ⁱ⁾≤−1</span></label>
+        <label><input type="checkbox" name="q58-1" value="C" data-reason="正得分 0.4 可分对类别，但仍有 0.6 的间隔损失。"><span class="choice-letter">C.</span><span>对于y⁽ⁱ⁾=1的每个例子，有θᵀx⁽ⁱ⁾≥0</span></label>
+        <label><input type="checkbox" name="q58-1" value="D" data-reason="负得分 −0.4 可分对类别，但仍有 0.6 的间隔损失。"><span class="choice-letter">D.</span><span>对于y⁽ⁱ⁾=0的每个例子，有θᵀx⁽ⁱ⁾≤0</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -104,12 +135,12 @@
     <form class="exercise choice-exercise" data-quiz data-answer="AD">
       <fieldset>
         <legend>多选题 · 选全后检查</legend>
-        <label><input type="checkbox" name="q59-1" value="A"><span class="choice-letter">A.</span><span>尝试使用具有大量隐藏单元的神经网络。</span></label>
-        <label><input type="checkbox" name="q59-1" value="B"><span class="choice-letter">B.</span><span>减少训练集中的示例数。</span></label>
-        <label><input type="checkbox" name="q59-1" value="C"><span class="choice-letter">C.</span><span>使用不同的优化方法，因为使用梯度下降训练逻辑可能会导致局部最小。</span></label>
-        <label><input type="checkbox" name="q59-1" value="D"><span class="choice-letter">D.</span><span>创建/添加新的多项式特征。</span></label>
+        <label><input type="checkbox" name="q59-1" value="A" data-reason="更有表达能力的神经网络可能学到目前模型漏掉的关系。"><span class="choice-letter">A.</span><span>尝试使用具有大量隐藏单元的神经网络。</span></label>
+        <label><input type="checkbox" name="q59-1" value="B" data-reason="模型在现有训练集上已经难以拟合，减样本不会增加表达能力。"><span class="choice-letter">B.</span><span>减少训练集中的示例数。</span></label>
+        <label><input type="checkbox" name="q59-1" value="C" data-reason="交叉熵对线性得分模型的参数是凸的，局部最小值并非理由。"><span class="choice-letter">C.</span><span>使用不同的优化方法，因为使用梯度下降训练逻辑可能会导致局部最小。</span></label>
+        <label><input type="checkbox" name="q59-1" value="D" data-reason="多项式特征可以表达原先的线性模型无法画出的边界。"><span class="choice-letter">D.</span><span>创建/添加新的多项式特征。</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -122,12 +153,12 @@
     <form class="exercise choice-exercise" data-quiz data-answer="CD">
       <fieldset>
         <legend>多选题 · 选全后检查</legend>
-        <label><input type="checkbox" name="q60-1" value="A"><span class="choice-letter">A.</span><span>假设您使用支持向量机进行多类分类，并希望使用“一对所有”方法。如果你有K个不同的类，你将训练K−1个不同的支持向量机。</span></label>
-        <label><input type="checkbox" name="q60-1" value="B"><span class="choice-letter">B.</span><span>如果数据是线性可分的，那么不管C值是多少，线性内核的支持向量机都将返回相同的参数θ（即θ的结果值不依赖于C）。</span></label>
-        <label><input type="checkbox" name="q60-1" value="C"><span class="choice-letter">C.</span><span>高斯核的最大值（即sim(x,l(1))）是1。</span></label>
-        <label><input type="checkbox" name="q60-1" value="D"><span class="choice-letter">D.</span><span>在使用高斯核之前进行特征归一化是很重要的。</span></label>
+        <label><input type="checkbox" name="q60-1" value="A" data-reason="每个类别都需要一个本类对其余的二分类器，总数为 K。"><span class="choice-letter">A.</span><span>假设您使用支持向量机进行多类分类，并希望使用“一对所有”方法。如果你有K个不同的类，你将训练K−1个不同的支持向量机。</span></label>
+        <label><input type="checkbox" name="q60-1" value="B" data-reason="即使训练点可分，较低的 C 也可能容许一些间隔违规，改变解。"><span class="choice-letter">B.</span><span>如果数据是线性可分的，那么不管C值是多少，线性内核的支持向量机都将返回相同的参数θ（即θ的结果值不依赖于C）。</span></label>
+        <label><input type="checkbox" name="q60-1" value="C" data-reason="样本等于参考点时距离为 0，指数为 0，相似度为 1。"><span class="choice-letter">C.</span><span>高斯核的最大值（即sim(x,l(1))）是1。</span></label>
+        <label><input type="checkbox" name="q60-1" value="D" data-reason="高斯核依赖距离，缩放能避免大数值范围的特征不合理地主导比较。"><span class="choice-letter">D.</span><span>在使用高斯核之前进行特征归一化是很重要的。</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -135,7 +166,12 @@
     </details>
   </article>
   </section>
-  <section class="lesson-recall" aria-labelledby="recall-heading"><h2 id="recall-heading">考前回忆</h2><p>正类到 +1、负类到 −1 时对应损失归零。高斯核中心高度为 1，σ² 影响宽窄。</p></section>
+  <section class="lesson-recall" id="recall" aria-labelledby="recall-heading"><h2 id="recall-heading">易错点与快速判断</h2><p>正类到 +1、负类到 −1 时对应损失归零。高斯核中心高度为 1，σ² 影响宽窄。</p></section>
+  <section aria-labelledby="retrieval-heading">
+    <h2 id="retrieval-heading">跨课回顾</h2>
+    <p>一条逻辑回归边界的阈值为 0.5，其线性得分为多少？</p>
+    <details class="solution"><summary>核对你的判断</summary><div><p>得分为 0。SVM 也可用得分 0 来判定边界，再进一步区分离边界有多远。</p><p><a href="0005-logistic-regression.html#concepts">回看决策边界</a></p></div></details>
+  </section>
   <footer>
     <p>遇到疑问，可以把题号和你卡住的步骤发给我。</p>
     <p class="small">参考资料 <a href="https://see.stanford.edu/materials/aimlcs229/cs229-notes3.pdf">斯坦福 CS229 支持向量机讲义</a></p>

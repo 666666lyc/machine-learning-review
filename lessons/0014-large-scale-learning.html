@@ -6,6 +6,7 @@
   <title>从梯度更新到大规模学习 · 第 10 天</title>
   <link rel="stylesheet" href="../assets/lesson.css">
   <script defer src="../assets/quiz.js"></script>
+  <script defer src="../assets/study.js"></script>
 </head>
 <body>
 <div class="sitebar"><nav aria-label="课程导航">
@@ -17,25 +18,49 @@
   <header class="lesson-intro">
     <a class="day-label" href="../index.html#day-10">第 10 天</a>
     <h1>从梯度更新到大规模学习</h1>
-    <p class="lede">训练数据有一百万条。每次更新都读完这一百万条太慢，能不能先读一条，或者几台机器一起读？</p>
-    <nav class="lesson-nav" aria-label="本课内容"><a href="#concepts">知识点</a><a href="#example">带做例题</a><a href="#practice">动手练习</a><a href="#original">原题 81–85</a></nav>
+    <p class="lede"><strong>每次更新可以读一条、一小批或全部样本，三种做法会走出不同的路线。</strong></p>
+    <p>每一步都读取一百万条训练数据很慢。如果先根据一条就更新，虽然动作更快，但这一条的方向能代表全部样本吗？</p>
+    <p class="prerequisite">接上之前学过的<a href="0003-simple-linear-regression.html">用旧参数算梯度</a>。</p>
+    <div class="depth-picker" hidden>
+      <label for="study-depth">学习深度</label>
+      <select id="study-depth" aria-describedby="depth-hint">
+        <option value="quick">极速模式</option>
+        <option value="standard" selected>标准模式</option>
+        <option value="deep">深入模式</option>
+      </select>
+      <p class="depth-hint small" id="depth-hint"></p>
+    </div>
+    <nav class="lesson-nav" aria-label="本课内容"><a href="#concepts">图解</a><a href="#example" data-study="standard">带做例题</a><a href="#practice" data-study="standard">动手练习</a><a href="#essential">必记</a><a href="#recall">易错点</a><a href="#original">原题 81–85</a></nav>
   </header>
   <section id="concepts" aria-labelledby="concepts-heading">
-    <h2 id="concepts-heading">知识点</h2>
-    <div class="concept"><h3>一条还是一批</h3><p><strong>批量梯度下降</strong>在同一组参数下，求所有样本梯度的平均，再更新一步。<strong>随机梯度下降</strong>（SGD）用一条样本的梯度更新一步。<strong>小批量</strong>介于两者之间，每次用一小组样本。</p><p>单条梯度代表局部信号，SGD 更新后整体代价有时会上升。固定数据常先打乱顺序，查看多条样本的平均代价走势。若平均代价持续升高，可先试降低学习率做对照。</p></div>
-    <div class="concept"><h3>检查实现与学习新数据</h3><p><strong>梯度检查</strong>用很小的变化 h 估算参数的斜率：[J(θ+h)−J(θ−h)]/(2h)。对单样本梯度，用同一条样本的代价作差，检查推导或代码是否一致。</p><p><strong>在线学习</strong>指数据到达后持续更新，例如根据今天收到的点击数据调整模型。它可减少重新训练所需的等待，也可以跟随偏好变化，取决于更新速度和数据质量。</p></div>
-    <div class="concept"><h3>MapReduce 先分配，再汇总</h3><p>在一轮批量训练中，各机器拿同一组参数。Map 阶段各算自己负责数据的梯度和及样本数，Reduce 阶段汇总各机器的和，再除以总样本数，最后统一更新。</p><p>标准逐样本 SGD 的后一步需要前一步已经更新的参数，不能直接用同一次分片求和代替。并行的总耗时还包括网络传输和同步，因此加速往往小于机器数。</p></div>
+    <h2 id="concepts-heading">先看现象，再写规则</h2>
+    <div class="demo" data-demo="batches">
+      <h3>相同读数，比较更新轨迹</h3>
+      <p>把完整读数轮次拨到 1。数一数三种方法各更新了几步，再拨到 6，观察哪条线较常偏离全量目标的中心。</p>
+      <p class="demo-caption">淡色圆表示全量代价等高线。比较在读取相同样本数下的更新次数与轨迹波动。</p>
+    </div>
+    <div class="concept" data-study="standard"><h3>一条还是一批</h3><p><strong>批量梯度下降</strong>在同一组参数下，求所有样本梯度的平均，再更新一步。<strong>随机梯度下降</strong>（SGD）用一条样本的梯度更新一步。<strong>小批量</strong>介于两者之间，每次用一小组样本。</p><p>单条梯度代表局部信号，SGD 更新后整体代价有时会上升。固定数据常先打乱顺序，查看多条样本的平均代价走势。若平均代价持续升高，可先试降低学习率做对照。</p></div>
+    <div class="concept" data-study="standard"><h3>检查实现与学习新数据</h3><p><strong>梯度检查</strong>用很小的变化 h 估算参数的斜率：[J(θ+h)−J(θ−h)]/(2h)。对单样本梯度，用同一条样本的代价作差，检查推导或代码是否一致。</p><p><strong>在线学习</strong>指数据到达后持续更新，例如根据今天收到的点击数据调整模型。它可减少重新训练所需的等待，也可以跟随偏好变化，取决于更新速度和数据质量。</p></div>
+    <div class="concept" data-study="standard"><h3>MapReduce 先分配，再汇总</h3><p>在一轮批量训练中，各机器拿同一组参数。Map 阶段各算自己负责数据的梯度和及样本数，Reduce 阶段汇总各机器的和，再除以总样本数，最后统一更新。</p><p>标准逐样本 SGD 的后一步需要前一步已经更新的参数，不能直接用同一次分片求和代替。并行的总耗时还包括网络传输和同步，因此加速往往小于机器数。</p></div>
+    <aside class="quick-reference" id="essential" aria-labelledby="essential-heading">
+      <h3 id="essential-heading">必记</h3>
+      <p class="formula">BGD 每步平均全部样本梯度，小批量每步平均一小组梯度，SGD 每步用一条。并行汇总批量梯度时，用各分片梯度和除以总样本数。</p>
+    </aside>
   </section>
-  <section id="example" class="example" aria-labelledby="example-heading">
+  <section id="example" data-study="standard" class="example" aria-labelledby="example-heading">
     <h2 id="example-heading">跟着算一遍</h2>
     <ol><li>参数当前相同，分片 A 的样本梯度为 2、4，局部和 6、样本数 2。分片 B 的唯一梯度为 6，局部和 6、样本数 1。</li><li>合并两个分片，梯度总和 12、样本数 3，平均梯度是 4。不能直接把两台机器的局部平均 3、6 取平均，因为它们样本数不同。</li><li>若参数为 1，学习率为 0.1，这轮更新为 1−0.1×4=0.6。</li></ol>
   </section>
-  <section id="practice" class="try" aria-labelledby="practice-heading">
+  <section id="practice" data-study="standard" class="try" aria-labelledby="practice-heading">
     <h2 id="practice-heading">自己试一题</h2>
     <p>两台机器分别累积 3 条样本的梯度和 9、1 条样本的梯度和 7。全局平均梯度是多少？</p>
     <details class="solution"><summary>核对练习思路</summary><div><p>先相加得梯度和 16，总样本数 4，平均梯度为 4。</p></div></details>
   </section>
-  <section id="original" aria-labelledby="questions-heading">
+  <details class="solution" data-study="standard" data-advanced>
+    <summary>深入理解</summary>
+    <div><p>图解的每条样本损失是以各自最优点 aᵢ 为中心的二次函数，梯度为 θ−aᵢ。样本顺序和学习率固定，以便比较。实际训练可打乱固定训练集，并在有代表性的数据上看整体误差趋势。做数值梯度检查时，应使用同一批样本计算两侧代价。</p></div>
+  </details>
+  <section id="original" data-study="standard" aria-labelledby="questions-heading">
     <h2 id="questions-heading">原题练习</h2>
     <nav class="question-jump" aria-label="跳到本课原题"><a href="#q81">81</a><a href="#q82">82</a><a href="#q83">83</a><a href="#q84">84</a><a href="#q85">85</a></nav>
     <p class="small">先独立作答，再展开解析核对。计算题可以在纸上列式。</p>
@@ -46,12 +71,12 @@
     <form class="exercise choice-exercise" data-quiz data-answer="C">
       <fieldset>
         <legend>单选题</legend>
-        <label><input type="radio" name="q81-1" value="A"><span class="choice-letter">A.</span><span>试着在图中用较少的例子（比如250个例子而不是500个）来计算平均成本。</span></label>
-        <label><input type="radio" name="q81-1" value="B"><span class="choice-letter">B.</span><span>这在随机梯度下降的情况下是不可能的，因为它保证收敛到最优参数θ。</span></label>
-        <label><input type="radio" name="q81-1" value="C"><span class="choice-letter">C.</span><span>尝试将学习率α减半（减少），看看这是否会导致成本持续下降；如果没有，继续减半直到成本会持续下降。</span></label>
-        <label><input type="radio" name="q81-1" value="D"><span class="choice-letter">D.</span><span>从训练集中取更少的例子</span></label>
+        <label><input type="radio" name="q81-1" value="A" data-reason="缩小统计窗口可能让图更抖，并未改变参数更新方式。"><span class="choice-letter">A.</span><span>试着在图中用较少的例子（比如250个例子而不是500个）来计算平均成本。</span></label>
+        <label><input type="radio" name="q81-1" value="B" data-reason="SGD 的整体损失可能上升，步长过大会让参数更新不稳定。"><span class="choice-letter">B.</span><span>这在随机梯度下降的情况下是不可能的，因为它保证收敛到最优参数θ。</span></label>
+        <label><input type="radio" name="q81-1" value="C" data-reason="把步长减小做对照，可检查长期上升是否由更新幅度过大引起。"><span class="choice-letter">C.</span><span>尝试将学习率α减半（减少），看看这是否会导致成本持续下降；如果没有，继续减半直到成本会持续下降。</span></label>
+        <label><input type="radio" name="q81-1" value="D" data-reason="少用训练数据不能针对步长问题，还可能丢掉可用信号。"><span class="choice-letter">D.</span><span>从训练集中取更少的例子</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -64,12 +89,12 @@
     <form class="exercise choice-exercise" data-quiz data-answer="AB">
       <fieldset>
         <legend>多选题 · 选全后检查</legend>
-        <label><input type="checkbox" name="q82-1" value="A"><span class="choice-letter">A.</span><span>您可以使用数值梯度检查的方法来验证您的随机梯度下降实现是对的（随机梯度下降的一步是计算偏导数∂∂θjcost(θ,(x⁽ⁱ⁾,y⁽ⁱ⁾))）</span></label>
-        <label><input type="checkbox" name="q82-1" value="B"><span class="choice-letter">B.</span><span>在运行随机梯度下降之前，您应该随机洗牌（重新排序）训练集。</span></label>
-        <label><input type="checkbox" name="q82-1" value="C"><span class="choice-letter">C.</span><span>假设您使用随机梯度下降来训练线性回归模型。代价函数J(θ)=[1/(2m)]∑ᵢ₌₁ᵐ (hθ(x⁽ⁱ⁾)−y⁽ⁱ⁾)²一定会随着每次迭代减小。</span></label>
-        <label><input type="checkbox" name="q82-1" value="D"><span class="choice-letter">D.</span><span>为了确保随机梯度下降收敛，我们通常在每次迭代后计算Jtrain(θ)，并绘制它，以确保成本函数总体上是递减的。</span></label>
+        <label><input type="checkbox" name="q82-1" value="A" data-reason="可以对同一条样本的代价做数值差分，对比代码算出的解析梯度。"><span class="choice-letter">A.</span><span>您可以使用数值梯度检查的方法来验证您的随机梯度下降实现是对的（随机梯度下降的一步是计算偏导数∂∂θjcost(θ,(x⁽ⁱ⁾,y⁽ⁱ⁾))）</span></label>
+        <label><input type="checkbox" name="q82-1" value="B" data-reason="固定数据集先打乱顺序，可减少连续同类样本带来的偏移。"><span class="choice-letter">B.</span><span>在运行随机梯度下降之前，您应该随机洗牌（重新排序）训练集。</span></label>
+        <label><input type="checkbox" name="q82-1" value="C" data-reason="一条样本的下降方向未必让全部样本的平均代价降低。"><span class="choice-letter">C.</span><span>假设您使用随机梯度下降来训练线性回归模型。代价函数J(θ)=[1/(2m)]∑ᵢ₌₁ᵐ (hθ(x⁽ⁱ⁾)−y⁽ⁱ⁾)²一定会随着每次迭代减小。</span></label>
+        <label><input type="checkbox" name="q82-1" value="D" data-reason="每一步都计算全训练集代价会很贵，常用样本损失的滑动平均观察走势。"><span class="choice-letter">D.</span><span>为了确保随机梯度下降收敛，我们通常在每次迭代后计算Jtrain(θ)，并绘制它，以确保成本函数总体上是递减的。</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -82,12 +107,12 @@
     <form class="exercise choice-exercise" data-quiz data-answer="AD">
       <fieldset>
         <legend>多选题 · 选全后检查</legend>
-        <label><input type="checkbox" name="q83-1" value="A"><span class="choice-letter">A.</span><span>如果我们有一个连续/不间断的数据流，用在线学习算法通常是最适合的。</span></label>
-        <label><input type="checkbox" name="q83-1" value="B"><span class="choice-letter">B.</span><span>当我们有一个大小为m的固定训练集需要训练时，在线学习算法是最合适的。</span></label>
-        <label><input type="checkbox" name="q83-1" value="C"><span class="choice-letter">C.</span><span>使用在线学习时，您必须保存获得的每个新培训示例，因为您将需要重用过去的示例来重新训练模型，即使在将来获得新的训练例子之后也是如此。</span></label>
-        <label><input type="checkbox" name="q83-1" value="D"><span class="choice-letter">D.</span><span>在线学习的一个优点是，如果我们正在建模的功能随着时间的推移而变化（例如，如果我们正在建模用户单击不同URL的概率，并且用户的品味/偏好随着时间的推移而变化），在线学习算法将自动适应这些变化。</span></label>
+        <label><input type="checkbox" name="q83-1" value="A" data-reason="数据持续到来时，可边接收边更新参数。"><span class="choice-letter">A.</span><span>如果我们有一个连续/不间断的数据流，用在线学习算法通常是最适合的。</span></label>
+        <label><input type="checkbox" name="q83-1" value="B" data-reason="固定训练集也能用批量或小批量反复训练，单靠固定这一点不能优先选在线学习。"><span class="choice-letter">B.</span><span>当我们有一个大小为m的固定训练集需要训练时，在线学习算法是最合适的。</span></label>
+        <label><input type="checkbox" name="q83-1" value="C" data-reason="在线更新可以只保留当前状态。是否保存样本取决于后续需求。"><span class="choice-letter">C.</span><span>使用在线学习时，您必须保存获得的每个新培训示例，因为您将需要重用过去的示例来重新训练模型，即使在将来获得新的训练例子之后也是如此。</span></label>
+        <label><input type="checkbox" name="q83-1" value="D" data-reason="若持续收到代表当前偏好的数据，在线更新有机会跟上变化。"><span class="choice-letter">D.</span><span>在线学习的一个优点是，如果我们正在建模的功能随着时间的推移而变化（例如，如果我们正在建模用户单击不同URL的概率，并且用户的品味/偏好随着时间的推移而变化），在线学习算法将自动适应这些变化。</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -100,12 +125,12 @@
     <form class="exercise choice-exercise" data-quiz data-answer="CD">
       <fieldset>
         <legend>多选题 · 选全后检查</legend>
-        <label><input type="checkbox" name="q84-1" value="A"><span class="choice-letter">A.</span><span>用随机梯度下降训练逻辑回归</span></label>
-        <label><input type="checkbox" name="q84-1" value="B"><span class="choice-letter">B.</span><span>用随机梯度下降训练线性回归</span></label>
-        <label><input type="checkbox" name="q84-1" value="C"><span class="choice-letter">C.</span><span>用批量梯度下降训练逻辑回归</span></label>
-        <label><input type="checkbox" name="q84-1" value="D"><span class="choice-letter">D.</span><span>计算训练集中所有特征的平均值μ=(1/m)∑ᵢ₌₁ᵐ x⁽ⁱ⁾（例如为了执行平均归一化）。</span></label>
+        <label><input type="checkbox" name="q84-1" value="A" data-reason="每条样本更新后参数马上变动，标准串行 SGD 的后一步依赖前一步。"><span class="choice-letter">A.</span><span>用随机梯度下降训练逻辑回归</span></label>
+        <label><input type="checkbox" name="q84-1" value="B" data-reason="即使线性回归的梯度更简单，标准 SGD 仍依赖每次更新后的参数。"><span class="choice-letter">B.</span><span>用随机梯度下降训练线性回归</span></label>
+        <label><input type="checkbox" name="q84-1" value="C" data-reason="各机器用同一组旧参数计算局部梯度和，再一次性汇总更新。"><span class="choice-letter">C.</span><span>用批量梯度下降训练逻辑回归</span></label>
+        <label><input type="checkbox" name="q84-1" value="D" data-reason="按分片求特征和及样本数，再用全量总和除以总样本数。"><span class="choice-letter">D.</span><span>计算训练集中所有特征的平均值μ=(1/m)∑ᵢ₌₁ᵐ x⁽ⁱ⁾（例如为了执行平均归一化）。</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -118,12 +143,12 @@
     <form class="exercise choice-exercise" data-quiz data-answer="ABC">
       <fieldset>
         <legend>多选题 · 选全后检查</legend>
-        <label><input type="checkbox" name="q85-1" value="A"><span class="choice-letter">A.</span><span>由于网络延迟和其他与map-reduce相关的开销，如果我们使用N台计算机运行map-reduce，与使用1台计算机相比，我们可能会得到小于N倍的加速。</span></label>
-        <label><input type="checkbox" name="q85-1" value="B"><span class="choice-letter">B.</span><span>如果您只有一台具有一个计算核心的计算机，那么map-reduce不太可能有帮助。</span></label>
-        <label><input type="checkbox" name="q85-1" value="C"><span class="choice-letter">C.</span><span>当使用带梯度下降的map-reduce时，我们通常使用一台机器从每个map-reduce机器中累积梯度，以便计算该迭代的参数更新。</span></label>
-        <label><input type="checkbox" name="q85-1" value="D"><span class="choice-letter">D.</span><span>线性回归和逻辑回归可以用map-reduce并行化，但神经网络训练不能。</span></label>
+        <label><input type="checkbox" name="q85-1" value="A" data-reason="传输、汇总与同步都有成本，加速不一定等于机器数。"><span class="choice-letter">A.</span><span>由于网络延迟和其他与map-reduce相关的开销，如果我们使用N台计算机运行map-reduce，与使用1台计算机相比，我们可能会得到小于N倍的加速。</span></label>
+        <label><input type="checkbox" name="q85-1" value="B" data-reason="只有一个核心时没有数据计算并行收益，反而可能增加任务调度开销。"><span class="choice-letter">B.</span><span>如果您只有一台具有一个计算核心的计算机，那么map-reduce不太可能有帮助。</span></label>
+        <label><input type="checkbox" name="q85-1" value="C" data-reason="把分片的梯度和与样本数汇总，才能按全数据做一次更新。"><span class="choice-letter">C.</span><span>当使用带梯度下降的map-reduce时，我们通常使用一台机器从每个map-reduce机器中累积梯度，以便计算该迭代的参数更新。</span></label>
+        <label><input type="checkbox" name="q85-1" value="D" data-reason="神经网络的固定参数批量梯度同样可在分片上计算再汇总。"><span class="choice-letter">D.</span><span>线性回归和逻辑回归可以用map-reduce并行化，但神经网络训练不能。</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -131,7 +156,12 @@
     </details>
   </article>
   </section>
-  <section class="lesson-recall" aria-labelledby="recall-heading"><h2 id="recall-heading">考前回忆</h2><p>批量梯度可在相同参数下分块求和。SGD 单步有噪声，观察滑动平均。</p></section>
+  <section class="lesson-recall" id="recall" aria-labelledby="recall-heading"><h2 id="recall-heading">易错点与快速判断</h2><p>批量梯度可在相同参数下分块求和。SGD 单步有噪声，观察滑动平均。</p></section>
+  <section aria-labelledby="retrieval-heading">
+    <h2 id="retrieval-heading">跨课回顾</h2>
+    <p>一次全量更新中，为什么各分片必须使用同一组旧参数？</p>
+    <details class="solution"><summary>核对你的判断</summary><div><p>分片梯度都要在同一点求值，合并才等于该点的全量梯度。</p><p><a href="0003-simple-linear-regression.html#concepts">回看用旧参数算梯度</a></p></div></details>
+  </section>
   <footer>
     <p>遇到疑问，可以把题号和你卡住的步骤发给我。</p>
     <p class="small">参考资料 <a href="https://developers.google.com/machine-learning/crash-course/linear-regression">Google 线性回归课程</a> · <a href="https://cs229.stanford.edu/materials.html-withcomments">斯坦福 CS229 课程资料</a></p>

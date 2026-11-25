@@ -6,6 +6,7 @@
   <title>图像文字识别与上限分析 · 第 11 天</title>
   <link rel="stylesheet" href="../assets/lesson.css">
   <script defer src="../assets/quiz.js"></script>
+  <script defer src="../assets/study.js"></script>
 </head>
 <body>
 <div class="sitebar"><nav aria-label="课程导航">
@@ -17,25 +18,54 @@
   <header class="lesson-intro">
     <a class="day-label" href="../index.html#day-11">第 11 天</a>
     <h1>图像文字识别与上限分析</h1>
-    <p class="lede">一张拍下来的路牌需要变成可复制的文字。系统要先找到文字区域，再切分字符，最后逐个识别。整个系统经常出错，应该先修哪一环？</p>
-    <nav class="lesson-nav" aria-label="本课内容"><a href="#concepts">知识点</a><a href="#example">带做例题</a><a href="#practice">动手练习</a><a href="#original">原题 86–90</a></nav>
+    <p class="lede"><strong>文字识别拆成几个模块，并用上限分析选出值得先改进的模块。</strong></p>
+    <p>拍到一块路牌后，系统先找文字在什么位置，再切字符并逐个识别。端到端识别不准时，怎样找出最影响结果的一环？</p>
+    <p class="prerequisite">接上之前学过的<a href="0007-model-diagnostics.html">在同一验证集比较模型</a>。</p>
+    <div class="depth-picker" hidden>
+      <label for="study-depth">学习深度</label>
+      <select id="study-depth" aria-describedby="depth-hint">
+        <option value="quick">极速模式</option>
+        <option value="standard" selected>标准模式</option>
+        <option value="deep">深入模式</option>
+      </select>
+      <p class="depth-hint small" id="depth-hint"></p>
+    </div>
+    <nav class="lesson-nav" aria-label="本课内容"><a href="#concepts">图解</a><a href="#example" data-study="standard">带做例题</a><a href="#practice" data-study="standard">动手练习</a><a href="#essential">必记</a><a href="#recall">易错点</a><a href="#original">原题 86–90</a></nav>
   </header>
   <section id="concepts" aria-labelledby="concepts-heading">
-    <h2 id="concepts-heading">知识点</h2>
-    <div class="concept"><h3>滑动窗口怎么计数</h3><p><strong>滑动窗口</strong>是把一个小方框放在图像的许多位置，每个位置都让分类器检查一次。窗口每移动多少像素叫步长。横向与纵向各有多个合法起点，总数是两者相乘。</p><p><span class="formula">单方向位置数 = ⌊(图长 − 窗口长) / 步长⌋ + 1</span>这个式子假设窗口不越界、从第一个合法位置开始，且图长不小于窗口长。⌊ ⌋ 表示向下取整，+1 是把起点也算上。多种窗口尺寸分别求次数后相加。</p></div>
-    <div class="concept"><h3>标注成本和数据增强</h3><p>每分钟可标多少条，是速度。总条数除以速度得到分钟数。若工资以小时计，换成小时再乘工资。每条数据成本和模型表现最好结合误差分析来评估。</p><p><strong>数据增强</strong>是从现有样本做合理的变化，例如小幅旋转或平移。变化后要保留原有标签。添加简单副本会增加数量，但没有增加变化。</p></div>
-    <div class="concept"><h3>一次给一个阶段正确答案</h3><p><strong>上限分析</strong>先记录原系统的端到端准确率，再按流程依次把当前阶段的输出换成正确结果，并保留此前已经替换的阶段。每次记录相同的端到端指标。</p><p>相邻两次结果的差是该步骤在这个替换顺序下的增益。表中最后的 100% 表示该假设设置下整个系统的分数。改变顺序或条件时，增益也可能不同。</p></div>
+    <h2 id="concepts-heading">先看现象，再写规则</h2>
+    <div class="demo" data-demo="windows">
+      <h3>像扫描仪一样移动窗口</h3>
+      <p>先猜窗口从第一行移动到下一行的时机。按「下一位置」或播放，检查每一行有几个起点；再调步长和窗口边长。</p>
+      <p class="demo-caption">从左上角开始逐行扫描，窗口必须完整容纳在图像内。</p>
+    </div>
+    <div class="concept" data-study="standard"><h3>滑动窗口怎么计数</h3><p><strong>滑动窗口</strong>是把一个小方框放在图像的许多位置，每个位置都让分类器检查一次。窗口每移动多少像素叫步长。横向与纵向各有多个合法起点，总数是两者相乘。</p><p><span class="formula">单方向位置数 = ⌊(图长 − 窗口长) / 步长⌋ + 1</span>这个式子假设窗口不越界、从第一个合法位置开始，且图长不小于窗口长。⌊ ⌋ 表示向下取整，+1 是把起点也算上。多种窗口尺寸分别求次数后相加。</p></div>
+    <div class="demo" data-demo="pipeline" data-study="standard">
+      <h3>沿流水线给出正确结果</h3>
+      <p>依次把定位、切分、识别的输出换成正确结果，比较相邻两次端到端分数的差。</p>
+      <p class="demo-caption">演示数据为 65% → 70% → 85% → 100%。注意每一步的增量。</p>
+    </div>
+    <div class="concept" data-study="standard"><h3>标注成本和数据增强</h3><p>每分钟可标多少条，是速度。总条数除以速度得到分钟数。若工资以小时计，换成小时再乘工资。每条数据成本和模型表现最好结合误差分析来评估。</p><p><strong>数据增强</strong>是从现有样本做合理的变化，例如小幅旋转或平移。变化后要保留原有标签。添加简单副本会增加数量，但没有增加变化。</p></div>
+    <div class="concept" data-study="standard"><h3>一次给一个阶段正确答案</h3><p><strong>上限分析</strong>先记录原系统的端到端准确率，再按流程依次把当前阶段的输出换成正确结果，并保留此前已经替换的阶段。每次记录相同的端到端指标。</p><p>相邻两次结果的差是该步骤在这个替换顺序下的增益。表中最后的 100% 表示该假设设置下整个系统的分数。改变顺序或条件时，增益也可能不同。</p></div>
+    <aside class="quick-reference" id="essential" aria-labelledby="essential-heading">
+      <h3 id="essential-heading">必记</h3>
+      <p class="formula">单方向窗口数 = ⌊(图长−窗长)/步长⌋+1，横纵相乘。上限分析看逐阶段替换正确输出后的相邻准确率差。</p>
+    </aside>
   </section>
-  <section id="example" class="example" aria-labelledby="example-heading">
+  <section id="example" data-study="standard" class="example" aria-labelledby="example-heading">
     <h2 id="example-heading">跟着算一遍</h2>
     <ol><li>对 10×10 图像用 4×4 窗口和步长 2。每个方向起点是 0、2、4、6，共 4 个。所以一共检查 4×4=16 次。</li><li>另一个例子中，文字流水线的原准确率为 65%，给第一阶段正确输出后为 70%，再给第二阶段正确输出后为 85%。</li><li>相邻增益分别是 5 和 15 个百分点。按这次分析，第二阶段更值得进一步排查。</li></ol>
   </section>
-  <section id="practice" class="try" aria-labelledby="practice-heading">
+  <section id="practice" data-study="standard" class="try" aria-labelledby="practice-heading">
     <h2 id="practice-heading">自己试一题</h2>
     <p>标 1200 张图片，每分钟 5 张，每小时 15 元。按用时比例计费，应付多少？</p>
     <details class="solution"><summary>核对练习思路</summary><div><p>1200÷5=240 分钟，即 4 小时。一共 4×15=60 元。</p></div></details>
   </section>
-  <section id="original" aria-labelledby="questions-heading">
+  <details class="solution" data-study="standard" data-advanced>
+    <summary>深入理解</summary>
+    <div><p>可以用相同的评估样本做累计上限分析，记录替换顺序、各模块的正确输出和端到端分数。相邻差是这个顺序下的潜在增益。同一个模块的收益可能依赖其他模块是否已修好。增强图像时应确认标签在变换后仍然有效。</p></div>
+  </details>
+  <section id="original" data-study="standard" aria-labelledby="questions-heading">
     <h2 id="questions-heading">原题练习</h2>
     <nav class="question-jump" aria-label="跳到本课原题"><a href="#q86">86</a><a href="#q87">87</a><a href="#q88">88</a><a href="#q89">89</a><a href="#q90">90</a></nav>
     <p class="small">先独立作答，再展开解析核对。计算题可以在纸上列式。</p>
@@ -46,12 +76,12 @@
     <form class="exercise choice-exercise" data-quiz data-answer="A">
       <fieldset>
         <legend>单选题</legend>
-        <label><input type="radio" name="q86-1" value="A"><span class="choice-letter">A.</span><span>500,000</span></label>
-        <label><input type="radio" name="q86-1" value="B"><span class="choice-letter">B.</span><span>1,000,000</span></label>
-        <label><input type="radio" name="q86-1" value="C"><span class="choice-letter">C.</span><span>100,000</span></label>
-        <label><input type="radio" name="q86-1" value="D"><span class="choice-letter">D.</span><span>250,000</span></label>
+        <label><input type="radio" name="q86-1" value="A" data-reason="两种窗口分别为 496² 和 491² 个位置，总数约 50 万。"><span class="choice-letter">A.</span><span>500,000</span></label>
+        <label><input type="radio" name="q86-1" value="B" data-reason="步长为 2，每个方向约有 500 个位置，两种窗口不是各一百万。"><span class="choice-letter">B.</span><span>1,000,000</span></label>
+        <label><input type="radio" name="q86-1" value="C" data-reason="横纵位置要相乘。一种窗口就约有 25 万次。"><span class="choice-letter">C.</span><span>100,000</span></label>
+        <label><input type="radio" name="q86-1" value="D" data-reason="这个数量接近只算一种窗口。题目需要把两种窗口的次数相加。"><span class="choice-letter">D.</span><span>250,000</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -64,12 +94,12 @@
     <form class="exercise choice-exercise" data-quiz data-answer="A">
       <fieldset>
         <legend>单选题</legend>
-        <label><input type="radio" name="q87-1" value="A"><span class="choice-letter">A.</span><span>400</span></label>
-        <label><input type="radio" name="q87-1" value="B"><span class="choice-letter">B.</span><span>600</span></label>
-        <label><input type="radio" name="q87-1" value="C"><span class="choice-letter">C.</span><span>250</span></label>
-        <label><input type="radio" name="q87-1" value="D"><span class="choice-letter">D.</span><span>10,000</span></label>
+        <label><input type="radio" name="q87-1" value="A" data-reason="先算 10000÷4=2500 分钟，再乘 10/60 美元每分钟，约 417 美元，选 400。"><span class="choice-letter">A.</span><span>400</span></label>
+        <label><input type="radio" name="q87-1" value="B" data-reason="先核对总工时，2500 分钟约为 41.7 小时，乘时薪 10。"><span class="choice-letter">B.</span><span>600</span></label>
+        <label><input type="radio" name="q87-1" value="C" data-reason="标注速度是每分钟的速度，先把总时间正确换算成小时。"><span class="choice-letter">C.</span><span>250</span></label>
+        <label><input type="radio" name="q87-1" value="D" data-reason="10 美元是每小时支付的金额，每小时能处理 240 条。"><span class="choice-letter">D.</span><span>10,000</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -82,12 +112,12 @@
     <form class="exercise choice-exercise" data-quiz data-answer="BC" data-alternate="BCD" data-alternate-text="你找到了原题册的两个答案，也考虑了 D 的字面含义。展开解析可核对题目的表述差异。">
       <fieldset>
         <legend>多选题 · 选全后检查</legend>
-        <label><input type="checkbox" name="q88-1" value="A"><span class="choice-letter">A.</span><span>这是为算法提供额外训练数据的一种方法。</span></label>
-        <label><input type="checkbox" name="q88-1" value="B"><span class="choice-letter">B.</span><span>使用上限分析能帮助我们分析流水线的哪个部分对整个系统的提高最大。</span></label>
-        <label><input type="checkbox" name="q88-1" value="C"><span class="choice-letter">C.</span><span>使用上限分析能让我们知道到某个模块需不需要花精力做好;因为就算把这个模块精度提高到100%了,也无助于提高整个系统的精度。</span></label>
-        <label><input type="checkbox" name="q88-1" value="D"><span class="choice-letter">D.</span><span>使用上限分析并不会帮我们分析出哪个部分是high bias,哪个部分是high variance。</span></label>
+        <label><input type="checkbox" name="q88-1" value="A" data-reason="上限分析用正确的阶段输出测试改进空间，额外数据可以另用于训练。"><span class="choice-letter">A.</span><span>这是为算法提供额外训练数据的一种方法。</span></label>
+        <label><input type="checkbox" name="q88-1" value="B" data-reason="相邻两次端到端得分的差，可以估计该替换阶段的潜在收益。"><span class="choice-letter">B.</span><span>使用上限分析能帮助我们分析流水线的哪个部分对整个系统的提高最大。</span></label>
+        <label><input type="checkbox" name="q88-1" value="C" data-reason="如果替换成正确输出也几乎没提升，这一环在当前顺序下可能优先级较低。"><span class="choice-letter">C.</span><span>使用上限分析能让我们知道到某个模块需不需要花精力做好;因为就算把这个模块精度提高到100%了,也无助于提高整个系统的精度。</span></label>
+        <label><input type="checkbox" name="q88-1" value="D" data-reason="按字面这项道出了上限分析的限制，但题目问收益，题册只计 B、C。"><span class="choice-letter">D.</span><span>使用上限分析并不会帮我们分析出哪个部分是high bias,哪个部分是high variance。</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -101,12 +131,12 @@
     <form class="exercise choice-exercise" data-quiz data-answer="A">
       <fieldset>
         <legend>单选题</legend>
-        <label><input type="radio" name="q89-1" value="A"><span class="choice-letter">A.</span><span>对现有训练集中的图像应用平移、扭曲和旋转。</span></label>
-        <label><input type="radio" name="q89-1" value="B"><span class="choice-letter">B.</span><span>选择两个汽车图像并对其进行平均以生成第三个示例。</span></label>
-        <label><input type="radio" name="q89-1" value="C"><span class="choice-letter">C.</span><span>从训练集中获取一些图像，并向每个像素添加随机高斯噪声。</span></label>
-        <label><input type="radio" name="q89-1" value="D"><span class="choice-letter">D.</span><span>为训练集中的每个图像制作两份副本；这会立即使训练集大小加倍。</span></label>
+        <label><input type="radio" name="q89-1" value="A" data-reason="适度几何变换能得到新版本，前提是变换后仍能认出汽车。"><span class="choice-letter">A.</span><span>对现有训练集中的图像应用平移、扭曲和旋转。</span></label>
+        <label><input type="radio" name="q89-1" value="B" data-reason="像素平均可能得到重影，结果未必像真实汽车照片。"><span class="choice-letter">B.</span><span>选择两个汽车图像并对其进行平均以生成第三个示例。</span></label>
+        <label><input type="radio" name="q89-1" value="C" data-reason="像素独立加噪不一定保留可辨特征，题目给的几何变化更贴近真实变化。"><span class="choice-letter">C.</span><span>从训练集中获取一些图像，并向每个像素添加随机高斯噪声。</span></label>
+        <label><input type="radio" name="q89-1" value="D" data-reason="复制能改变同一批图的权重，却没有加入新的视觉变化。"><span class="choice-letter">D.</span><span>为训练集中的每个图像制作两份副本；这会立即使训练集大小加倍。</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -121,12 +151,12 @@
     <form class="exercise choice-exercise" data-quiz data-answer="AB">
       <fieldset>
         <legend>多选题 · 选全后检查</legend>
-        <label><input type="checkbox" name="q90-1" value="A"><span class="choice-letter">A.</span><span>提高字符识别系统的性能是可能的。</span></label>
-        <label><input type="checkbox" name="q90-1" value="B"><span class="choice-letter">B.</span><span>执行此处的上限分析，需要我们对其它的三个流程都加上标签来判断对错(ground-truth)。</span></label>
-        <label><input type="checkbox" name="q90-1" value="C"><span class="choice-letter">C.</span><span>最没有前途的部分是字符识别系统，因为它已经获得了100%的准确率。</span></label>
-        <label><input type="checkbox" name="q90-1" value="D"><span class="choice-letter">D.</span><span>最有前途的组件是文本检测系统，因为它的性能最低（72%），因此潜在增益最大。</span></label>
+        <label><input type="checkbox" name="q90-1" value="A" data-reason="把某阶段换成正确输出后总准确率上升，说明系统仍有改进空间。"><span class="choice-letter">A.</span><span>提高字符识别系统的性能是可能的。</span></label>
+        <label><input type="checkbox" name="q90-1" value="B" data-reason="逐阶段做替换需要各阶段的正确输出，才能比较替换造成的提升。"><span class="choice-letter">B.</span><span>执行此处的上限分析，需要我们对其它的三个流程都加上标签来判断对错(ground-truth)。</span></label>
+        <label><input type="checkbox" name="q90-1" value="C" data-reason="100% 表示替换后的端到端结果，不能当作原字符识别模块的准确率。"><span class="choice-letter">C.</span><span>最没有前途的部分是字符识别系统，因为它已经获得了100%的准确率。</span></label>
+        <label><input type="checkbox" name="q90-1" value="D" data-reason="72% 是替换后的累计总分。要比较优先级，应算该步比上一行提高了多少。"><span class="choice-letter">D.</span><span>最有前途的组件是文本检测系统，因为它的性能最低（72%），因此潜在增益最大。</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -134,7 +164,12 @@
     </details>
   </article>
   </section>
-  <section class="lesson-recall" aria-labelledby="recall-heading"><h2 id="recall-heading">考前回忆</h2><p>窗口计数先算单方向合法起点。上限分析比较相邻两次系统指标的差。</p></section>
+  <section class="lesson-recall" id="recall" aria-labelledby="recall-heading"><h2 id="recall-heading">易错点与快速判断</h2><p>窗口计数先算单方向合法起点。上限分析比较相邻两次系统指标的差。</p></section>
+  <section aria-labelledby="retrieval-heading">
+    <h2 id="retrieval-heading">跨课回顾</h2>
+    <p>两个 OCR 模块分别在难度不同的验证集上测试，能用分数的差判断谁更值得改吗？</p>
+    <details class="solution"><summary>核对你的判断</summary><div><p>应在相同样本上比较端到端分数，并保留各步骤的替换条件。</p><p><a href="0007-model-diagnostics.html#concepts">回看在同一验证集比较模型</a></p></div></details>
+  </section>
   <footer>
     <p>遇到疑问，可以把题号和你卡住的步骤发给我。</p>
     <p class="small">参考资料 <a href="https://home-wordpress.deeplearning.ai/wp-content/uploads/2022/03/andrew-ng-machine-learning-yearning.pdf">吴恩达《Machine Learning Yearning》</a> · <a href="https://cs229.stanford.edu/materials.html-withcomments">斯坦福 CS229 课程资料</a></p>

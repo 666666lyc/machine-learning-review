@@ -6,6 +6,7 @@
   <title>逻辑回归从得分到类别 · 第 3 天</title>
   <link rel="stylesheet" href="../assets/lesson.css">
   <script defer src="../assets/quiz.js"></script>
+  <script defer src="../assets/study.js"></script>
 </head>
 <body>
 <div class="sitebar"><nav aria-label="课程导航">
@@ -17,25 +18,54 @@
   <header class="lesson-intro">
     <a class="day-label" href="../index.html#day-3">第 3 天</a>
     <h1>逻辑回归从得分到类别</h1>
-    <p class="lede">系统输出一封邮件有 80% 的概率是垃圾邮件。这个概率从哪里来，又怎样决定把邮件放进垃圾箱？</p>
-    <nav class="lesson-nav" aria-label="本课内容"><a href="#concepts">知识点</a><a href="#example">带做例题</a><a href="#practice">动手练习</a><a href="#original">原题 26–30</a></nav>
+    <p class="lede"><strong>把线性得分转成 0 到 1 之间的概率，再按阈值判定类别。</strong></p>
+    <p>线性模型给两封邮件打了 3 分和 −2 分。两个得分可以比较高低，但要表达「是垃圾邮件的概率」，需要用新刻度。</p>
+    <p class="prerequisite">接上之前学过的<a href="0003-simple-linear-regression.html">线性预测与代价</a>。</p>
+    <div class="depth-picker" hidden>
+      <label for="study-depth">学习深度</label>
+      <select id="study-depth" aria-describedby="depth-hint">
+        <option value="quick">极速模式</option>
+        <option value="standard" selected>标准模式</option>
+        <option value="deep">深入模式</option>
+      </select>
+      <p class="depth-hint small" id="depth-hint"></p>
+    </div>
+    <nav class="lesson-nav" aria-label="本课内容"><a href="#concepts">图解</a><a href="#example" data-study="standard">带做例题</a><a href="#practice" data-study="standard">动手练习</a><a href="#essential">必记</a><a href="#recall">易错点</a><a href="#original">原题 26–30</a></nav>
   </header>
   <section id="concepts" aria-labelledby="concepts-heading">
-    <h2 id="concepts-heading">知识点</h2>
-    <div class="concept"><h3>先得分，再转成概率</h3><p>先用加权和得到得分 z=θᵀx。θ 是模型系数，x 是特征向量，约定包含截距所需的常数 1。再用 Sigmoid 函数把得分映射到 0 到 1 之间。</p><p><span class="formula">h<sub>θ</sub>(x) = g(z) = 1/(1+e<sup>−z</sup>)</span>e 是自然指数函数的底数，约为 2.718。z=0 时 h=0.5，z 越大概率越高。若 h=0.8，模型给正类的估计概率是 0.8，负类是 0.2。</p></div>
-    <div class="concept"><h3>阈值和决策边界</h3><p>阈值是做出分类的分界值。以 0.5 为例，h≥0.5 判正类，h&lt;0.5 判负类。Sigmoid 一直递增，h=0.5 对应 z=0，所以解 θᵀx=0 就能画出边界。</p><p>只有 x₁、x₂ 的一次项时，边界通常是直线。加上平方项或交叉项，可得到弯曲边界。阈值改成其他数值时，应从 h 等于新阈值出发。</p></div>
-    <div class="concept"><h3>预测错得有多离谱</h3><p>逻辑回归常用<strong>交叉熵损失</strong>。真实 y=1 时损失是 −ln(h)；真实 y=0 时是 −ln(1−h)。ln 是自然对数。模型分给真实类别的概率越小，惩罚越大，单个损失非负。</p><p><span class="formula">θⱼ ← θⱼ − (α/m) ∑<sub>i=1</sub><sup>m</sup> (h<sub>θ</sub>(x<sup>(i)</sup>)−y<sup>(i)</sup>) xⱼ<sup>(i)</sup></span>α 是学习率，m 是样本数，xⱼ<sup>(i)</sup> 是第 i 条样本的第 j 个特征。用旧系数算完所有更新，再一起替换。相比线性回归，关键区别在于预测值 h 含 Sigmoid。</p></div>
+    <h2 id="concepts-heading">先看现象，再写规则</h2>
+    <div class="demo" data-demo="sigmoid">
+      <h3>得分、概率和分类边界</h3>
+      <p>先把输入调到 2，再只动阈值，观察同一个点的概率和预测类别各自怎么变。</p>
+      <p class="demo-caption">蓝线给概率，红色虚线标出阈值和决策边界，绿点是当前样本。</p>
+    </div>
+    <div class="concept" data-study="standard"><h3>先得分，再转成概率</h3><p>先用加权和得到得分 z=θᵀx。θ 是模型系数，x 是特征向量，约定包含截距所需的常数 1。再用 Sigmoid 函数把得分映射到 0 到 1 之间。</p><p><span class="formula">h<sub>θ</sub>(x) = g(z) = 1/(1+e<sup>−z</sup>)</span>e 是自然指数函数的底数，约为 2.718。z=0 时 h=0.5，z 越大概率越高。若 h=0.8，模型给正类的估计概率是 0.8，负类是 0.2。</p></div>
+    <div class="concept" data-study="standard"><h3>阈值和决策边界</h3><p>阈值是做出分类的分界值。以 0.5 为例，h≥0.5 判正类，h&lt;0.5 判负类。Sigmoid 一直递增，h=0.5 对应 z=0，所以解 θᵀx=0 就能画出边界。</p><p>只有 x₁、x₂ 的一次项时，边界通常是直线。加上平方项或交叉项，可得到弯曲边界。阈值改成其他数值时，应从 h 等于新阈值出发。</p></div>
+    <div class="demo" data-demo="losses">
+      <h3>一次猜错，两种惩罚</h3>
+      <p>实际标签为正。把得分从 −6 往右拖，比较模型极其自信地猜错时两条曲线的高度和坡度。</p>
+      <p class="demo-caption">两种损失都使用前一个图解里的 Sigmoid 概率。</p>
+    </div>
+    <div class="concept" data-study="standard"><h3>预测错得有多离谱</h3><p>逻辑回归常用<strong>交叉熵损失</strong>。真实 y=1 时损失是 −ln(h)；真实 y=0 时是 −ln(1−h)。ln 是自然对数。模型分给真实类别的概率越小，惩罚越大，单个损失非负。 在图中对比两种损失。对真实正类，概率很接近 0 时，平方误差接近 1 且曲线很平，交叉熵仍快速增大。</p><p><span class="formula">θⱼ ← θⱼ − (α/m) ∑<sub>i=1</sub><sup>m</sup> (h<sub>θ</sub>(x<sup>(i)</sup>)−y<sup>(i)</sup>) xⱼ<sup>(i)</sup></span>α 是学习率，m 是样本数，xⱼ<sup>(i)</sup> 是第 i 条样本的第 j 个特征。用旧系数算完所有更新，再一起替换。相比线性回归，关键区别在于预测值 h 含 Sigmoid。</p></div>
+    <aside class="quick-reference" id="essential" aria-labelledby="essential-heading">
+      <h3 id="essential-heading">必记</h3>
+      <p class="formula">线性得分 z = θᵀx，正类概率 h = 1/(1 + e<sup>−z</sup>)。判正类用 h ≥ 阈值。阈值 0.5 对应边界 z = 0。</p>
+    </aside>
   </section>
-  <section id="example" class="example" aria-labelledby="example-heading">
+  <section id="example" data-study="standard" class="example" aria-labelledby="example-heading">
     <h2 id="example-heading">跟着算一遍</h2>
-    <ol><li>设得分 z=2−x₁。取阈值 0.5，令 z=0 得 x₁=2，这就是分界线。</li><li>x₁=1 时 z=1，h≈0.731，大于 0.5，判为正类；x₁=3 时 z=−1，h≈0.269，判为负类。</li><li>若 x₁=1 的真实标签为 1，损失 −ln(0.731)≈0.313；若真实标签为 0，损失 −ln(0.269)≈1.313。这说明判断得越自信却判断错了，损失越大。</li></ol>
+    <ol><li>设得分 z=2−x₁。阈值为 0.5 时，边界得分为 0，所以边界在 x₁=2。</li><li>x₁=1 时，z=1、正类概率约为 0.731，判正类。把阈值提高到 0.8 时，同一条数据的概率仍是 0.731，判为负类。</li><li>若真实标签为 1，预测 0.02 的平方误差是 0.9604，预测 0.002 的平方误差约为 0.996，两者差得很小。交叉熵从 −ln(0.02)≈3.91 升到 −ln(0.002)≈6.21，因此对自信的错判给了更明显的调整信号。</li></ol>
   </section>
-  <section id="practice" class="try" aria-labelledby="practice-heading">
+  <section id="practice" data-study="standard" class="try" aria-labelledby="practice-heading">
     <h2 id="practice-heading">自己试一题</h2>
-    <p>设 z=4−2x₁，阈值为 0.5。边界在哪里？x₁=3 判哪类？</p>
-    <details class="solution"><summary>核对练习思路</summary><div><p>令 4−2x₁=0 得 x₁=2。x₁=3 时 z=−2，h 小于 0.5，判负类。</p></div></details>
+    <p>设 z=4−2x₁。x₁=1.9 时，阈值为 0.5 和 0.6 会分别判什么类别？</p>
+    <details class="solution"><summary>核对练习思路</summary><div><p>得分 0.2 对应约 0.550 的概率。阈值 0.5 判正类，阈值 0.6 判负类。</p></div></details>
   </section>
-  <section id="original" aria-labelledby="questions-heading">
+  <details class="solution" data-study="standard" data-advanced>
+    <summary>深入理解</summary>
+    <div><p>对单样本，交叉熵关于得分 z 的导数为 h−y，二阶导数为 h(1−h)≥0。由于 z 对参数是线性的，训练目标是凸的；若数据完全线性可分且无正则化，损失可趋向 0 而不存在有限的最优参数。<br>平方误差接在 Sigmoid 后时，导数多乘 h(1−h)，极其自信地猜错时更新信号很弱，关于 z 的损失也不保证凸。</p></div>
+  </details>
+  <section id="original" data-study="standard" aria-labelledby="questions-heading">
     <h2 id="questions-heading">原题练习</h2>
     <nav class="question-jump" aria-label="跳到本课原题"><a href="#q26">26</a><a href="#q27">27</a><a href="#q28">28</a><a href="#q29">29</a><a href="#q30">30</a></nav>
     <p class="small">先独立作答，再展开解析核对。计算题可以在纸上列式。</p>
@@ -46,12 +76,12 @@
     <form class="exercise choice-exercise" data-quiz data-answer="CD">
       <fieldset>
         <legend>多选题 · 选全后检查</legend>
-        <label><input type="checkbox" name="q26-1" value="A"><span class="choice-letter">A.</span><span>我们对P(y=0∣x;θ)的估计是0.4</span></label>
-        <label><input type="checkbox" name="q26-1" value="B"><span class="choice-letter">B.</span><span>我们对P(y=1∣x;θ)的估计是0.6</span></label>
-        <label><input type="checkbox" name="q26-1" value="C"><span class="choice-letter">C.</span><span>我们对P(y=0∣x;θ)的估计是0.6</span></label>
-        <label><input type="checkbox" name="q26-1" value="D"><span class="choice-letter">D.</span><span>我们对P(y=1∣x;θ)的估计是0.4</span></label>
+        <label><input type="checkbox" name="q26-1" value="A" data-reason="h 代表 y=1 的概率。y=0 的概率取它的补数。"><span class="choice-letter">A.</span><span>我们对P(y=0∣x;θ)的估计是0.4</span></label>
+        <label><input type="checkbox" name="q26-1" value="B" data-reason="0.6 是负类概率。正类概率就是模型给的 0.4。"><span class="choice-letter">B.</span><span>我们对P(y=1∣x;θ)的估计是0.6</span></label>
+        <label><input type="checkbox" name="q26-1" value="C" data-reason="二分类两类概率和为 1，负类概率为 0.6。"><span class="choice-letter">C.</span><span>我们对P(y=0∣x;θ)的估计是0.6</span></label>
+        <label><input type="checkbox" name="q26-1" value="D" data-reason="逻辑回归把 h 定义为正类概率，所以是 0.4。"><span class="choice-letter">D.</span><span>我们对P(y=1∣x;θ)的估计是0.4</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -65,12 +95,12 @@
     <form class="exercise choice-exercise" data-quiz data-answer="AB">
       <fieldset>
         <legend>多选题 · 选全后检查</legend>
-        <label><input type="checkbox" name="q27-1" value="A"><span class="choice-letter">A.</span><span>添加多项式特征（例如，使用hθ(x)=g(θ₀+θ₁x₁+θ₂x₂+θ₃x₁²+θ₄x₁x₂+θ₅x₂²)）可以增加我们拟合训练数据的程度</span></label>
-        <label><input type="checkbox" name="q27-1" value="B"><span class="choice-letter">B.</span><span>在θ的最佳值（例如，由fminunc找到）处，J(θ)≥0</span></label>
-        <label><input type="checkbox" name="q27-1" value="C"><span class="choice-letter">C.</span><span>添加多项式特征（例如，使用hθ(x)=g(θ₀+θ₁x₁+θ₂x₂+θ₃x₁²+θ₄x₁x₂+θ₅x₂²)将增加J(θ)，因为我们现在正在对更多项进行求和</span></label>
-        <label><input type="checkbox" name="q27-1" value="D"><span class="choice-letter">D.</span><span>如果我们训练梯度下降迭代足够多次，对于训练集中的一些例子x⁽ⁱ⁾，可能得到hθ(x⁽ⁱ⁾)&gt;1</span></label>
+        <label><input type="checkbox" name="q27-1" value="A" data-reason="新增平方项和交叉项可以画出包围内部正样本的边界。"><span class="choice-letter">A.</span><span>添加多项式特征（例如，使用hθ(x)=g(θ₀+θ₁x₁+θ₂x₂+θ₃x₁²+θ₄x₁x₂+θ₅x₂²)）可以增加我们拟合训练数据的程度</span></label>
+        <label><input type="checkbox" name="q27-1" value="B" data-reason="交叉熵每项是概率的负对数，最小值也不会是负数。"><span class="choice-letter">B.</span><span>在θ的最佳值（例如，由fminunc找到）处，J(θ)≥0</span></label>
+        <label><input type="checkbox" name="q27-1" value="C" data-reason="求和的项数按样本数计算。给新增系数取 0 还能复现原模型。"><span class="choice-letter">C.</span><span>添加多项式特征（例如，使用hθ(x)=g(θ₀+θ₁x₁+θ₂x₂+θ₃x₁²+θ₄x₁x₂+θ₅x₂²)将增加J(θ)，因为我们现在正在对更多项进行求和</span></label>
+        <label><input type="checkbox" name="q27-1" value="D" data-reason="即使得分很大，Sigmoid 也只能从 1 的下方逼近。"><span class="choice-letter">D.</span><span>如果我们训练梯度下降迭代足够多次，对于训练集中的一些例子x⁽ⁱ⁾，可能得到hθ(x⁽ⁱ⁾)&gt;1</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -83,12 +113,12 @@
     <form class="exercise choice-exercise" data-quiz data-answer="BD">
       <fieldset>
         <legend>多选题 · 选全后检查</legend>
-        <label><input type="checkbox" name="q28-1" value="A"><span class="choice-letter">A.</span><span>θ ← θ − (α/m)∑ᵢ₌₁ᵐ [θᵀx⁽ⁱ⁾−y⁽ⁱ⁾]x⁽ⁱ⁾。</span></label>
-        <label><input type="checkbox" name="q28-1" value="B"><span class="choice-letter">B.</span><span>θⱼ ← θⱼ − (α/m)∑ᵢ₌₁ᵐ [1/(1+e^(−θᵀx⁽ⁱ⁾))−y⁽ⁱ⁾]xⱼ⁽ⁱ⁾，同时更新所有 j。</span></label>
-        <label><input type="checkbox" name="q28-1" value="C"><span class="choice-letter">C.</span><span>θⱼ ← θⱼ − (α/m)∑ᵢ₌₁ᵐ [hθ(x⁽ⁱ⁾)−y⁽ⁱ⁾]x⁽ⁱ⁾，同时更新所有 j。</span></label>
-        <label><input type="checkbox" name="q28-1" value="D"><span class="choice-letter">D.</span><span>θⱼ ← θⱼ − (α/m)∑ᵢ₌₁ᵐ [hθ(x⁽ⁱ⁾)−y⁽ⁱ⁾]xⱼ⁽ⁱ⁾，同时更新所有 j。</span></label>
+        <label><input type="checkbox" name="q28-1" value="A" data-reason="θᵀx 是原始得分，先用 Sigmoid 才能得到 h。"><span class="choice-letter">A.</span><span>θ ← θ − (α/m)∑ᵢ₌₁ᵐ [θᵀx⁽ⁱ⁾−y⁽ⁱ⁾]x⁽ⁱ⁾。</span></label>
+        <label><input type="checkbox" name="q28-1" value="B" data-reason="分式就是得分代入 Sigmoid，且该式同时更新所有系数。"><span class="choice-letter">B.</span><span>θⱼ ← θⱼ − (α/m)∑ᵢ₌₁ᵐ [1/(1+e^(−θᵀx⁽ⁱ⁾))−y⁽ⁱ⁾]xⱼ⁽ⁱ⁾，同时更新所有 j。</span></label>
+        <label><input type="checkbox" name="q28-1" value="C" data-reason="更新单个 θⱼ 要用 xⱼ。整个 x 向量产生的是一列结果。"><span class="choice-letter">C.</span><span>θⱼ ← θⱼ − (α/m)∑ᵢ₌₁ᵐ [hθ(x⁽ⁱ⁾)−y⁽ⁱ⁾]x⁽ⁱ⁾，同时更新所有 j。</span></label>
+        <label><input type="checkbox" name="q28-1" value="D" data-reason="将题给分量梯度乘学习率，再从第 j 个旧系数中减去。"><span class="choice-letter">D.</span><span>θⱼ ← θⱼ − (α/m)∑ᵢ₌₁ᵐ [hθ(x⁽ⁱ⁾)−y⁽ⁱ⁾]xⱼ⁽ⁱ⁾，同时更新所有 j。</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -101,12 +131,12 @@
     <form class="exercise choice-exercise" data-quiz data-answer="BC">
       <fieldset>
         <legend>多选题 · 选全后检查</legend>
-        <label><input type="checkbox" name="q29-1" value="A"><span class="choice-letter">A.</span><span>对于逻辑回归，梯度下降有时会收敛到一个局部最小值（并且无法找到全局最小值）。这就是为什么我们更喜欢更先进的优化算法，如fminunc（共轭梯度/BFGS/L-BFGS/等等）</span></label>
-        <label><input type="checkbox" name="q29-1" value="B"><span class="choice-letter">B.</span><span>sigmoid函数g(z)=1/(1+e^(−z))数值永远不会大于1</span></label>
-        <label><input type="checkbox" name="q29-1" value="C"><span class="choice-letter">C.</span><span>用m≥1个例子训练的逻辑回归的代价函数J(θ)总是大于或等于零</span></label>
-        <label><input type="checkbox" name="q29-1" value="D"><span class="choice-letter">D.</span><span>使用线性回归+阈值的方法做分类预测，总是很有效的</span></label>
+        <label><input type="checkbox" name="q29-1" value="A" data-reason="标准交叉熵对逻辑回归参数是凸的，更高级的优化器可以用于加速。"><span class="choice-letter">A.</span><span>对于逻辑回归，梯度下降有时会收敛到一个局部最小值（并且无法找到全局最小值）。这就是为什么我们更喜欢更先进的优化算法，如fminunc（共轭梯度/BFGS/L-BFGS/等等）</span></label>
+        <label><input type="checkbox" name="q29-1" value="B" data-reason="有限得分对应的 Sigmoid 输出严格在 0 与 1 之间。"><span class="choice-letter">B.</span><span>sigmoid函数g(z)=1/(1+e^(−z))数值永远不会大于1</span></label>
+        <label><input type="checkbox" name="q29-1" value="C" data-reason="真实类别的概率至多 1，负对数损失至少是 0。"><span class="choice-letter">C.</span><span>用m≥1个例子训练的逻辑回归的代价函数J(θ)总是大于或等于零</span></label>
+        <label><input type="checkbox" name="q29-1" value="D" data-reason="线性回归可输出 0 到 1 以外的值，阈值的效果也依赖数据。"><span class="choice-letter">D.</span><span>使用线性回归+阈值的方法做分类预测，总是很有效的</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -119,12 +149,12 @@
     <form class="exercise choice-exercise" data-quiz data-answer="A">
       <fieldset>
         <legend>单选题</legend>
-        <label><input type="radio" name="q30-1" value="A"><span class="choice-letter">A.</span><span><img class="question-image" src="../assets/questions/image10.jpeg" width="960" height="254" alt="x₁=6 的竖直边界，左侧标 y=1，右侧标 y=0。" loading="lazy" decoding="async"></span></label>
-        <label><input type="radio" name="q30-1" value="B"><span class="choice-letter">B.</span><span><img class="question-image" src="../assets/questions/image11.jpeg" width="960" height="254" alt="x₁=6 的竖直边界，左侧标 y=0，右侧标 y=1。" loading="lazy" decoding="async"></span></label>
-        <label><input type="radio" name="q30-1" value="C"><span class="choice-letter">C.</span><span><img class="question-image" src="../assets/questions/image12.jpeg" width="960" height="254" alt="x₂=6 的水平边界，上方标 y=0，下方标 y=1。" loading="lazy" decoding="async"></span></label>
-        <label><input type="radio" name="q30-1" value="D"><span class="choice-letter">D.</span><span><img class="question-image" src="../assets/questions/image13.png" width="960" height="254" alt="x₂=6 的水平边界，上方标 y=1，下方标 y=0。" loading="lazy" decoding="async"></span></label>
+        <label><input type="radio" name="q30-1" value="A" data-reason="令 6−x₁=0 得竖直线 x₁=6，左侧的得分为正。"><span class="choice-letter">A.</span><span><img class="question-image" src="../assets/questions/image10.jpeg" width="960" height="254" alt="x₁=6 的竖直边界，左侧标 y=1，右侧标 y=0。" loading="lazy" decoding="async"></span></label>
+        <label><input type="radio" name="q30-1" value="B" data-reason="竖直线的位置可能对上了。代入左边一点 x₁=0，得分 6，应判正类。"><span class="choice-letter">B.</span><span><img class="question-image" src="../assets/questions/image11.jpeg" width="960" height="254" alt="x₁=6 的竖直边界，左侧标 y=0，右侧标 y=1。" loading="lazy" decoding="async"></span></label>
+        <label><input type="radio" name="q30-1" value="C" data-reason="得分含 x₁ 而不含 x₂，因此边界约束横坐标。"><span class="choice-letter">C.</span><span><img class="question-image" src="../assets/questions/image12.jpeg" width="960" height="254" alt="x₂=6 的水平边界，上方标 y=0，下方标 y=1。" loading="lazy" decoding="async"></span></label>
+        <label><input type="radio" name="q30-1" value="D" data-reason="得分只随 x₁ 变化，边界应是 x₁=6 的竖直线。"><span class="choice-letter">D.</span><span><img class="question-image" src="../assets/questions/image13.png" width="960" height="254" alt="x₂=6 的水平边界，上方标 y=1，下方标 y=0。" loading="lazy" decoding="async"></span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -132,7 +162,12 @@
     </details>
   </article>
   </section>
-  <section class="lesson-recall" aria-labelledby="recall-heading"><h2 id="recall-heading">考前回忆</h2><p>Sigmoid 把得分映射为正类概率。阈值 0.5 时，解 θᵀx=0 得边界。</p></section>
+  <section class="lesson-recall" id="recall" aria-labelledby="recall-heading"><h2 id="recall-heading">易错点与快速判断</h2><p>Sigmoid 把得分映射为正类概率。阈值 0.5 时，解 θᵀx=0 得边界。</p></section>
+  <section aria-labelledby="retrieval-heading">
+    <h2 id="retrieval-heading">跨课回顾</h2>
+    <p>如果房价模型直接给 -2 作为正类概率，有什么问题？</p>
+    <details class="solution"><summary>核对你的判断</summary><div><p>概率必须在 0 到 1 之间。可以保留线性得分，再用 Sigmoid 转为概率。</p><p><a href="0003-simple-linear-regression.html#concepts">回看线性预测与代价</a></p></div></details>
+  </section>
   <footer>
     <p>遇到疑问，可以把题号和你卡住的步骤发给我。</p>
     <p class="small">参考资料 <a href="https://see.stanford.edu/materials/aimlcs229/cs229-notes1.pdf">斯坦福 CS229 监督学习讲义</a> · <a href="https://developers.google.com/machine-learning/crash-course/logistic-regression">Google 逻辑回归课程</a></p>

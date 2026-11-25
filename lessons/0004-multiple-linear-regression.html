@@ -6,6 +6,7 @@
   <title>多元线性回归与特征缩放 · 第 2 天</title>
   <link rel="stylesheet" href="../assets/lesson.css">
   <script defer src="../assets/quiz.js"></script>
+  <script defer src="../assets/study.js"></script>
 </head>
 <body>
 <div class="sitebar"><nav aria-label="课程导航">
@@ -17,25 +18,49 @@
   <header class="lesson-intro">
     <a class="day-label" href="../index.html#day-2">第 2 天</a>
     <h1>多元线性回归与特征缩放</h1>
-    <p class="lede">如果要把房屋面积和房间数量一起用来估价，每套房需要存几个输入？面积与房间数的变化范围不一样，会怎样影响训练？</p>
-    <nav class="lesson-nav" aria-label="本课内容"><a href="#concepts">知识点</a><a href="#example">带做例题</a><a href="#practice">动手练习</a><a href="#original">原题 16–20</a></nav>
+    <p class="lede"><strong>让多个特征一起预测，并用特征缩放减少优化过程中的来回震荡。</strong></p>
+    <p>面积可能从 60 到 180 平方米，房间数却只从 1 到 5。同样改一点系数，面积那一项会让预测变化得更多，更新时容易反复跨过谷底。</p>
+    <p class="prerequisite">接上之前学过的<a href="0002-matrix-operations.html">矩阵的行和列</a>。</p>
+    <div class="depth-picker" hidden>
+      <label for="study-depth">学习深度</label>
+      <select id="study-depth" aria-describedby="depth-hint">
+        <option value="quick">极速模式</option>
+        <option value="standard" selected>标准模式</option>
+        <option value="deep">深入模式</option>
+      </select>
+      <p class="depth-hint small" id="depth-hint"></p>
+    </div>
+    <nav class="lesson-nav" aria-label="本课内容"><a href="#concepts">图解</a><a href="#example" data-study="standard">带做例题</a><a href="#practice" data-study="standard">动手练习</a><a href="#essential">必记</a><a href="#recall">易错点</a><a href="#original">原题 16–20</a></nav>
   </header>
   <section id="concepts" aria-labelledby="concepts-heading">
-    <h2 id="concepts-heading">知识点</h2>
-    <div class="concept"><h3>一条样本可以有多个特征</h3><p><span class="formula">h<sub>θ</sub>(x)=θ₀+θ₁x₁+⋯+θₙxₙ</span>x₁、x₂ 等是同一条样本的不同特征。θ₀ 是截距，θⱼ是第 j 个特征的系数。常把恒为 1 的输入列 x₀ 加到数据表里，让 θ₀ 也能参加矩阵乘法。</p><p>m 条样本、n 个原特征时，设计矩阵 X 含 m 行和 n+1 列。真实值列向量 y 是 m×1，系数列向量 θ 是 (n+1)×1，所以 Xθ 输出一列 m 个预测。</p></div>
-    <div class="concept"><h3>先造特征，再按列缩放</h3><p>用 x 和 x² 同时预测，属于<strong>多项式特征</strong>。曲线可以弯，但参数 θ 仍只是乘各列再相加。先计算所有样本的 x²，再把这一列单独缩放。</p><p>按本课题目常用的均值归一化，先减这一列均值，再除以该列的极差（最大值−最小值）。这与除以标准差的做法不同，考试按题干指定分母算。缩放通常让梯度下降更容易收敛；新样本使用训练集算出的同一组均值和尺度。</p></div>
-    <div class="concept"><h3>梯度下降与正规方程</h3><p>学习率合适时，梯度下降逐步找到较低代价。代价一直缓慢下降，可以试更大步长并观察；代价上升或反复跳动时，可检查步长是否过大。</p><p><span class="formula">θ = (XᵀX)⁻¹Xᵀy</span>当 X 的列线性无关时，这个式子给出普通最小二乘解。正规方程处理的是 (n+1)×(n+1) 的矩阵，n 很大时开销高。若有重复列等依赖，不能直接使用上式的逆。</p></div>
+    <h2 id="concepts-heading">先看现象，再写规则</h2>
+    <div class="demo" data-demo="scaling">
+      <h3>同一步长，两种谷地形状</h3>
+      <p>固定步长，先看缩放前的红色轨迹。切到缩放后，再对比第 1 步和第 10 步。</p>
+      <p class="demo-caption">图中比较两个二次代价的形状。窄方向斜率大，一步容易跨过去，宽方向每步却只前进一点。</p>
+    </div>
+    <div class="concept" data-study="standard"><h3>一条样本可以有多个特征</h3><p><span class="formula">h<sub>θ</sub>(x)=θ₀+θ₁x₁+⋯+θₙxₙ</span>x₁、x₂ 等是同一条样本的不同特征。θ₀ 是截距，θⱼ是第 j 个特征的系数。常把恒为 1 的输入列 x₀ 加到数据表里，让 θ₀ 也能参加矩阵乘法。</p><p>m 条样本、n 个原特征时，设计矩阵 X 含 m 行和 n+1 列。真实值列向量 y 是 m×1，系数列向量 θ 是 (n+1)×1，所以 Xθ 输出一列 m 个预测。</p></div>
+    <div class="concept" data-study="standard"><h3>先造特征，再按列缩放</h3><p>用 x 和 x² 同时预测，属于<strong>多项式特征</strong>。曲线可以弯，但参数 θ 仍只是乘各列再相加。先计算所有样本的 x²，再把这一列单独缩放。</p><p>按本课题目常用的均值归一化，先减这一列均值，再除以该列的极差（最大值−最小值）。这与除以标准差的做法不同，考试按题干指定分母算。缩放通常让梯度下降更容易收敛；新样本使用训练集算出的同一组均值和尺度。</p></div>
+    <div class="concept" data-study="standard"><h3>梯度下降与正规方程</h3><p>学习率合适时，梯度下降逐步找到较低代价。代价一直缓慢下降，可以试更大步长并观察；代价上升或反复跳动时，可检查步长是否过大。</p><p><span class="formula">θ = (XᵀX)⁻¹Xᵀy</span>当 X 的列线性无关时，这个式子给出普通最小二乘解。正规方程处理的是 (n+1)×(n+1) 的矩阵，n 很大时开销高。若有重复列等依赖，不能直接使用上式的逆。</p></div>
+    <aside class="quick-reference" id="essential" aria-labelledby="essential-heading">
+      <h3 id="essential-heading">必记</h3>
+      <p class="formula">每行有一条样本，额外加一列 1 表示截距，预测写作 Xθ。均值归一化按列计算 (x − 均值) / 极差。</p>
+    </aside>
   </section>
-  <section id="example" class="example" aria-labelledby="example-heading">
+  <section id="example" data-study="standard" class="example" aria-labelledby="example-heading">
     <h2 id="example-heading">跟着算一遍</h2>
-    <ol><li>以 3 个输入 x=1、2、3 为例，添加平方特征后该列为 1、4、9。</li><li>这一列的均值是 (1+4+9)/3=14/3，极差是 9−1=8。</li><li>第二行的平方特征缩放后为 (4−14/3)/8=−1/12。加一列 1 后，3 个样本、2 个原特征对应 X 的形状 3×3。</li></ol>
+    <ol><li>以 3 个输入 x=1、2、3 为例，先造平方特征得到 1、4、9。这一列的均值是 14/3，极差是 8。</li><li>第二条的平方特征缩放后是 (4−14/3)/8=−1/12。加一列 1 后，3 条样本、2 个原特征对应 X 的形状 3×3。</li><li>回到图中的二次代价。从 (1.4, 0.6) 出发，步长 0.08，第二个方向在缩放前梯度为 24×0.6=14.4，更新到 0.6−0.08×14.4=−0.552。缩放后该方向梯度为 0.6，更新到 0.552。前者翻到了谷底另一侧。</li></ol>
   </section>
-  <section id="practice" class="try" aria-labelledby="practice-heading">
+  <section id="practice" data-study="standard" class="try" aria-labelledby="practice-heading">
     <h2 id="practice-heading">自己试一题</h2>
     <p>5 条样本，2 个原特征，加上截距列后，X、θ、y 的形状各是什么？</p>
     <details class="solution"><summary>核对练习思路</summary><div><p>X 是 5×3，θ 是 3×1，y 是 5×1，所以 Xθ 是 5×1。</p></div></details>
   </section>
-  <section id="original" aria-labelledby="questions-heading">
+  <details class="solution" data-study="standard" data-advanced>
+    <summary>深入理解</summary>
+    <div><p>普通最小二乘问题在 X 列线性无关时可由正规方程 XᵀXθ = Xᵀy 求解。数值实现常用 QR 或 SVD，避免直接显式求逆。缩放能缓和尺度差异，相关性很强的列仍可能造成狭长的等高线。训练集零极差的常量特征可去除或按约定处理。</p></div>
+  </details>
+  <section id="original" data-study="standard" aria-labelledby="questions-heading">
     <h2 id="questions-heading">原题练习</h2>
     <nav class="question-jump" aria-label="跳到本课原题"><a href="#q16">16</a><a href="#q17">17</a><a href="#q18">18</a><a href="#q19">19</a><a href="#q20">20</a></nav>
     <p class="small">先独立作答，再展开解析核对。计算题可以在纸上列式。</p>
@@ -55,11 +80,11 @@
     <form class="exercise choice-exercise" data-quiz data-answer="C">
       <fieldset>
         <legend>单选题</legend>
-        <label><input type="radio" name="q17-1" value="A"><span class="choice-letter">A.</span><span>α=0.3是学习率的有效选择。</span></label>
-        <label><input type="radio" name="q17-1" value="B"><span class="choice-letter">B.</span><span>与其使用α当前值，不如尝试更小的α值（比如α=0.1）</span></label>
-        <label><input type="radio" name="q17-1" value="C"><span class="choice-letter">C.</span><span>与其使用α当前值，不如尝试更大的α值（比如α=1.0）</span></label>
+        <label><input type="radio" name="q17-1" value="A" data-reason="当前步长能下降，但 15 步仍很慢，值得试更大的学习率并继续监控。"><span class="choice-letter">A.</span><span>α=0.3是学习率的有效选择。</span></label>
+        <label><input type="radio" name="q17-1" value="B" data-reason="更小的步长可能让已经缓慢的进展更慢。"><span class="choice-letter">B.</span><span>与其使用α当前值，不如尝试更小的α值（比如α=0.1）</span></label>
+        <label><input type="radio" name="q17-1" value="C" data-reason="下降平稳但缓慢，可以对照试更大步长，观察是否开始震荡。"><span class="choice-letter">C.</span><span>与其使用α当前值，不如尝试更大的α值（比如α=1.0）</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -72,12 +97,12 @@
     <form class="exercise choice-exercise" data-quiz data-answer="B">
       <fieldset>
         <legend>单选题</legend>
-        <label><input type="radio" name="q18-1" value="A"><span class="choice-letter">A.</span><span>X 14×3, y 14×1, θ 3×3</span></label>
-        <label><input type="radio" name="q18-1" value="B"><span class="choice-letter">B.</span><span>X 14×4, y 14×1, θ 4×1</span></label>
-        <label><input type="radio" name="q18-1" value="C"><span class="choice-letter">C.</span><span>X 14×3, y 14×1, θ 3×1</span></label>
-        <label><input type="radio" name="q18-1" value="D"><span class="choice-letter">D.</span><span>X 14×4, y 14×4, θ 4×4</span></label>
+        <label><input type="radio" name="q18-1" value="A" data-reason="设计矩阵还要增加截距列。系数排成一列，每列输入对应一个系数。"><span class="choice-letter">A.</span><span>X 14×3, y 14×1, θ 3×3</span></label>
+        <label><input type="radio" name="q18-1" value="B" data-reason="14 行对应样本数，3 个原特征加截距共有 4 列。"><span class="choice-letter">B.</span><span>X 14×4, y 14×1, θ 4×1</span></label>
+        <label><input type="radio" name="q18-1" value="C" data-reason="你数到了 3 个原特征，恒为 1 的列也占一列和一个系数。"><span class="choice-letter">C.</span><span>X 14×3, y 14×1, θ 3×1</span></label>
+        <label><input type="radio" name="q18-1" value="D" data-reason="每条样本只有一个目标值，y 只需一列，θ 也写成列向量。"><span class="choice-letter">D.</span><span>X 14×4, y 14×4, θ 4×4</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -90,12 +115,12 @@
     <form class="exercise choice-exercise" data-quiz data-answer="A">
       <fieldset>
         <legend>单选题</legend>
-        <label><input type="radio" name="q19-1" value="A"><span class="choice-letter">A.</span><span>梯度下降，因为正规方程中计算和处理 XᵀX 非常慢</span></label>
-        <label><input type="radio" name="q19-1" value="B"><span class="choice-letter">B.</span><span>正规方程，因为它提供了一种直接求解的有效方法</span></label>
-        <label><input type="radio" name="q19-1" value="C"><span class="choice-letter">C.</span><span>梯度下降，因为它总是收敛到最优θ</span></label>
-        <label><input type="radio" name="q19-1" value="D"><span class="choice-letter">D.</span><span>正规方程，因为梯度下降可能无法找到最优θ</span></label>
+        <label><input type="radio" name="q19-1" value="A" data-reason="XᵀX 有约二十万行和二十万列，显式构造和处理的代价很高。"><span class="choice-letter">A.</span><span>梯度下降，因为正规方程中计算和处理 XᵀX 非常慢</span></label>
+        <label><input type="radio" name="q19-1" value="B" data-reason="直接解仍需处理极大的特征矩阵乘积，规模是这道题的瓶颈。"><span class="choice-letter">B.</span><span>正规方程，因为它提供了一种直接求解的有效方法</span></label>
+        <label><input type="radio" name="q19-1" value="C" data-reason="梯度下降依赖步长等条件。此题选择它是因为正规方程的规模开销。"><span class="choice-letter">C.</span><span>梯度下降，因为它总是收敛到最优θ</span></label>
+        <label><input type="radio" name="q19-1" value="D" data-reason="平方损失是凸的，合适设置下梯度下降可趋向最优值。"><span class="choice-letter">D.</span><span>正规方程，因为梯度下降可能无法找到最优θ</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -108,12 +133,12 @@
     <form class="exercise choice-exercise" data-quiz data-answer="C">
       <fieldset>
         <legend>多选题 · 选全后检查</legend>
-        <label><input type="checkbox" name="q20-1" value="A"><span class="choice-letter">A.</span><span>它可以防止梯度下降陷入局部最优</span></label>
-        <label><input type="checkbox" name="q20-1" value="B"><span class="choice-letter">B.</span><span>它通过降低梯度下降的每次迭代的计算成本来加速梯度下降</span></label>
-        <label><input type="checkbox" name="q20-1" value="C"><span class="choice-letter">C.</span><span>它通过减少迭代次数来获得一个好的解，从而加快了梯度下降的速度</span></label>
-        <label><input type="checkbox" name="q20-1" value="D"><span class="choice-letter">D.</span><span>它防止矩阵 XᵀX （用于正规方程）不可逆（奇异/退化）</span></label>
+        <label><input type="checkbox" name="q20-1" value="A" data-reason="普通线性回归平方损失是凸的，缩放主要改变参数空间里的等高线形状。"><span class="choice-letter">A.</span><span>它可以防止梯度下降陷入局部最优</span></label>
+        <label><input type="checkbox" name="q20-1" value="B" data-reason="更新仍需计算同样数量的样本和特征，收益主要来自少走几步。"><span class="choice-letter">B.</span><span>它通过降低梯度下降的每次迭代的计算成本来加速梯度下降</span></label>
+        <label><input type="checkbox" name="q20-1" value="C" data-reason="让特征尺度接近，梯度下降通常能更快到达较好解。"><span class="choice-letter">C.</span><span>它通过减少迭代次数来获得一个好的解，从而加快了梯度下降的速度</span></label>
+        <label><input type="checkbox" name="q20-1" value="D" data-reason="两列本来重复时，缩放后仍可能线性相关，无法保证可逆。"><span class="choice-letter">D.</span><span>它防止矩阵 XᵀX （用于正规方程）不可逆（奇异/退化）</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -121,7 +146,12 @@
     </details>
   </article>
   </section>
-  <section class="lesson-recall" aria-labelledby="recall-heading"><h2 id="recall-heading">考前回忆</h2><p>加截距列后 X 有 n+1 列。先构造多项式特征，再逐列缩放。正规方程的直接逆要求满列秩。</p></section>
+  <section class="lesson-recall" id="recall" aria-labelledby="recall-heading"><h2 id="recall-heading">易错点与快速判断</h2><p>加截距列后 X 有 n+1 列。先构造多项式特征，再逐列缩放。正规方程的直接逆要求满列秩。</p></section>
+  <section aria-labelledby="retrieval-heading">
+    <h2 id="retrieval-heading">跨课回顾</h2>
+    <p>三套房各有两项特征，再加上截距列。X 与系数相乘时输出是什么形状？</p>
+    <details class="solution"><summary>核对你的判断</summary><div><p>X 是 3×3，系数是 3×1，所以输出 3×1，每套房得到一个预测。</p><p><a href="0002-matrix-operations.html#concepts">回看矩阵的行和列</a></p></div></details>
+  </section>
   <footer>
     <p>遇到疑问，可以把题号和你卡住的步骤发给我。</p>
     <p class="small">参考资料 <a href="https://see.stanford.edu/materials/aimlcs229/cs229-notes1.pdf">斯坦福 CS229 监督学习讲义</a> · <a href="https://developers.google.com/machine-learning/crash-course/linear-regression">Google 线性回归课程</a></p>

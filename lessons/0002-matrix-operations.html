@@ -6,6 +6,7 @@
   <title>判断矩阵运算的维度 · 第 1 天</title>
   <link rel="stylesheet" href="../assets/lesson.css">
   <script defer src="../assets/quiz.js"></script>
+  <script defer src="../assets/study.js"></script>
 </head>
 <body>
 <div class="sitebar"><nav aria-label="课程导航">
@@ -17,25 +18,49 @@
   <header class="lesson-intro">
     <a class="day-label" href="../index.html#day-1">第 1 天</a>
     <h1>判断矩阵运算的维度</h1>
-    <p class="lede">有 2 位学生、每人有 3 项成绩，再给每项成绩一个权重。怎样一眼看出最后应该得到几个总分？先把数据排好，再检查行数和列数。</p>
-    <nav class="lesson-nav" aria-label="本课内容"><a href="#concepts">知识点</a><a href="#example">带做例题</a><a href="#practice">动手练习</a><a href="#original">原题 11–15</a></nav>
+    <p class="lede"><strong>矩阵乘法是把左边的一行和右边的一列逐项相乘，再把结果加起来。</strong></p>
+    <p>两位学生各有三项成绩。把成绩排在两行，能不能一次算出两位学生在两套权重下的总分？</p>
+    <p class="prerequisite">接上之前学过的<a href="0001-learning-task-types.html">样本与特征</a>。</p>
+    <div class="depth-picker" hidden>
+      <label for="study-depth">学习深度</label>
+      <select id="study-depth" aria-describedby="depth-hint">
+        <option value="quick">极速模式</option>
+        <option value="standard" selected>标准模式</option>
+        <option value="deep">深入模式</option>
+      </select>
+      <p class="depth-hint small" id="depth-hint"></p>
+    </div>
+    <nav class="lesson-nav" aria-label="本课内容"><a href="#concepts">图解</a><a href="#example" data-study="standard">带做例题</a><a href="#practice" data-study="standard">动手练习</a><a href="#essential">必记</a><a href="#recall">易错点</a><a href="#original">原题 11–15</a></nav>
   </header>
   <section id="concepts" aria-labelledby="concepts-heading">
-    <h2 id="concepts-heading">知识点</h2>
-    <div class="concept"><h3>先读形状</h3><p>矩阵就是按行和列排成的数字表。2×3 表示 2 行、3 列。只有一列的是列向量，只有一行的是行向量。形状中的第一个数永远是行数。</p></div>
-    <div class="concept"><h3>加减、数乘、转置</h3><p>两个矩阵形状相同就能逐位置加减。比如第一行第一列是 4 和 −2，相减是 4−(−2)=6。</p><p>一个普通数字叫<strong>标量</strong>。数乘就是每个元素都乘这个数字，形状保持原样。<strong>转置</strong>把行和列互换，记作 Aᵀ，2×3 变成 3×2。</p></div>
-    <div class="concept"><h3>矩阵相乘和内积</h3><p>A 有 m 行 n 列，B 有 n 行 p 列，写成 (m×n)(n×p) → m×p。中间的两个 n 相同才可以乘，外侧的 m 和 p 是结果的形状。</p><p>第 i 行、第 j 列的结果，是 A 的第 i 行和 B 的第 j 列逐项相乘后加起来。这个「对应相乘再相加」的运算就是<strong>内积</strong>。两个 n×1 列向量 u、v 的内积写作 uᵀv，结果是一个数。AB 和 BA 的形状、甚至能否相乘，都可能不同。</p></div>
+    <h2 id="concepts-heading">先看现象，再写规则</h2>
+    <div class="demo" data-demo="matrix">
+      <h3>点亮一行和一列</h3>
+      <p>先猜结果右上角用哪些数。选「第 1 行」「第 2 列」检查，再试左下角。</p>
+      <p class="demo-caption">右上角由第一行 (1, 2, 3) 与第二列 (0, 1, 1) 配对，得到 5。</p>
+    </div>
+    <div class="concept" data-study="standard"><h3>先读形状</h3><p>矩阵就是按行和列排成的数字表。2×3 表示 2 行、3 列。只有一列的是列向量，只有一行的是行向量。形状中的第一个数永远是行数。</p></div>
+    <div class="concept" data-study="standard"><h3>加减、数乘、转置</h3><p>两个矩阵形状相同就能逐位置加减。比如第一行第一列是 4 和 −2，相减是 4−(−2)=6。</p><p>一个普通数字叫<strong>标量</strong>。数乘就是每个元素都乘这个数字，形状保持原样。<strong>转置</strong>把行和列互换，记作 Aᵀ，2×3 变成 3×2。</p></div>
+    <div class="concept" data-study="standard"><h3>矩阵相乘和内积</h3><p>A 有 m 行 n 列，B 有 n 行 p 列，写成 (m×n)(n×p) → m×p。中间的两个 n 相同才可以乘，外侧的 m 和 p 是结果的形状。</p><p>第 i 行、第 j 列的结果，是 A 的第 i 行和 B 的第 j 列逐项相乘后加起来。这个「对应相乘再相加」的运算就是<strong>内积</strong>。两个 n×1 列向量 u、v 的内积写作 uᵀv，结果是一个数。AB 和 BA 的形状、甚至能否相乘，都可能不同。</p></div>
+    <aside class="quick-reference" id="essential" aria-labelledby="essential-heading">
+      <h3 id="essential-heading">必记</h3>
+      <p class="formula">先看形状 (m×n)(n×p) → m×p。结果的第 i 行、第 j 列用 A 的第 i 行乘 B 的第 j 列。</p>
+    </aside>
   </section>
-  <section id="example" class="example" aria-labelledby="example-heading">
+  <section id="example" data-study="standard" class="example" aria-labelledby="example-heading">
     <h2 id="example-heading">跟着算一遍</h2>
     <ol><li>把学生成绩排成两行 (80, 70, 90) 与 (60, 90, 80)。权重是列向量 (0.2, 0.3, 0.5)ᵀ。</li><li>先查形状：(2×3)(3×1) → 2×1，所以每位学生会得到一个总分。</li><li>第一位是 80×0.2+70×0.3+90×0.5=16+21+45=82。第二位是 60×0.2+90×0.3+80×0.5=12+27+40=79。</li></ol>
   </section>
-  <section id="practice" class="try" aria-labelledby="practice-heading">
+  <section id="practice" data-study="standard" class="try" aria-labelledby="practice-heading">
     <h2 id="practice-heading">自己试一题</h2>
     <p>A 是 3×2，B 是 2×4。AB 的形状是什么？BA 能算吗？</p>
     <details class="solution"><summary>核对练习思路</summary><div><p>AB 的中间维数是 2，结果为 3×4。BA 中间维数是 4 和 3，对不上，所以不能乘。</p></div></details>
   </section>
-  <section id="original" aria-labelledby="questions-heading">
+  <details class="solution" data-study="standard" data-advanced>
+    <summary>深入理解</summary>
+    <div><p>把每一行拿来和右矩阵的每一列配对，就能实现矩阵乘法。普通逐元素相乘只在同一位置配对。矩阵乘法通常不可交换，原式能乘也不能保证交换后能乘。</p></div>
+  </details>
+  <section id="original" data-study="standard" aria-labelledby="questions-heading">
     <h2 id="questions-heading">原题练习</h2>
     <nav class="question-jump" aria-label="跳到本课原题"><a href="#q11">11</a><a href="#q12">12</a><a href="#q13">13</a><a href="#q14">14</a><a href="#q15">15</a></nav>
     <p class="small">先独立作答，再展开解析核对。计算题可以在纸上列式。</p>
@@ -47,12 +72,12 @@ A−B 的结果是什么？以下每对方括号按第一行、第二行列出�
     <form class="exercise choice-exercise" data-quiz data-answer="D">
       <fieldset>
         <legend>单选题</legend>
-        <label><input type="radio" name="q11-1" value="A"><span class="choice-letter">A.</span><span>[[4, 12], [1, 1]]</span></label>
-        <label><input type="radio" name="q11-1" value="B"><span class="choice-letter">B.</span><span>[[6, −12], [11, 11]]</span></label>
-        <label><input type="radio" name="q11-1" value="C"><span class="choice-letter">C.</span><span>[[2, −6], [1, 7]]</span></label>
-        <label><input type="radio" name="q11-1" value="D"><span class="choice-letter">D.</span><span>[[6, −6], [11, 7]]</span></label>
+        <label><input type="radio" name="q11-1" value="A" data-reason="先查左上格，4−(−2)=6。右上格应为 3−9=−6。"><span class="choice-letter">A.</span><span>[[4, 12], [1, 1]]</span></label>
+        <label><input type="radio" name="q11-1" value="B" data-reason="左下的 11 对了。再算同位置的右列：3−9=−6，9−2=7。"><span class="choice-letter">B.</span><span>[[6, −12], [11, 11]]</span></label>
+        <label><input type="radio" name="q11-1" value="C" data-reason="两行第一格都在减负数，4−(−2)=6，6−(−5)=11。"><span class="choice-letter">C.</span><span>[[2, −6], [1, 7]]</span></label>
+        <label><input type="radio" name="q11-1" value="D" data-reason="逐位置计算，两行分别是 (6,−6) 和 (11,7)。"><span class="choice-letter">D.</span><span>[[6, −6], [11, 7]]</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -92,12 +117,12 @@ A−B 的结果是什么？以下每对方括号按第一行、第二行列出�
     <form class="exercise choice-exercise" data-quiz data-answer="AB">
       <fieldset>
         <legend>多选题 · 选全后检查</legend>
-        <label><input type="checkbox" name="q15-1" value="A"><span class="choice-letter">A.</span><span>A+B=B+A</span></label>
-        <label><input type="checkbox" name="q15-1" value="B"><span class="choice-letter">B.</span><span>如果v是一个3维向量，那么A∗B∗v是三维向量</span></label>
-        <label><input type="checkbox" name="q15-1" value="C"><span class="choice-letter">C.</span><span>A∗B∗A=B∗A∗B</span></label>
-        <label><input type="checkbox" name="q15-1" value="D"><span class="choice-letter">D.</span><span>如果C=A∗B，那么C是个6x6矩阵</span></label>
+        <label><input type="checkbox" name="q15-1" value="A" data-reason="两个同形矩阵逐位置相加，元素相加可以交换。"><span class="choice-letter">A.</span><span>A+B=B+A</span></label>
+        <label><input type="checkbox" name="q15-1" value="B" data-reason="3×3 矩阵乘 3×1 列向量，结果仍有 3 行。"><span class="choice-letter">B.</span><span>如果v是一个3维向量，那么A∗B∗v是三维向量</span></label>
+        <label><input type="checkbox" name="q15-1" value="C" data-reason="矩阵乘法通常不能交换。A=I、B=2I 时，ABA=2I、BAB=4I。"><span class="choice-letter">C.</span><span>A∗B∗A=B∗A∗B</span></label>
+        <label><input type="checkbox" name="q15-1" value="D" data-reason="结果取左边的 3 行和右边的 3 列。把维数相加得 6 是另一种操作。"><span class="choice-letter">D.</span><span>如果C=A∗B，那么C是个6x6矩阵</span></label>
       </fieldset>
-      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+      <div class="quiz-actions"><button type="submit">检查答案</button><div class="feedback" role="status"></div></div>
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
@@ -105,7 +130,12 @@ A−B 的结果是什么？以下每对方括号按第一行、第二行列出�
     </details>
   </article>
   </section>
-  <section class="lesson-recall" aria-labelledby="recall-heading"><h2 id="recall-heading">考前回忆</h2><p>加减要求同形状。转置交换行列。矩阵乘法检查中间维数，结果取外侧维数。</p></section>
+  <section class="lesson-recall" id="recall" aria-labelledby="recall-heading"><h2 id="recall-heading">易错点与快速判断</h2><p>加减要求同形状。转置交换行列。矩阵乘法检查中间维数，结果取外侧维数。</p></section>
+  <section aria-labelledby="retrieval-heading">
+    <h2 id="retrieval-heading">跨课回顾</h2>
+    <p>天气表有 12 天记录，每天记录湿度和风速。样本数和特征数各是多少？</p>
+    <details class="solution"><summary>核对你的判断</summary><div><p>12 条样本，2 个特征。写成矩阵就是 12 行、2 列。</p><p><a href="0001-learning-task-types.html#concepts">回看样本与特征</a></p></div></details>
+  </section>
   <footer>
     <p>遇到疑问，可以把题号和你卡住的步骤发给我。</p>
     <p class="small">参考资料 <a href="https://ocw.mit.edu/courses/18-06sc-linear-algebra-fall-2011/resources/mit18_06scf11_ses1-3sum/">MIT 18.06 矩阵乘法讲义</a></p>
