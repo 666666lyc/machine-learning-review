@@ -33,20 +33,25 @@
     <nav class="lesson-nav" aria-label="本课内容"><a href="#concepts">图解</a><a href="#example" data-study="standard">带做例题</a><a href="#practice" data-study="standard">动手练习</a><a href="#essential">必记</a><a href="#recall">易错点</a><a href="#original">原题 6–10</a></nav>
   </header>
   <section id="concepts" aria-labelledby="concepts-heading">
-    <h2 id="concepts-heading">先看现象，再写规则</h2>
+    <h2 id="concepts-heading">先懂概念，再看图</h2>
+    <div class="concept">
+      <h3>先分清两张图在画什么</h3>
+      <p>预测直线里，<strong>斜率</strong>是面积每增加 1 单位，预测价格增多少；<strong>截距</strong>是输入为 0 时的预测值。预测减去实际观测值叫<strong>残差</strong>，可以为正也可以为负。</p>
+      <p>第一张图横轴是房屋面积。第二张图横轴是斜率，纵轴是<strong>代价</strong>，即把整组训练残差合成的分数，越低越好。<strong>梯度</strong>告诉你各参数往上调一点时代价怎么变；按相反方向走就是梯度下降，<strong>学习率</strong>决定步子大小。</p>
+    </div>
     <div class="demo" data-demo="fit">
       <h3>先动手找一条好直线</h3>
       <p>暂时把直线固定为经过原点。先猜面积该乘几，再拖斜率，找出让两段残差都消失的设置。</p>
       <p class="demo-caption">蓝点是真实数据，绿色实线是预测直线，红色虚线表示预测值与实际值的差。</p>
     </div>
-    <div class="concept" data-study="standard"><h3>用两个数字给直线打分</h3><p>斜率设为 1 时，预测是 1、2，实际是 2、4，误差为 −1、−2。分别平方得 1、4，和为 5。除以两倍样本数 4，代价为 1.25。平方使正负误差不会抵消。</p></div>
+    <div class="concept" data-study="standard"><h3>用两条训练记录给直线打分</h3><p>斜率设为 1 时，预测是 1、2，实际是 2、4，误差为 −1、−2。分别平方得 1、4，和为 5。两个样本的平方误差平均为 5÷2=2.5，即<strong>均方误差</strong>。本课按题库惯例再除以 2，得到代价 1.25；这个常数让求导更简单，不改变哪组参数最好。平方让正负误差不抵消，也让较大的误差更显眼。</p></div>
     <div class="demo" data-demo="descent">
       <h3>让计算机沿代价曲线走</h3>
       <p>先用 0.20 点两次，预测第三次会到哪里。再试 0.60 和 0.90，对比跨过谷底后的变化。</p>
       <p class="demo-caption">蓝线记录每个斜率的代价。红点是当前一步，绿色空心点是走过的位置。</p>
     </div>
     <div class="concept" data-study="standard"><h3>用代价选择下一步方向</h3><p>从斜率 0 往右挪一点，代价会下降。走到谷底右边，下降方向会指向左边。设定一个学习率后，每一步按当前位置的梯度决定更新幅度。</p></div>
-    <div class="concept" data-study="standard"><h3>把图上的名字换成题库符号</h3><p>斜率 w 写作 θ₁，截距 b 写作 θ₀，预测 ŷ 写作 h<sub>θ</sub>(x)。m 是样本数。等高线图上的每根线连接代价一样的参数点，直线上的预测和代价随参数变化是两张不同的图。</p></div>
+    <div class="concept" data-study="standard"><h3>把图上的名字换成题库符号</h3><p>斜率 w 写作 θ₁，截距 b 写作 θ₀，预测 ŷ 写作 h<sub>θ</sub>(x)。m 是样本数。如果斜率和截距都在变，可以像用地图画海拔一样，用一条线连起代价相同的参数组合。这叫<strong>等高线</strong>，坐标表示参数，而不是训练房屋。</p></div>
     <aside class="quick-reference" id="essential" aria-labelledby="essential-heading">
       <h3 id="essential-heading">必记</h3>
       <p class="formula">ŷ = wx + b。J = Σ(ŷ − y)² / (2m)。更新时用旧参数算梯度，再同时执行 参数 ← 旧参数 − 学习率 × 该参数的梯度。</p>

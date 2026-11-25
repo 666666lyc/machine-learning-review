@@ -33,14 +33,19 @@
     <nav class="lesson-nav" aria-label="本课内容"><a href="#concepts">图解</a><a href="#example" data-study="standard">带做例题</a><a href="#practice" data-study="standard">动手练习</a><a href="#essential">必记</a><a href="#recall">易错点</a><a href="#original">原题 61–65</a></nav>
   </header>
   <section id="concepts" aria-labelledby="concepts-heading">
-    <h2 id="concepts-heading">先看现象，再写规则</h2>
+    <h2 id="concepts-heading">先懂概念，再看图</h2>
+    <div class="concept">
+      <h3>分组不是预测现成的标签</h3>
+      <p>顾客表里有消费记录，却没有「哪类顾客」的答案。<strong>聚类</strong>按相似性找组，每组也叫一个<strong>簇</strong>。K 是你事先指定的组数，means 指每组会用样本位置的平均值当中心。</p>
+      <p>图中的点是样本，它们不会移动。先让样本挑离自己最近的中心，再让中心搬到新成员的平均位置。观察这两步分别改了哪些东西。</p>
+    </div>
     <div class="demo" data-demo="clustering">
       <h3>分一次，再挪一次</h3>
       <p>两个中心先都放在左边。每按一次完成一种操作。观察第二次分配时有没有点换组，再换个初始位置重跑。</p>
       <p class="demo-caption">实心点是样本，空心点是中心，虚线连着样本和目前所属的中心。</p>
     </div>
     <div class="concept" data-study="standard"><h3>簇、中心与距离</h3><p>一组相似的样本叫一个<strong>簇</strong>，K 是想分出的簇数，μₖ 是第 k 组中心，c<sup>(i)</sup> 是第 i 条样本分到的组号。K-means 用特征空间中的距离来衡量相似。</p><p>二维点 (a,b) 与 (c,d) 的平方距离为 (a−c)²+(b−d)²。比较最近中心时可以省去开平方，排序不变。若各特征尺度相差大，先考虑缩放。</p></div>
-    <div class="concept" data-study="standard"><h3>两步反复做</h3><p>先<strong>分配</strong>，给每个样本选最近中心。再<strong>更新</strong>，对每个组内的样本逐个坐标求平均，作为新中心。下一轮样本可以换组。</p><p><span class="formula">J = (1/m) ∑<sub>i=1</sub><sup>m</sup> ‖x<sup>(i)</sup> − μ<sub>c(i)</sub>‖²</span>J 是每个样本到所属中心的平均平方距离，也叫失真。固定中心时选最近点不会让 J 增加，固定分组时用均值更新也不会让 J 增加。</p></div>
+    <div class="concept" data-study="standard"><h3>两步反复做</h3><p>先<strong>分配</strong>，给每个样本选最近中心。再<strong>更新</strong>，对每个组内的样本逐个坐标求平均，作为新中心。下一轮样本可以换组。</p><p><span class="formula">J = (1/m) ∑<sub>i=1</sub><sup>m</sup> ‖x<sup>(i)</sup> − μ<sub>c(i)</sub>‖²</span>m 是样本数，‖·‖² 表示距离的平方。J 把每个样本到自己组中心的平方距离取平均，也叫<strong>失真</strong>，可理解为用中心代表原样本时丢失了多少位置信息。固定中心时选最近点不会让 J 增加，固定分组时用均值更新也不会让 J 增加。</p></div>
     <div class="concept" data-study="standard"><h3>中心从哪里来</h3><p>常从数据中随机取 K 个不同样本作初始中心。初值会影响结果，固定 K 时可以多跑几次，选 J 最小的一次。</p><p>改变 K 时不能只选 J 最小的方案，因为 K 多了通常就更能贴近训练点。还要结合目标、组间差距和曲线趋势。对新闻做聚类前，需要先把文字变成可比较的数值特征。</p></div>
     <aside class="quick-reference" id="essential" aria-labelledby="essential-heading">
       <h3 id="essential-heading">必记</h3>
@@ -58,7 +63,7 @@
   </section>
   <details class="solution" data-study="standard" data-advanced>
     <summary>深入理解</summary>
-    <div><p>分配步骤逐点选距离最小的中心，更新步骤用均值最小化组内平方距离，两步都不会增加目标值。不同初值可能到达不同局部最优。固定 K 可比较多次初始化中的最小失真；选择 K 还需结合业务解释和聚类结构。</p></div>
+    <div><p>分配步骤逐点选距离最小的中心，更新步骤用均值最小化组内平方距离，两步都不会增加目标值。不同初始中心可能停在不同结果：当前两步已无法再改善，但换个起点可能找到更低的失真，这叫<strong>局部最优</strong>。固定 K 可比较多次初始化中的最小失真；选择 K 还需结合业务解释和聚类结构。</p></div>
   </details>
   <section id="original" data-study="standard" aria-labelledby="questions-heading">
     <h2 id="questions-heading">原题练习</h2>

@@ -33,21 +33,26 @@
     <nav class="lesson-nav" aria-label="本课内容"><a href="#concepts">图解</a><a href="#example" data-study="standard">带做例题</a><a href="#practice" data-study="standard">动手练习</a><a href="#essential">必记</a><a href="#recall">易错点</a><a href="#original">原题 56–60</a></nav>
   </header>
   <section id="concepts" aria-labelledby="concepts-heading">
-    <h2 id="concepts-heading">先看现象，再写规则</h2>
+    <h2 id="concepts-heading">先懂概念，再看图</h2>
+    <div class="concept">
+      <h3>把决策边界想成一条分隔线</h3>
+      <p><strong>支持向量机（SVM）</strong>是一种常用于分类的模型。两组点能用直线分开时，想象给分隔线两侧画一条对称的安全带；能画多宽，取决于离线最近的点。这里的<strong>间隔</strong>说的是这段几何距离，不是两个分数差了多少。</p>
+      <p>现实中两组点可能挤在一起。<strong>软间隔</strong>允许点进安全带甚至分错，用损失来做取舍。若分界线还需要弯曲，就可以先用<strong>核函数</strong>计算点之间的相似程度。</p>
+    </div>
     <div class="demo" data-demo="margin">
       <h3>哪条边界留出的空地最宽</h3>
       <p>把绿线左右移动，先找出最宽的绿色带，再加入越界点。看看能否通过小幅移动同时保持分类与间隔。</p>
       <p class="demo-caption">图中只比较竖直边界。原始数据里，带边上的最近点决定可留出的间隔。</p>
     </div>
     <div class="concept" data-study="standard"><h3>先看距离和支持向量</h3><p>原始图中左右最近点的横坐标为 −1 和 1。边界放在中点时，两边各留 1 个单位。达到最宽安全带时，贴着带边的样本是这组硬间隔演示中的支持向量。</p></div>
-    <div class="concept" data-study="standard"><h3>分类正确也可能需要付代价</h3><p>把得分归一到边界 z=0、间隔边 z=±1。真实正类若得分 0.4，分类虽对，间隔损失仍是 1−0.4=0.6。软间隔允许样本落入带内或分错，C 越大越重视减少这类损失。</p></div>
+    <div class="concept" data-study="standard"><h3>分类正确也可能需要付代价</h3><p>把得分归一到边界 z=0、间隔边 z=±1。真实正类若得分 0.4，分类虽对，间隔损失仍是 1−0.4=0.6。软间隔允许样本落入带内或分错，C 是「把这些违例算多重」的权重。C 越大，模型越重视减少违例，但不保证新样本一定分得更准。</p></div>
     <div class="demo" data-demo="kernel">
       <h3>核宽度会怎样改变边界</h3>
       <p>把 σ² 从 1 改到 0.25。猜红点更像还是更不像参考点，再看圆形边界往里还是往外移。</p>
       <p class="demo-caption">示意分类器把核相似度至少 0.5 的点判为正类，所以一颗参考点就能围出圆形边界。</p>
     </div>
-    <div class="concept" data-study="standard"><h3>一条直线分不开时，用相似度</h3><p>高斯核衡量样本离参考点有多近，同一点的相似度为 1。σ² 小时相似度下降较快。使用多个参考点的核相似度，分类边界可以弯曲；用距离前应注意特征尺度。</p></div>
-    <div class="concept" data-study="standard"><h3>诊断欠拟合，或扩展到多类</h3><p>高斯核 SVM 欠拟合时，可在验证集试更大的 C 或更小的 σ²。K 个类别做一对其余，需要训练 K 个分类器。</p></div>
+    <div class="concept" data-study="standard"><h3>一条直线分不开时，用相似度</h3><p>高斯核衡量样本离参考点有多近，同一点的相似度为 1。σ²（sigma 的平方）控制「多远才算不相似」。σ² 越小，相似度随距离下降越快，参考点影响的范围也越窄。使用多个参考点的核相似度，分类边界可以弯曲；用距离前应注意特征尺度。</p></div>
+    <div class="concept" data-study="standard"><h3>诊断欠拟合，或扩展到多类</h3><p>高斯核 SVM 欠拟合时，可在验证集试更大的 C 或更小的 σ²。<strong>一对其余</strong>是把每一类轮流当正类，把其他类合起来当负类。例如分猫、狗、鸟时，分别训练「猫或非猫」「狗或非狗」「鸟或非鸟」三个分类器。</p></div>
     <aside class="quick-reference" id="essential" aria-labelledby="essential-heading">
       <h3 id="essential-heading">必记</h3>
       <p class="formula">边界由 z=0 决定。正类间隔损失 max(0, 1−z)，负类 max(0, 1+z)。高斯核 K = exp(−距离平方/(2σ²))。</p>
@@ -64,7 +69,7 @@
   </section>
   <details class="solution" data-study="standard" data-advanced>
     <summary>深入理解</summary>
-    <div><p>在规范化约束下，z=±1 两条平行线之间的几何宽度为 2/‖w‖。硬间隔最大化这段宽度。软间隔允许违反约束，通过 C 权衡违规损失与参数惩罚。核方法可把分类得分写成若干个核相似度的加权和加上偏置。</p></div>
+    <div><p>把得分的尺度定到带边为 z=±1 后，两条平行带边之间的几何宽度为 2/‖w‖。此处 w 是各特征的线性权重，‖w‖ 是这串权重组成的向量长度。硬间隔最大化这段宽度。软间隔允许违反约束，通过 C 权衡违规损失与参数惩罚。核方法可把分类得分写成若干个核相似度的加权和加上偏置。</p></div>
   </details>
   <section id="original" data-study="standard" aria-labelledby="questions-heading">
     <h2 id="questions-heading">原题练习</h2>

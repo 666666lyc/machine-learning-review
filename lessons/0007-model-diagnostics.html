@@ -33,14 +33,19 @@
     <nav class="lesson-nav" aria-label="本课内容"><a href="#concepts">图解</a><a href="#example" data-study="standard">带做例题</a><a href="#practice" data-study="standard">动手练习</a><a href="#essential">必记</a><a href="#recall">易错点</a><a href="#original">原题 46–50</a></nav>
   </header>
   <section id="concepts" aria-labelledby="concepts-heading">
-    <h2 id="concepts-heading">先看现象，再写规则</h2>
+    <h2 id="concepts-heading">先懂概念，再看图</h2>
+    <div class="concept">
+      <h3>先弄清两条线各代表什么</h3>
+      <p><strong>训练误差</strong>是在参与训练的例子上算的；<strong>验证误差</strong>是在独立留出的例子上算的。<strong>基准</strong>是一条用来比较的水平线，图中用 5% 示意，不是任何任务都该达到 5%。</p>
+      <p><strong>学习曲线</strong>在这一课的横轴是训练样本数，不是训练轮次。每次用另一种样本规模重新训练，再对照两种误差。先看两条线离基准有多远，再看两条线彼此差多少。</p>
+    </div>
     <div class="demo" data-demo="diagnostics">
       <h3>多给一点数据，误差会怎样</h3>
       <p>分别把三条示意学习曲线拖到样本最多处。先比验证误差和训练误差的差距，再比它们与 5% 基准的距离。</p>
       <p class="demo-caption">曲线一右端仍有明显差距，曲线二的两条线都高，曲线三的两条线都接近低误差基准。</p>
     </div>
-    <div class="concept" data-study="standard"><h3>训练、验证、测试各有用途</h3><p><strong>训练集</strong>用来学系数。<strong>验证集</strong>用来选模型、特征或 λ。<strong>测试集</strong>留到方案确定后，用于估计最终表现。题目常把验证集叫交叉验证集。</p><p>比较模型时应使用同一误差定义和有代表性的数据。如果训练和验证来自不同环境，误差差距也可能由数据分布不同造成。</p></div>
-    <div class="concept" data-study="standard"><h3>学习曲线怎么读</h3><p>横轴放训练样本数，纵轴放误差。每个点都用该规模的数据重新训练，然后分别算训练误差和验证误差。先看样本数较大的右侧，再比较两条曲线。</p><p>训练误差与验证误差都高而且接近，通常是<strong>高偏差</strong>，说明模型没有学到主要规律。训练误差低，验证误差高、差距持续，通常是<strong>高方差</strong>，说明模型过度适应了训练样本。</p></div>
+    <div class="concept" data-study="standard"><h3>训练、验证、测试各有用途</h3><p><strong>训练集</strong>用来学系数。<strong>验证集</strong>用来选模型、特征或 λ。<strong>测试集</strong>留到方案确定后，用于估计最终表现。原题里的「交叉验证集」指留出的验证数据。实际项目里也常做 <strong>K 折交叉验证</strong>：把数据分 K 份，每次轮流留一份作验证，再汇总多次结果。</p><p>比较模型时应使用同一误差定义和有代表性的数据。如果训练和验证来自不同环境，误差差距也可能来自数据分布不同。比如训练照片多在白天拍摄，验证照片却多在夜里，它们代表的场景本来就不同。</p></div>
+    <div class="concept" data-study="standard"><h3>学习曲线怎么读</h3><p>横轴放训练样本数，纵轴放误差。每个点都用该规模的数据重新训练，然后分别算训练误差和验证误差。先看样本数较大的右侧，再比较两条曲线。</p><p>训练误差与验证误差都高而且接近，常提示<strong>高偏差</strong>：模型太简单或约束太强，连训练数据里的主要规律也没学好。训练误差低，验证误差高、差距持续，常提示<strong>高方差</strong>：模型对这批训练数据过于敏感，学到了不易在新数据中重复的细节。</p></div>
     <div class="concept" data-study="standard"><h3>按诊断挑下一步</h3><p>高偏差优先尝试有信息的新特征、更有表达力的模型或较弱的正则化。高方差可以尝试更多有代表性的训练样本、简化特征或较强的正则化。</p><p>训练和验证误差接近也可能都很低。判断「高」要结合任务目标或可达到的基准，不能只看有没有差距。</p></div>
     <aside class="quick-reference" id="essential" aria-labelledby="essential-heading">
       <h3 id="essential-heading">必记</h3>

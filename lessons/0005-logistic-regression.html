@@ -33,20 +33,25 @@
     <nav class="lesson-nav" aria-label="本课内容"><a href="#concepts">图解</a><a href="#example" data-study="standard">带做例题</a><a href="#practice" data-study="standard">动手练习</a><a href="#essential">必记</a><a href="#recall">易错点</a><a href="#original">原题 26–30</a></nav>
   </header>
   <section id="concepts" aria-labelledby="concepts-heading">
-    <h2 id="concepts-heading">先看现象，再写规则</h2>
+    <h2 id="concepts-heading">先懂概念，再看图</h2>
+    <div class="concept">
+      <h3>先区分三个数字</h3>
+      <p>模型先算一个<strong>得分</strong>，它可能为负，也可能大于 1。<strong>Sigmoid</strong>（S 形函数）把它转成 0 到 1 之间的数，用来估计目标类别的概率。我们要找的类别称为<strong>正类</strong>（例如垃圾邮件，记为 1）；另一类记为 0。</p>
+      <p><strong>阈值</strong>是下判断用的门槛：概率达到它才判正类。提高门槛可以改判结果，却不改变同一封邮件原本的概率。恰好卡在门槛的输入位置组成<strong>决策边界</strong>。</p>
+    </div>
     <div class="demo" data-demo="sigmoid">
       <h3>得分、概率和分类边界</h3>
       <p>先把输入调到 2，再只动阈值，观察同一个点的概率和预测类别各自怎么变。</p>
       <p class="demo-caption">蓝线给概率，红色虚线标出阈值和决策边界，绿点是当前样本。</p>
     </div>
     <div class="concept" data-study="standard"><h3>先得分，再转成概率</h3><p>先用加权和得到得分 z=θᵀx。θ 是模型系数，x 是特征向量，约定包含截距所需的常数 1。再用 Sigmoid 函数把得分映射到 0 到 1 之间。</p><p><span class="formula">h<sub>θ</sub>(x) = g(z) = 1/(1+e<sup>−z</sup>)</span>e 是自然指数函数的底数，约为 2.718。z=0 时 h=0.5，z 越大概率越高。若 h=0.8，模型给正类的估计概率是 0.8，负类是 0.2。</p></div>
-    <div class="concept" data-study="standard"><h3>阈值和决策边界</h3><p>阈值是做出分类的分界值。以 0.5 为例，h≥0.5 判正类，h&lt;0.5 判负类。Sigmoid 一直递增，h=0.5 对应 z=0，所以解 θᵀx=0 就能画出边界。</p><p>只有 x₁、x₂ 的一次项时，边界通常是直线。加上平方项或交叉项，可得到弯曲边界。阈值改成其他数值时，应从 h 等于新阈值出发。</p></div>
+    <div class="concept" data-study="standard"><h3>阈值和决策边界</h3><p>阈值是做出分类的分界值。以 0.5 为例，h≥0.5 判正类，h&lt;0.5 判负类。Sigmoid 一直递增，h=0.5 对应 z=0，所以解 θᵀx=0 就能画出边界。</p><p>只有 x₁、x₂ 的一次项时，边界通常是直线。加入平方项（如 x₁²）或交叉项（如 x₁x₂，即两个特征的乘积）后，原输入平面上的边界可以弯曲。阈值改成其他数值时，应从 h 等于新阈值出发。</p></div>
     <div class="demo" data-demo="losses">
       <h3>一次猜错，两种惩罚</h3>
       <p>实际标签为正。把得分从 −6 往右拖，比较模型极其自信地猜错时两条曲线的高度和坡度。</p>
       <p class="demo-caption">两种损失都使用前一个图解里的 Sigmoid 概率。</p>
     </div>
-    <div class="concept" data-study="standard"><h3>预测错得有多离谱</h3><p>逻辑回归常用<strong>交叉熵损失</strong>。真实 y=1 时损失是 −ln(h)；真实 y=0 时是 −ln(1−h)。ln 是自然对数。模型分给真实类别的概率越小，惩罚越大，单个损失非负。 在图中对比两种损失。对真实正类，概率很接近 0 时，平方误差接近 1 且曲线很平，交叉熵仍快速增大。</p><p><span class="formula">θⱼ ← θⱼ − (α/m) ∑<sub>i=1</sub><sup>m</sup> (h<sub>θ</sub>(x<sup>(i)</sup>)−y<sup>(i)</sup>) xⱼ<sup>(i)</sup></span>α 是学习率，m 是样本数，xⱼ<sup>(i)</sup> 是第 i 条样本的第 j 个特征。用旧系数算完所有更新，再一起替换。相比线性回归，关键区别在于预测值 h 含 Sigmoid。</p></div>
+    <div class="concept" data-study="standard"><h3>预测错得有多离谱</h3><p>逻辑回归常用<strong>交叉熵损失</strong>。它只问「模型给真实类别分了多大概率」，再取这个概率的负对数。真实 y=1 时用 −ln(h)；真实 y=0 时用 −ln(1−h)。ln 是以 e 为底的对数；例如 ln(1)=0，真实类别概率越接近 0，负对数就越大。模型分给真实类别的概率越小，惩罚越大，单个损失非负。 在图中对比两种损失。对真实正类，概率很接近 0 时，平方误差接近 1 且曲线很平，交叉熵仍快速增大。</p><p><span class="formula">θⱼ ← θⱼ − (α/m) ∑<sub>i=1</sub><sup>m</sup> (h<sub>θ</sub>(x<sup>(i)</sup>)−y<sup>(i)</sup>) xⱼ<sup>(i)</sup></span>α 是学习率，m 是样本数，xⱼ<sup>(i)</sup> 是第 i 条样本的第 j 个特征。用旧系数算完所有更新，再一起替换。相比线性回归，关键区别在于预测值 h 含 Sigmoid。</p></div>
     <aside class="quick-reference" id="essential" aria-labelledby="essential-heading">
       <h3 id="essential-heading">必记</h3>
       <p class="formula">线性得分 z = θᵀx，正类概率 h = 1/(1 + e<sup>−z</sup>)。判正类用 h ≥ 阈值。阈值 0.5 对应边界 z = 0。</p>
@@ -63,7 +68,7 @@
   </section>
   <details class="solution" data-study="standard" data-advanced>
     <summary>深入理解</summary>
-    <div><p>对单样本，交叉熵关于得分 z 的导数为 h−y，二阶导数为 h(1−h)≥0。由于 z 对参数是线性的，训练目标是凸的；若数据完全线性可分且无正则化，损失可趋向 0 而不存在有限的最优参数。<br>平方误差接在 Sigmoid 后时，导数多乘 h(1−h)，极其自信地猜错时更新信号很弱，关于 z 的损失也不保证凸。</p></div>
+    <div><p>对单样本，交叉熵关于得分 z 的导数为 h−y，二阶导数为 h(1−h)≥0。由于 z 是参数的加权和，训练目标是<strong>凸的</strong>，可以理解为目标没有相互隔开的局部低谷。如果一条边界就能把所有训练点完全分开（线性可分），且目标不惩罚过大的参数，把得分继续放大可能让损失不断接近 0，却没有有限的参数能达到 0。<br>平方误差接在 Sigmoid 后时，导数多乘 h(1−h)，极其自信地猜错时更新信号很弱，关于 z 的损失也不保证凸。</p></div>
   </details>
   <section id="original" data-study="standard" aria-labelledby="questions-heading">
     <h2 id="questions-heading">原题练习</h2>

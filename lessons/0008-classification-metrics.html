@@ -33,14 +33,19 @@
     <nav class="lesson-nav" aria-label="本课内容"><a href="#concepts">图解</a><a href="#example" data-study="standard">带做例题</a><a href="#practice" data-study="standard">动手练习</a><a href="#essential">必记</a><a href="#recall">易错点</a><a href="#original">原题 51–55</a></nav>
   </header>
   <section id="concepts" aria-labelledby="concepts-heading">
-    <h2 id="concepts-heading">先看现象，再写规则</h2>
+    <h2 id="concepts-heading">先懂概念，再看图</h2>
+    <div class="concept">
+      <h3>把两种猜错分开数</h3>
+      <p>我们想拦截垃圾邮件，就把「垃圾」定为<strong>正类</strong>。「正常」是负类。把正常邮件错拦了叫<strong>误报</strong>；放过垃圾邮件叫<strong>漏报</strong>。</p>
+      <p><strong>召回率</strong>问的是：所有真实垃圾邮件中拦住了多少？<strong>精确率</strong>问的是：所有被拦的邮件中有多少真是垃圾邮件？先确定分母是谁，再看结果。</p>
+    </div>
     <div class="demo" data-demo="metrics">
       <h3>移动阈值，重数四种结果</h3>
       <p>从 0.50 拖到 0.85，找出哪些实心点变成空心点。先猜召回率会往哪个方向变，再看表格验证。</p>
       <p class="demo-caption">实心表示预测为正，空心表示预测为负。上排是真实的垃圾邮件。</p>
     </div>
-    <div class="concept" data-study="standard"><h3>先规定谁是正类</h3><p>正类就是当前要找的类别，例如垃圾邮件。把实际类别与预测类别交叉记录，就得到<strong>混淆矩阵</strong>。TP（真阳性）是找对的正类，FP（假阳性）是误报，FN（假阴性）是漏报，TN（真阴性）是判对的负类。读图先看轴或行列标题。</p></div>
-    <div class="concept" data-study="standard"><h3>同一张表回答四个不同的问题</h3><p><strong>准确率</strong> Accuracy = (TP+TN)/(TP+FP+FN+TN)，问「全部猜对多少」。<strong>精确率</strong> Precision = TP/(TP+FP)，问「我说是正类的里面，有多少真的是」。</p><p><strong>召回率</strong> Recall = TP/(TP+FN)，问「所有真实正类里面，我找到了多少」。<strong>F1</strong> = 2PR/(P+R)，P 和 R 分别是精确率和召回率，只有两者都高时 F1 才高。分母为 0 时要说明所用的约定，例如一个正类都没预测时，精确率按定义未定义。</p></div>
+    <div class="concept" data-study="standard"><h3>先规定谁是正类</h3><p>正类就是当前要找的类别，例如垃圾邮件。把「实际是／不是垃圾」和「模型拦／不拦」组合成四格，逐格计数，就得到<strong>混淆矩阵</strong>。TP（真阳性）是找对的正类，FP（假阳性）是误报，FN（假阴性）是漏报，TN（真阴性）是判对的负类。读图先看轴或行列标题。</p></div>
+    <div class="concept" data-study="standard"><h3>同一张表回答四个不同的问题</h3><p><strong>准确率</strong> Accuracy = (TP+TN)/(TP+FP+FN+TN)，问「全部猜对多少」。<strong>精确率</strong> Precision = TP/(TP+FP)，问「我说是正类的里面，有多少真的是」。</p><p><strong>召回率</strong> Recall = TP/(TP+FN)，问「所有真实正类里面，我找到了多少」。<strong>F1</strong> = 2PR/(P+R)，P 和 R 分别是精确率和召回率。F1 是两者的<strong>调和平均</strong>，会被较低的一项明显拉低。比如 P=1、R=0.5 时，F1 约为 0.67，比普通平均 0.75 低。分母为 0 时要说明所用的约定，例如一个正类都没预测时，精确率按定义未定义。</p></div>
     <div class="concept" data-study="standard"><h3>阈值改变了哪些样本</h3><p>固定数据和分数时，提高阈值会从预测正类中删去一些样本。TP 不会变多，实际正类数不变，所以召回率只能下降或持平。降低阈值的情况相反。</p><p>精确率的分子和分母都可能变化，要看新增或移除的样本里有多少是真正类。数据量再大也要先看特征能否预测目标，以及模型是否能表达相关规律。</p></div>
     <aside class="quick-reference" id="essential" aria-labelledby="essential-heading">
       <h3 id="essential-heading">必记</h3>

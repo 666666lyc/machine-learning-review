@@ -33,15 +33,20 @@
     <nav class="lesson-nav" aria-label="本课内容"><a href="#concepts">图解</a><a href="#example" data-study="standard">带做例题</a><a href="#practice" data-study="standard">动手练习</a><a href="#essential">必记</a><a href="#recall">易错点</a><a href="#original">原题 31–35</a></nav>
   </header>
   <section id="concepts" aria-labelledby="concepts-heading">
-    <h2 id="concepts-heading">先看现象，再写规则</h2>
+    <h2 id="concepts-heading">先懂概念，再看图</h2>
+    <div class="concept">
+      <h3>贴合旧数据，不等于会预测</h3>
+      <p><strong>拟合</strong>就是调整模型来贴近观察数据。用来调参数的是<strong>训练集</strong>；另留一批不参与这一步的数据叫<strong>验证集</strong>，可用来比较模型。<strong>噪声</strong>是测量误差、临时变化等不容易在新样本上重复的波动。</p>
+      <p><strong>过拟合</strong>像背下练习题连同题目里的偶然细节，换题就不会。<strong>正则化</strong>在训练目标里加一笔「惩罚」，本课用 λ 表示这笔惩罚的强弱。先猜加大 λ 后哪组点会预测得更准，再看图。</p>
+    </div>
     <div class="demo" data-demo="regularization">
       <h3>同一组训练点，改变惩罚</h3>
       <p>蓝色实心点用于拟合，红色空心点用于验证。把惩罚由 0 慢慢加大，找验证误差最低的设置，再试最大一档。</p>
-      <p class="demo-caption">λ 太小，曲线会追逐训练点波动。λ 太大，曲线可能错过主要趋势。</p>
+      <p class="demo-caption">λ 太小，曲线容易追逐训练点的偶然波动。λ 太大，曲线可能错过主要趋势。</p>
     </div>
     <div class="concept" data-study="standard"><h3>拟合是贴近数据的程度</h3><p><strong>欠拟合</strong>是模型连已有数据的主要趋势都表达不出来，例如用水平线描述持续上涨的价格。<strong>过拟合</strong>是模型太贴合训练数据里偶然的波动，新数据换一批就容易出错。</p><p>给模型增加平方项等特征，往往能提高表达能力。模型也有机会把噪声拟合进去。判断新数据表现需要验证集。</p></div>
-    <div class="concept" data-study="standard"><h3>给过大的系数加上惩罚</h3><p><span class="formula">总训练目标 = 原训练损失 + [λ/(2m)] ∑<sub>j=1</sub><sup>n</sup> θⱼ²</span>这是 L2 正则化的一种写法。λ（lambda）控制惩罚强度，m 是样本数，θⱼ 是第 j 个特征的系数。求和从 j=1 开始，常见约定下截距 θ₀ 不参加。</p><p>λ=0 时没有惩罚。λ 增大时，被惩罚的系数总体更受约束。过大的 λ 可能让模型连主要趋势也拟合不上。训练损失可能略变差，而新数据误差可能变小，两者应分别评估。</p></div>
-    <div class="concept" data-study="standard"><h3>看图时先找整体趋势</h3><p>先看红点大体往哪走。蓝线漏掉成片的趋势，可能欠拟合；蓝线为了穿过个别点反复弯折，可能过拟合。个别点离曲线远时，也可能只是离群点。用验证集确认图上的判断。</p></div>
+    <div class="concept" data-study="standard"><h3>给过大的系数加上惩罚</h3><p><span class="formula">总训练目标 = 原训练损失 + [λ/(2m)] ∑<sub>j=1</sub><sup>n</sup> θⱼ²</span>把被惩罚系数逐个平方再相加，就是这里的 <strong>L2 正则化</strong>。系数从 1 变成 2，平方惩罚会变成 4 倍。λ（lambda）控制惩罚强度，m 是样本数，θⱼ 是第 j 个特征的系数。求和从 j=1 开始，常见约定下截距 θ₀ 不参加。</p><p>λ=0 时没有惩罚。λ 增大时，被惩罚的系数总体更受约束。过大的 λ 可能让模型连主要趋势也拟合不上。训练损失可能略变差，而新数据误差可能变小，两者应分别评估。</p></div>
+    <div class="concept" data-study="standard"><h3>看图时先找整体趋势</h3><p>先看红点大体往哪走。绿色预测线没跟上整体趋势，可能欠拟合；它为了穿过个别训练点反复弯折，可能过拟合。个别点偏得很远也可能只是<strong>离群点</strong>，即明显偏离多数数据的记录，不能单凭它判断模型好坏。用验证集确认图上的判断。</p></div>
     <aside class="quick-reference" id="essential" aria-labelledby="essential-heading">
       <h3 id="essential-heading">必记</h3>
       <p class="formula">L2 目标 = 训练损失 + [λ/(2m)] Σθⱼ²。题库的常见约定从 j=1 求和，截距不参与惩罚。</p>
@@ -58,7 +63,7 @@
   </section>
   <details class="solution" data-study="standard" data-advanced>
     <summary>深入理解</summary>
-    <div><p>L2 惩罚对受罚参数增加与参数值成比例的梯度，越大的系数越受约束。演示用均方误差加 λΣwⱼ² 训练同一个 7 次多项式，系数越可比较，惩罚越容易解释。用同一验证集比较候选 λ，再用留出的测试集做最终评估。</p></div>
+    <div><p>L2 惩罚对受罚参数增加与参数值成比例的梯度，越大的系数越受约束。演示用均方误差加 λΣwⱼ² 来训练，公式的常数约定与教材写法不同，但 λ 越大、约束越强的含义不变。模型最高用到 x⁷。因为改变特征单位会改变所需系数大小，训练前通常先把特征缩放到可比较的尺度。用同一验证集比较候选 λ，再用留出的测试集做最终评估。</p></div>
   </details>
   <section id="original" data-study="standard" aria-labelledby="questions-heading">
     <h2 id="questions-heading">原题练习</h2>
@@ -80,7 +85,7 @@
     </form>
     <details class="solution">
       <summary>查看答案与解析</summary>
-      <div><p class="solution-key"><strong>答案</strong> D</p><p>按题目沿用的无正则化训练目标解释，令新增特征的系数为 0 就能复现旧模型，因此最优训练损失不会变大。A 的惩罚可能牺牲训练拟合；B 的新增特征可能提高方差；C 的新样本效果需用验证集检查。</p><p class="source-note"><strong>题册勘误</strong> D 的“总是”适用于同一训练目标下的最优训练损失。它不保证分类准确率或实际优化过程的结果。</p></div>
+      <div><p class="solution-key"><strong>答案</strong> D</p><p>按题目沿用的无正则化训练目标解释，令新增特征的系数为 0 就能复现旧模型，因此最优训练损失不会变大。A 的惩罚可能牺牲训练拟合；B 的新增特征可能让模型更依赖这一批训练样本，换一批训练数据时结果变化更大（高方差）；C 的新样本效果需用验证集检查。</p><p class="source-note"><strong>题册勘误</strong> D 的“总是”适用于同一训练目标下的最优训练损失。它不保证分类准确率或实际优化过程的结果。</p></div>
     </details>
   </article>
   <article class="question" id="q32" data-original-question="32">

@@ -33,14 +33,19 @@
     <nav class="lesson-nav" aria-label="本课内容"><a href="#concepts">图解</a><a href="#example" data-study="standard">带做例题</a><a href="#practice" data-study="standard">动手练习</a><a href="#essential">必记</a><a href="#recall">易错点</a><a href="#original">原题 66–70</a></nav>
   </header>
   <section id="concepts" aria-labelledby="concepts-heading">
-    <h2 id="concepts-heading">先看现象，再写规则</h2>
+    <h2 id="concepts-heading">先懂概念，再看图</h2>
+    <div class="concept">
+      <h3>先想象一张长条形的点云</h3>
+      <p>如果测到很多人的身高和臂展，两列数常常一起增大。与其记住每个点原来的两个坐标，也可以沿着点云伸展最明显的方向记一个坐标。这种用更少坐标表示数据的做法叫<strong>降维</strong>。</p>
+      <p><strong>主成分分析（PCA）</strong>把点投到一条或几条轴上。<strong>投影</strong>像把点垂直落到轴上；<strong>重建</strong>是用保留下来的坐标估回点的位置。图里的虚线显示重建时丢掉了哪一段。</p>
+    </div>
     <div class="demo" data-demo="pca">
       <h3>旋转轴，比较被保留的变化</h3>
       <p>先比较 0° 和 90°，再试 45° 和 135°。预测哪里红线最短，然后看平均重建误差。</p>
       <p class="demo-caption">蓝点是原位置，空心绿点是近似重建的位置，红色虚线是丢掉的那段距离。</p>
     </div>
-    <div class="concept" data-study="standard"><h3>从中心看哪里伸展最远</h3><p>主成分分析（PCA）先给每一列减去均值，这一步叫<strong>中心化</strong>。<strong>方差</strong>度量数值围绕均值散开的程度。PCA 寻找投影后数据最分散的单位方向，叫第一主成分。方向反过来只会使坐标变号。</p><p>投影可以想成把点垂直落到一条轴上。原来记录两个坐标，现在用沿这条轴的一个坐标表示。第二个主成分与第一个垂直，并尽量解释剩余变化。特征量纲差异很大时，再考虑按列缩放。</p></div>
-    <div class="concept" data-study="standard"><h3>投影和近似重建</h3><p>把保留的 k 个单位方向排成矩阵 U<sub>reduce</sub>，每列是一个方向。设 x 已减均值，z = U<sub>reduce</sub>ᵀx 是压缩后的坐标，x<sub>approx</sub> = U<sub>reduce</sub>z 是在原空间的近似点。</p><p>重建到原始坐标时，还需把之前减掉的均值加回去。如果舍弃了一些方向，就可能丢失细节。若保留 n 个方向，维度仍是 n。</p></div>
+    <div class="concept" data-study="standard"><h3>从中心看哪里伸展最远</h3><p>主成分分析（PCA）先给每一列减去均值，这一步叫<strong>中心化</strong>。<strong>方差</strong>度量数值围绕均值散开的程度。PCA 寻找投影后数据最分散的单位方向，叫第一主成分。方向反过来只会使坐标变号。</p><p>投影可以想成把点垂直落到一条轴上。原来记录两个坐标，现在用沿这条轴的一个坐标表示。第二个主成分与第一个垂直，并尽量解释剩余变化。如果一列用厘米、另一列用千克，原始单位和数值范围可能左右哪一列看起来更「分散」。此时可以先按列缩放，再做 PCA。</p></div>
+    <div class="concept" data-study="standard"><h3>投影和近似重建</h3><p><strong>单位方向</strong>指长度为 1 的向量，只表达朝哪边，不额外放大长度。把保留的 k 个单位方向排成矩阵 U<sub>reduce</sub>，每列是一个方向。设 x 已减均值，z = U<sub>reduce</sub>ᵀx 是压缩后的坐标，x<sub>approx</sub> = U<sub>reduce</sub>z 是在原空间的近似点。</p><p>重建到原始坐标时，还需把之前减掉的均值加回去。如果舍弃了一些方向，就可能丢失细节。若保留 n 个方向，维度仍是 n。</p></div>
     <div class="concept" data-study="standard"><h3>选择要保留多少方差</h3><p><span class="formula">方差保留比例 = 1 − (重建残差平方和 / 中心化数据平方和)</span>比较时要用中心化的数据。比如要求保留至少 95%，就让右边的丢失比例至多 5%，然后选满足条件的最小 k。</p><p>PCA 可用于压缩、把高维数据投影到二维画图，或减少后续模型的输入数。它的目标是保留输入变化，没有用到实际标签 y，后续任务表现还要验证。</p></div>
     <aside class="quick-reference" id="essential" aria-labelledby="essential-heading">
       <h3 id="essential-heading">必记</h3>
@@ -58,7 +63,7 @@
   </section>
   <details class="solution" data-study="standard" data-advanced>
     <summary>深入理解</summary>
-    <div><p>把中心化样本写成矩阵 X，每行一个样本。投影方差可写为 uᵀ(XᵀX/m)u。将 u 限制为单位向量后，这个量在最大特征值对应的特征向量上最大。对于多条主轴，也可以对中心化矩阵做 SVD 并取最大的右奇异方向。沿主轴的正负号都可用。</p></div>
+    <div><p>把中心化样本写成矩阵 X，每行一个样本。投影方差可写为 uᵀ(XᵀX/m)u。XᵀX/m 称为协方差矩阵：对角线记录每列有多分散，其他位置记录两列如何一起变化。它的特征向量是经矩阵作用后方向不变的轴；特征值衡量对应轴的投影方差。取最大的几个即可，也可用奇异值分解（SVD）求这些方向。沿主轴的正负号都可用。</p></div>
   </details>
   <section id="original" data-study="standard" aria-labelledby="questions-heading">
     <h2 id="questions-heading">原题练习</h2>

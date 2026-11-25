@@ -33,14 +33,19 @@
     <nav class="lesson-nav" aria-label="本课内容"><a href="#concepts">图解</a><a href="#example" data-study="standard">带做例题</a><a href="#practice" data-study="standard">动手练习</a><a href="#essential">必记</a><a href="#recall">易错点</a><a href="#original">原题 76–80</a></nav>
   </header>
   <section id="concepts" aria-labelledby="concepts-heading">
-    <h2 id="concepts-heading">先看现象，再写规则</h2>
+    <h2 id="concepts-heading">先懂概念，再看图</h2>
+    <div class="concept">
+      <h3>空着的一格不是零分</h3>
+      <p>把电影排成行、用户排成列。没有评分可能只是没看过；系统会先记一张<strong>掩码</strong>表，标清哪些格有真实分数。它只用有分数的格子来纠正自己的预测。</p>
+      <p><strong>协同过滤</strong>是用许多用户给物品的评分，反推出用户偏好和物品特点。例如一部动作片的动作风格得分更高，而喜欢动作片的人也在这个方向上权重更高。图中的空格始终是预测，不会变成真实评分。</p>
+    </div>
     <div class="demo" data-demo="recommendation">
       <h3>看着一个空格被逐步估计</h3>
       <p>先猜用户 B 给电影 3 的分数可能偏高还是偏低。点几轮更新，比较已评分误差和空格预测的变化。</p>
       <p class="demo-caption">高亮格的数字始终是预测。更新只使用其他 5 个已评分格。</p>
     </div>
     <div class="concept" data-study="standard"><h3>把评分排成一张表</h3><p>行是物品 i，列是用户 j。y<sup>(i,j)</sup> 是实际评分，r(i,j)=1 表示这一格有评分，r(i,j)=0 表示没观察到。r 这张只含 0 和 1 的表叫<strong>掩码</strong>，用来指定哪些格参与计算。</p></div>
-    <div class="concept" data-study="standard"><h3>用用户和物品的向量预测</h3><p>给物品 i 一个向量 x<sup>(i)</sup>，给用户 j 一个向量 θ<sup>(j)</sup>。每个向量可以理解为几种偏好方向上的数值。预测评分是内积 (θ<sup>(j)</sup>)ᵀx<sup>(i)</sup>。内容推荐可事先给物品选特征；协同过滤可以从各用户的共同评分中同时学出两组向量。</p><p>评分误差只在 r=1 的格子里计算。先把每格的预测减去实际评分，再平方，最后对已评分格子求平均。若训练目标另有正则化，它会惩罚过大的向量。两组向量同时从全零出发会使梯度为零，需要其他初始化。</p></div>
+    <div class="concept" data-study="standard"><h3>用用户和物品的向量预测</h3><p>给物品 i 一个向量 x<sup>(i)</sup>，给用户 j 一个向量 θ<sup>(j)</sup>。每个向量可以理解为几种偏好方向上的数值。预测评分是内积 (θ<sup>(j)</sup>)ᵀx<sup>(i)</sup>。内容推荐可事先给物品选特征；协同过滤可以从各用户的共同评分中同时学出两组向量。</p><p>评分误差只在 r=1 的格子里计算。先把每格的预测减去实际评分，再平方，最后对已评分格子求平均。若训练目标另有正则化，它会惩罚过大的向量。<strong>初始化</strong>就是训练前给参数挑起点。若两组向量同时从全零开始，用来更新用户向量的物品值和用来更新物品向量的用户值都是 0，梯度也就都是 0。可换用小的随机数起步。</p></div>
     <div class="concept" data-study="standard"><h3>处理不同量表与代码掩码</h3><p>1–5 星和 1–10 分应分别换到共同尺度，例如转成 0–1。「最低分」映成 0，「最高分」映成 1。再对齐用户和物品，未打分的格子可以空着。</p><p>在题库的 MATLAB / Octave 写法中，A*B 是矩阵乘法，C.*R 是对应位置相乘。R 为 0 的格子被抹掉，R 为 1 的原值保留。也可以用 C(R==1) 直接选出要加的格子。</p></div>
     <aside class="quick-reference" id="essential" aria-labelledby="essential-heading">
       <h3 id="essential-heading">必记</h3>
@@ -58,7 +63,7 @@
   </section>
   <details class="solution" data-study="standard" data-advanced>
     <summary>深入理解</summary>
-    <div><p>每个已评分格的误差 e 同时为两组参数提供梯度。对物品向量的贡献为 e·用户向量，对用户向量的贡献为 e·物品向量。使用同一轮旧参数计算两个梯度。所有参数同时置零会使两组梯度都是零。用户或物品完全没有评分时，还需要内容特征、基准评分或其他冷启动信息。</p></div>
+    <div><p>每个已评分格的误差 e 同时为两组参数提供梯度。对物品向量的贡献为 e·用户向量，对用户向量的贡献为 e·物品向量。使用同一轮旧参数计算两个梯度。所有参数同时置零会使两组梯度都是零。用户或物品完全没有评分时，还需要内容特征、基准评分或其他<strong>冷启动</strong>信息，即还没有历史评分时可用的线索，比如新电影的类型。</p></div>
   </details>
   <section id="original" data-study="standard" aria-labelledby="questions-heading">
     <h2 id="questions-heading">原题练习</h2>

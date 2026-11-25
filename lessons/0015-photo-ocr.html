@@ -33,20 +33,25 @@
     <nav class="lesson-nav" aria-label="本课内容"><a href="#concepts">图解</a><a href="#example" data-study="standard">带做例题</a><a href="#practice" data-study="standard">动手练习</a><a href="#essential">必记</a><a href="#recall">易错点</a><a href="#original">原题 86–90</a></nav>
   </header>
   <section id="concepts" aria-labelledby="concepts-heading">
-    <h2 id="concepts-heading">先看现象，再写规则</h2>
+    <h2 id="concepts-heading">先懂概念，再看图</h2>
+    <div class="concept">
+      <h3>先看清系统的一整条链</h3>
+      <p><strong>光学字符识别（OCR）</strong>就是从图片里读出文字。课里示意把它拆成找文本区域、切分字符、识别字符三步。前一步的结果交给后一步，这种串法叫<strong>流水线</strong>。</p>
+      <p><strong>端到端准确率</strong>是从原图输入到最终识别结果的整体表现，不是某一步自己的分数。<strong>上限分析</strong>是暂时给某一步正确答案，看整体分数能涨多少，从而决定先查哪一步。</p>
+    </div>
     <div class="demo" data-demo="windows">
       <h3>像扫描仪一样移动窗口</h3>
       <p>先猜窗口从第一行移动到下一行的时机。按「下一位置」或播放，检查每一行有几个起点；再调步长和窗口边长。</p>
       <p class="demo-caption">从左上角开始逐行扫描，窗口必须完整容纳在图像内。</p>
     </div>
-    <div class="concept" data-study="standard"><h3>滑动窗口怎么计数</h3><p><strong>滑动窗口</strong>是把一个小方框放在图像的许多位置，每个位置都让分类器检查一次。窗口每移动多少像素叫步长。横向与纵向各有多个合法起点，总数是两者相乘。</p><p><span class="formula">单方向位置数 = ⌊(图长 − 窗口长) / 步长⌋ + 1</span>这个式子假设窗口不越界、从第一个合法位置开始，且图长不小于窗口长。⌊ ⌋ 表示向下取整，+1 是把起点也算上。多种窗口尺寸分别求次数后相加。</p></div>
+    <div class="concept" data-study="standard"><h3>滑动窗口怎么计数</h3><p><strong>滑动窗口</strong>是把一个小方框放在图像的许多位置，每个位置都让分类器检查一次。窗口每移动多少像素叫步长。横向与纵向各有多个合法起点，总数是两者相乘。</p><p><span class="formula">单方向位置数 = ⌊(图长 − 窗口长) / 步长⌋ + 1</span>这个式子从图像边缘开始计数，只允许整个窗口在图内。若某方向窗口比图还长，就没有合法位置，不能直接套式子。⌊ ⌋ 表示向下取整，+1 是把起点也算上。多种窗口尺寸分别求次数后相加。</p></div>
     <div class="demo" data-demo="pipeline" data-study="standard">
       <h3>沿流水线给出正确结果</h3>
       <p>依次把定位、切分、识别的输出换成正确结果，比较相邻两次端到端分数的差。</p>
       <p class="demo-caption">演示数据为 65% → 70% → 85% → 100%。注意每一步的增量。</p>
     </div>
     <div class="concept" data-study="standard"><h3>标注成本和数据增强</h3><p>每分钟可标多少条，是速度。总条数除以速度得到分钟数。若工资以小时计，换成小时再乘工资。每条数据成本和模型表现最好结合误差分析来评估。</p><p><strong>数据增强</strong>是从现有样本做合理的变化，例如小幅旋转或平移。变化后要保留原有标签。添加简单副本会增加数量，但没有增加变化。</p></div>
-    <div class="concept" data-study="standard"><h3>一次给一个阶段正确答案</h3><p><strong>上限分析</strong>先记录原系统的端到端准确率，再按流程依次把当前阶段的输出换成正确结果，并保留此前已经替换的阶段。每次记录相同的端到端指标。</p><p>相邻两次结果的差是该步骤在这个替换顺序下的增益。表中最后的 100% 表示该假设设置下整个系统的分数。改变顺序或条件时，增益也可能不同。</p></div>
+    <div class="concept" data-study="standard"><h3>一次给一个阶段正确答案</h3><p><strong>上限分析</strong>先记录原系统的端到端准确率（基准），再按流程依次把当前阶段的输出换成正确结果，并保留此前已经替换的阶段。每次记录相同的端到端指标。</p><p>相邻两次结果的差是该步骤在这个替换顺序下的增益。表中最后的 100% 是多个阶段都拿到正确输出时，整个系统的分数。它不表示最后一个模块单独就能做到 100%。改变顺序或条件时，增益也可能不同。</p></div>
     <aside class="quick-reference" id="essential" aria-labelledby="essential-heading">
       <h3 id="essential-heading">必记</h3>
       <p class="formula">单方向窗口数 = ⌊(图长−窗长)/步长⌋+1，横纵相乘。上限分析看逐阶段替换正确输出后的相邻准确率差。</p>

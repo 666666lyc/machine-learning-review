@@ -33,15 +33,20 @@
     <nav class="lesson-nav" aria-label="本课内容"><a href="#concepts">图解</a><a href="#example" data-study="standard">带做例题</a><a href="#practice" data-study="standard">动手练习</a><a href="#essential">必记</a><a href="#recall">易错点</a><a href="#original">原题 71–75</a></nav>
   </header>
   <section id="concepts" aria-labelledby="concepts-heading">
-    <h2 id="concepts-heading">先看现象，再写规则</h2>
+    <h2 id="concepts-heading">先懂概念，再看图</h2>
+    <div class="concept">
+      <h3>不认识所有故障，也能先挑出可疑读数</h3>
+      <p><strong>分布</strong>描述读数集中在哪里、向外散得多开。<strong>密度</strong>是曲线在某处的高度：这里高，表示附近的读数比较常见。它不是「恰好等于这个读数」的概率。</p>
+      <p>先看同一个阈值下，读数往中心靠近会怎样；再固定读数，只改门槛。被标为异常是「值得查」，不是「确认已坏」。</p>
+    </div>
     <div class="demo" data-demo="anomaly">
       <h3>正常范围和异常阈值</h3>
       <p>先把读数从 14 拖向 10，再固定读数 14，只降低阈值。比较两次操作到底改变了密度还是判定标准。</p>
       <p class="demo-caption">蓝线是正常密度，红色虚线是阈值，淡红区域会被标记待查。</p>
     </div>
     <div class="concept" data-study="standard"><h3>先描述多数正常样本</h3><p>异常检测可以先用大量常规样本估计正常数据的分布，再把很少见的记录挑出来。少量已知异常可以用来挑阈值并衡量误报和漏报。有大量已标记的各类异常时，也可以用监督分类做比较。</p></div>
-    <div class="concept" data-study="standard"><h3>均值、方差与密度</h3><p>均值 μ 表示中心。先求每个数与均值之差的平方，再求平均，可估算本课模型用的方差 σ²；σ 是标准差。高斯分布是一种钟形分布，均值控制中心，方差控制宽度。</p><p><span class="formula">N(x; μ, σ²) = exp(−(x−μ)²/(2σ²)) / √(2πσ²)</span><span class="formula">p(x) = ∏<sub>j=1</sub><sup>n</sup> N(xⱼ; μⱼ, σⱼ²)</span>这里 xⱼ 是第 j 个特征，N 表示该特征的高斯密度，∏ 表示把各项相乘。这是把特征近似看作独立时的模型。p(x) 是密度得分，用来比较样本位置的常见程度。</p></div>
-    <div class="concept" data-study="standard"><h3>调阈值与构造特征</h3><p>规则 p(x)&lt;ε 时标异常，ε（epsilon）是阈值。调小 ε，要求密度更低才标异常，误报通常会减少，也可能增加漏报。</p><p>单看两项都正常，组合起来可能不常见。若正常温度和振动总是差不多，而异常时振动远高于温度，可以构造二者的比值或差值。比值要求除数不为 0。</p></div>
+    <div class="concept" data-study="standard"><h3>均值、方差与密度</h3><p>均值 μ 表示中心。先求每个数与均值之差的平方，再求平均，可估算本课模型用的方差 σ²；σ 是标准差。高斯分布是一种钟形分布，均值控制中心，方差控制宽度。</p><p><span class="formula">N(x; μ, σ²) = exp(−(x−μ)²/(2σ²)) / √(2πσ²)</span><span class="formula">p(x) = ∏<sub>j=1</sub><sup>n</sup> N(xⱼ; μⱼ, σⱼ²)</span>这里 xⱼ 是第 j 个特征，N 表示该特征的高斯密度，∏ 表示把各项相乘。相乘用了<strong>独立</strong>近似：知道某个特征的读数，不改变对另一个特征分布的估计。如果读数总是一起升降，这个近似可能漏掉组合异常。p(x) 是密度得分，用来比较样本位置的常见程度。</p></div>
+    <div class="concept" data-study="standard"><h3>调阈值与构造特征</h3><p>规则 p(x)&lt;ε 时标异常，ε（epsilon）是阈值。调小 ε，只有更罕见的读数才会被标记。在同一批数据和固定得分上，误报数不会增加，但漏报数可能上升。</p><p>单看两项都正常，组合起来可能不常见。若正常温度和振动总是差不多，而异常时振动远高于温度，可以构造二者的比值或差值。比值要求除数不为 0。</p></div>
     <aside class="quick-reference" id="essential" aria-labelledby="essential-heading">
       <h3 id="essential-heading">必记</h3>
       <p class="formula">均值 μ 决定中心，方差 σ² 决定宽度。独立特征模型把各维密度相乘；p(x) < ε 时标记待查。</p>
@@ -58,7 +63,7 @@
   </section>
   <details class="solution" data-study="standard" data-advanced>
     <summary>深入理解</summary>
-    <div><p>密度有单位，可大于 1。连续变量恰好等于某个值的概率为 0，区间概率是曲线下面积。多维密度相乘可能下溢，可累加对数密度再与 log ε 比较。相关特征可用差值、比值或考虑协方差的模型建模。</p></div>
+    <div><p>密度有单位，可大于 1。连续变量恰好等于某个值的概率为 0，区间概率是曲线下面积。许多很小的密度相乘，结果可能小到计算机把它当作 0，这叫<strong>下溢</strong>。取对数后，乘法变成加法；因为对数保留大小顺序，可以用对数密度和 log ε 比较。相关特征可用差值、比值或考虑协方差的模型建模。</p></div>
   </details>
   <section id="original" data-study="standard" aria-labelledby="questions-heading">
     <h2 id="questions-heading">原题练习</h2>

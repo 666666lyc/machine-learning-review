@@ -32,13 +32,18 @@
     <nav class="lesson-nav" aria-label="本课内容"><a href="#concepts">图解</a><a href="#example" data-study="standard">带做例题</a><a href="#practice" data-study="standard">动手练习</a><a href="#essential">必记</a><a href="#recall">易错点</a><a href="#original">原题 1–5</a></nav>
   </header>
   <section id="concepts" aria-labelledby="concepts-heading">
-    <h2 id="concepts-heading">先看现象，再写规则</h2>
+    <h2 id="concepts-heading">先懂概念，再看图</h2>
+    <div class="concept">
+      <h3>先认识一条记录</h3>
+      <p>把过去某天的观测当作一张记录卡：湿度和风速是拿来判断的<strong>特征</strong>，第二天实测结果是供模型对照的<strong>标签</strong>。模型就是从很多张卡片中学出来的一套判断规则。</p>
+      <p>先问有没有已知答案，再问答案是类别（下雨／不下雨）还是可比较大小的数值（气温）。如果没有答案，也可以把相似记录分成组，这叫<strong>聚类</strong>。</p>
+    </div>
     <div class="demo" data-demo="tasks">
       <h3>一张天气表，三种问题</h3>
       <p>先猜哪一种任务需要历史气温。切换学习目标，看表格留下了哪一列答案。</p>
       <p class="demo-caption">找相似天气时，表里只保留输入列，仍然可以按相似性分组。</p>
     </div>
-    <div class="concept" data-study="standard"><h3>一条样本里有什么</h3><p>假设一行天气记录写着「湿度 80%，风速 3 米/秒，次日有雨」。湿度和风速是用来做判断的信息，称为<strong>特征</strong>，常写作 <i>x</i>。次日有雨是过去实际观察到的答案，称为<strong>标签</strong>或目标，常写作 <i>y</i>。这一行就是一个<strong>样本</strong>。</p><p>模型从许多已知 <i>x</i> 和 <i>y</i> 的样本中找规律，再为新样本预测 <i>y</i>，这是<strong>监督学习</strong>。只有 <i>x</i>，目的是发现数据里未知的结构，例如把相似天气分组，这类任务可以用<strong>无监督学习</strong>。其中按相似性自动分组叫<strong>聚类</strong>。</p></div>
+    <div class="concept" data-study="standard"><h3>一条样本里有什么</h3><p>假设一行天气记录写着「湿度 80%，风速 3 米/秒，次日有雨」。湿度和风速是用来做判断的信息，称为<strong>特征</strong>，常写作 <i>x</i>。次日有雨是过去实际观察到的答案，称为<strong>标签</strong>或目标，常写作 <i>y</i>。这一行就是一个<strong>样本</strong>。</p><p>模型从许多已知 <i>x</i> 和 <i>y</i> 的样本中找规律，再为新样本预测 <i>y</i>，这是<strong>监督学习</strong>。若这一批数据只有特征 <i>x</i>，没有要对照的标签，也可以用<strong>无监督学习</strong>找规律。比如把潮湿多风的记录归为一组，而不预测具体哪天会下雨。</p></div>
     <div class="concept" data-study="standard"><h3>类别、数值和概率</h3><p>如果要预测的是「有雨」或「无雨」这样的类别，做<strong>分类</strong>。两类时叫二分类。把类别编码成 0 和 1 并不会改变任务性质。输出为 0.7 也可以是分类模型，它表示属于某个类别的估计概率。</p><p>如果要估计温度、降雨量或价格这一类数值，做<strong>回归</strong>。判断时看想预测的量能否按数值大小和距离来比较。例如 25 ℃和 26 ℃相差 1 ℃。</p></div>
     <div class="concept" data-study="standard"><h3>任务 T、经验 E 和指标 P</h3><p>T 是要完成的任务（Task），E 是用于学习的经验（Experience），P 是评价表现的指标（Performance measure）。判断 P 时问「这个量能告诉我模型做得多好吗？」</p><p>对于是否下雨的预测，E 是带有真实降雨记录的历史数据，P 可以是新日期上猜对的比例。预测气温时，P 可以换为平均绝对误差，也就是每次预测与真实温度相差多少，再求平均。</p></div>
     <aside class="quick-reference" id="essential" aria-labelledby="essential-heading">
@@ -57,7 +62,7 @@
   </section>
   <details class="solution" data-study="standard" data-advanced>
     <summary>深入理解</summary>
-    <div><p>任务的定义可以因标签的设计而改变。原始降雨量是连续数值，改成「降雨量至少 10 毫米」后，标签就能编码成 0 或 1。评估时按时间划分训练和验证，能避免把未来天气记录用于预测过去。</p></div>
+    <div><p>任务的定义可以因标签的设计而改变。原始降雨量是连续数值，改成「降雨量至少 10 毫米」后，标签就能编码成 0 或 1。如果要模拟实际天气预测，把较早记录拿去训练，把较晚记录留作验证。若用未来才知道的信息来预测过去，得到的分数会高估实际表现，这是一种<strong>数据泄漏</strong>。</p></div>
   </details>
   <section id="original" data-study="standard" aria-labelledby="questions-heading">
     <h2 id="questions-heading">原题练习</h2>

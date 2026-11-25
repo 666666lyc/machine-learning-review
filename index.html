@@ -18,7 +18,8 @@
 <main class="overview">
   <header class="overview-intro">
     <h1>零基础机器学习复习</h1>
-    <p class="lede">用 11 天串起 15 节课。先预测图解会怎样变化，亲手验证，再用公式和原题检查自己能否讲出原因。</p>
+    <p class="lede">用 11 天、15 节课学会判断机器学习任务、看懂常见公式，并用 75 道原题复习。不用先会写代码；公式遇到不认识的符号，可以先看例题带数字算一遍。</p>
+    <p><strong>第一次学：</strong>从第 1 天开始，用课内默认的「标准模式」。先看例子里要解决什么，再动图、跟算一道，最后收起解析自己做。<strong>考前回顾：</strong>从<a href="reference/quick-review.html">速查表</a>找忘掉的内容，再跳回对应课。</p>
     <a class="start" href="lessons/0001-learning-task-types.html">开始第 1 天</a>
   </header>
   <section id="map" aria-labelledby="map-heading">
@@ -27,33 +28,33 @@
       <li>
         <strong>先定义问题</strong>
         <div><nav aria-label="任务与数据"><a href="lessons/0001-learning-task-types.html">任务类型</a><a href="lessons/0002-matrix-operations.html">矩阵运算</a></nav>
-        <small>先确定要预测什么，再把每个样本的输入排成一行。</small></div>
+        <small>例如用气象记录判断明天会不会下雨。先分清记录里哪些是已知线索、哪些是真实答案，再把每条记录排成一行。</small></div>
       </li>
       <li>
         <strong>从数值到类别</strong>
         <div><nav aria-label="监督学习"><a href="lessons/0003-simple-linear-regression.html">单变量回归</a><span aria-hidden="true">→</span><a href="lessons/0004-multiple-linear-regression.html">多元回归</a><span aria-hidden="true">→</span><a href="lessons/0005-logistic-regression.html">逻辑回归</a><span aria-hidden="true">→</span><a href="lessons/0009-support-vector-machines.html">SVM</a></nav>
-        <small>从一个输入到多个输入。线性得分接上 Sigmoid 得到概率，SVM 则用间隔来选分类边界。</small></div>
+        <small>先用面积等线索估房价，再学怎么判邮件是不是垃圾邮件。最后对比两种分类方法：一种估概率，一种尽量让分界线远离最近的样本。</small></div>
       </li>
       <li>
         <strong>让模型在新数据上好用</strong>
         <div><nav aria-label="泛化与评估"><a href="lessons/0006-regularization.html">正则化</a><span aria-hidden="true">→</span><a href="lessons/0007-model-diagnostics.html">模型诊断</a><span aria-hidden="true">→</span><a href="lessons/0008-classification-metrics.html">分类指标</a></nav>
-        <small>约束模型复杂度，通过验证集判断拟合问题，再比较阈值带来的误报和漏报。</small></div>
+        <small>模型记住旧题，不一定会做新题。用没参与训练的数据检查表现，再学怎么权衡误报和漏报。</small></div>
       </li>
       <li>
         <strong>从输入里发现结构</strong>
         <div><nav aria-label="聚类、降维与异常检测"><a href="lessons/0010-k-means.html">K-means</a><a href="lessons/0011-pca.html">PCA</a><a href="lessons/0012-anomaly-detection.html">异常检测</a></nav>
-        <small>同一组特征可以用来找相似群组、保留主要变化，或找不常见的样本。</small></div>
+        <small>没有标准答案也能找规律：把相似的记录分组（聚类），用较少的数字保留主要信息（降维），或找出不寻常的记录（异常检测）。</small></div>
       </li>
       <li>
         <strong>把模型用进系统</strong>
         <div><nav aria-label="推荐、规模与流水线"><a href="lessons/0013-recommender-systems.html">推荐系统</a><a href="lessons/0014-large-scale-learning.html">大规模学习</a><a href="lessons/0015-photo-ocr.html">图片文字识别</a></nav>
-        <small>用矩阵内积预测缺失评分，用批次管理梯度计算，用上限分析定位流水线的改进机会。</small></div>
+        <small>练三个应用：猜用户可能给电影打几分，决定每次拿多少条数据来训练，找出图片识字流程里最该改的一步。</small></div>
       </li>
     </ol>
   </section>
   <section id="schedule" aria-labelledby="schedule-heading">
     <h2 id="schedule-heading">11 天课程目录</h2>
-    <p class="small">点课名看讲解，点题号直达题目。附件实际收录 75 道原题，缺第 21–25 题和第 36–45 题。</p>
+    <p class="small">点课名看讲解，点题号直达题目。原题册收录 75 道题。第 21–25 题和第 36–45 题原本缺失，这里保留原编号。</p>
     <div class="day-grid">
     <article class="day-card" id="day-1">
       <p class="day-count">第 1 天</p>
@@ -118,12 +119,12 @@
   </section>
   <section id="review" aria-labelledby="review-heading">
     <h2 id="review-heading">错题回顾</h2>
-    <p class="small">提交错答的题会出现在这里。计算题可在核对后手动加入。隔天重做时，先说出上次错在哪里，再重新计算或选择。</p>
+    <p class="small">提交错答的选择题会记在当前浏览器，不会跨设备同步。计算题可核对后手动加入。隔天重做时，先说出上次错在哪一步，再重新计算或选择。</p>
     <p id="review-empty">列表为空。做完一节后可以回来查看。</p>
     <ul class="review-list" id="review-list"></ul>
     <noscript><p>启用 JavaScript 后可在当前浏览器记录错题。</p></noscript>
   </section>
-  <footer><nav aria-label="辅助资料"><a href="reference/quick-review.html">考前速查</a><a href="reference/question-notes.html">题册勘误与存疑题</a><a href="吴恩达题目90题.docx">原 Word 题册</a></nav></footer>
+  <footer><nav aria-label="辅助资料"><a href="reference/quick-review.html">考前速查</a><a href="reference/question-notes.html">题册勘误与存疑题</a></nav></footer>
 </main>
 </body>
 </html>

@@ -33,15 +33,20 @@
     <nav class="lesson-nav" aria-label="本课内容"><a href="#concepts">图解</a><a href="#example" data-study="standard">带做例题</a><a href="#practice" data-study="standard">动手练习</a><a href="#essential">必记</a><a href="#recall">易错点</a><a href="#original">原题 16–20</a></nav>
   </header>
   <section id="concepts" aria-labelledby="concepts-heading">
-    <h2 id="concepts-heading">先看现象，再写规则</h2>
+    <h2 id="concepts-heading">先懂概念，再看图</h2>
+    <div class="concept">
+      <h3>从一个输入变成多个输入</h3>
+      <p>上一课只看面积；这次再看房间数。每个特征有自己的<strong>系数</strong>，预测时把「面积 × 面积系数」「房间数 × 房间数系数」与截距相加。<strong>优化</strong>就是调整这些系数，让训练代价更低。</p>
+      <p><strong>特征缩放</strong>是用训练数据把不同列改写到大致可比较的数值尺度。它不是删除某列，而是让同一个更新步长不那么容易在某个方向来回跳。图里横纵轴是模型的两个参数，不是房屋面积和房间数。</p>
+    </div>
     <div class="demo" data-demo="scaling">
       <h3>同一步长，两种谷地形状</h3>
       <p>固定步长，先看缩放前的红色轨迹。切到缩放后，再对比第 1 步和第 10 步。</p>
       <p class="demo-caption">图中比较两个二次代价的形状。窄方向斜率大，一步容易跨过去，宽方向每步却只前进一点。</p>
     </div>
-    <div class="concept" data-study="standard"><h3>一条样本可以有多个特征</h3><p><span class="formula">h<sub>θ</sub>(x)=θ₀+θ₁x₁+⋯+θₙxₙ</span>x₁、x₂ 等是同一条样本的不同特征。θ₀ 是截距，θⱼ是第 j 个特征的系数。常把恒为 1 的输入列 x₀ 加到数据表里，让 θ₀ 也能参加矩阵乘法。</p><p>m 条样本、n 个原特征时，设计矩阵 X 含 m 行和 n+1 列。真实值列向量 y 是 m×1，系数列向量 θ 是 (n+1)×1，所以 Xθ 输出一列 m 个预测。</p></div>
-    <div class="concept" data-study="standard"><h3>先造特征，再按列缩放</h3><p>用 x 和 x² 同时预测，属于<strong>多项式特征</strong>。曲线可以弯，但参数 θ 仍只是乘各列再相加。先计算所有样本的 x²，再把这一列单独缩放。</p><p>按本课题目常用的均值归一化，先减这一列均值，再除以该列的极差（最大值−最小值）。这与除以标准差的做法不同，考试按题干指定分母算。缩放通常让梯度下降更容易收敛；新样本使用训练集算出的同一组均值和尺度。</p></div>
-    <div class="concept" data-study="standard"><h3>梯度下降与正规方程</h3><p>学习率合适时，梯度下降逐步找到较低代价。代价一直缓慢下降，可以试更大步长并观察；代价上升或反复跳动时，可检查步长是否过大。</p><p><span class="formula">θ = (XᵀX)⁻¹Xᵀy</span>当 X 的列线性无关时，这个式子给出普通最小二乘解。正规方程处理的是 (n+1)×(n+1) 的矩阵，n 很大时开销高。若有重复列等依赖，不能直接使用上式的逆。</p></div>
+    <div class="concept" data-study="standard"><h3>一条样本可以有多个特征</h3><p><span class="formula">h<sub>θ</sub>(x)=θ₀+θ₁x₁+⋯+θₙxₙ</span>x₁、x₂ 等是同一条样本的不同特征。θ₀ 是截距，θⱼ 是第 j 个特征的系数。常把恒为 1 的输入列 x₀ 加到数据表里，让 θ₀ 也能参加矩阵乘法。</p><p>m 条样本、n 个原特征时，设计矩阵 X 含 m 行和 n+1 列。真实值列向量 y 是 m×1，系数列向量 θ 是 (n+1)×1，所以 Xθ 输出一列 m 个预测。</p></div>
+    <div class="concept" data-study="standard"><h3>先造特征，再按列缩放</h3><p>用 x 和 x² 同时预测，属于<strong>多项式特征</strong>。曲线可以弯，但参数 θ 仍只是乘各列再相加。先计算所有样本的 x²，再把这一列单独缩放。</p><p>按本课题目常用的均值归一化，先减这一列均值，再除以该列的极差（最大值−最小值）。也可以除以标准差（衡量数据围绕均值分散程度的量），这叫标准化。两种做法分母不同，做题按题干指定的规则。缩放通常让梯度下降更容易收敛；新样本使用训练集算出的同一组均值和尺度。</p></div>
+    <div class="concept" data-study="standard"><h3>梯度下降与正规方程</h3><p>学习率合适时，梯度下降逐步找到较低代价。代价一直缓慢下降，可以试更大步长并观察；代价上升或反复跳动时，可检查步长是否过大。</p><p><span class="formula">θ = (XᵀX)⁻¹Xᵀy</span><strong>最小二乘</strong>就是选一组系数，让训练残差的平方和最小。<strong>正规方程</strong>是对这个目标求导、令梯度等于 0 得到的一组方程。若 X 的列无法由其他列加权相加得到（即<strong>列线性无关</strong>），便可用上面这条求逆公式直接算出解。正规方程处理的是 (n+1)×(n+1) 的矩阵，n 很大时开销高。若有重复列等依赖，不能直接使用上式的逆。</p></div>
     <aside class="quick-reference" id="essential" aria-labelledby="essential-heading">
       <h3 id="essential-heading">必记</h3>
       <p class="formula">每行有一条样本，额外加一列 1 表示截距，预测写作 Xθ。均值归一化按列计算 (x − 均值) / 极差。</p>
@@ -58,7 +63,7 @@
   </section>
   <details class="solution" data-study="standard" data-advanced>
     <summary>深入理解</summary>
-    <div><p>普通最小二乘问题在 X 列线性无关时可由正规方程 XᵀXθ = Xᵀy 求解。数值实现常用 QR 或 SVD，避免直接显式求逆。缩放能缓和尺度差异，相关性很强的列仍可能造成狭长的等高线。训练集零极差的常量特征可去除或按约定处理。</p></div>
+    <div><p>普通最小二乘问题在 X 列线性无关时可由正规方程 XᵀXθ = Xᵀy 求解。实际求解常把矩阵拆成更易计算的形式，例如 QR 分解或奇异值分解（SVD），不必真的算出逆矩阵。初学时知道「不直接求逆」即可。缩放能缓和尺度差异，相关性很强的列仍可能造成狭长的等高线。训练集零极差的常量特征可去除或按约定处理。</p></div>
   </details>
   <section id="original" data-study="standard" aria-labelledby="questions-heading">
     <h2 id="questions-heading">原题练习</h2>

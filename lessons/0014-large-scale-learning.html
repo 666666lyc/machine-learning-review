@@ -33,18 +33,23 @@
     <nav class="lesson-nav" aria-label="本课内容"><a href="#concepts">图解</a><a href="#example" data-study="standard">带做例题</a><a href="#practice" data-study="standard">动手练习</a><a href="#essential">必记</a><a href="#recall">易错点</a><a href="#original">原题 81–85</a></nav>
   </header>
   <section id="concepts" aria-labelledby="concepts-heading">
-    <h2 id="concepts-heading">先看现象，再写规则</h2>
+    <h2 id="concepts-heading">先懂概念，再看图</h2>
+    <div class="concept">
+      <h3>读了几条样本，不等于更新了几步</h3>
+      <p>把要一起读的样本叫一<strong>批</strong>。每次更新前，可以读完全部样本，只读一条，或者取一小批。例如，同样读一遍 12 条数据，整批只更新 1 次，逐条就更新 12 次。</p>
+      <p><strong>轮次（epoch）</strong>指训练数据被完整扫过一遍；<strong>一步</strong>指参数改一次。图中让三种方法读相同数量的样本，再比较更新次数和路线，而不是只问哪条线走得最快。</p>
+    </div>
     <div class="demo" data-demo="batches">
       <h3>相同读数，比较更新轨迹</h3>
       <p>把完整读数轮次拨到 1。数一数三种方法各更新了几步，再拨到 6，观察哪条线较常偏离全量目标的中心。</p>
       <p class="demo-caption">淡色圆表示全量代价等高线。比较在读取相同样本数下的更新次数与轨迹波动。</p>
     </div>
     <div class="concept" data-study="standard"><h3>一条还是一批</h3><p><strong>批量梯度下降</strong>在同一组参数下，求所有样本梯度的平均，再更新一步。<strong>随机梯度下降</strong>（SGD）用一条样本的梯度更新一步。<strong>小批量</strong>介于两者之间，每次用一小组样本。</p><p>单条梯度代表局部信号，SGD 更新后整体代价有时会上升。固定数据常先打乱顺序，查看多条样本的平均代价走势。若平均代价持续升高，可先试降低学习率做对照。</p></div>
-    <div class="concept" data-study="standard"><h3>检查实现与学习新数据</h3><p><strong>梯度检查</strong>用很小的变化 h 估算参数的斜率：[J(θ+h)−J(θ−h)]/(2h)。对单样本梯度，用同一条样本的代价作差，检查推导或代码是否一致。</p><p><strong>在线学习</strong>指数据到达后持续更新，例如根据今天收到的点击数据调整模型。它可减少重新训练所需的等待，也可以跟随偏好变化，取决于更新速度和数据质量。</p></div>
-    <div class="concept" data-study="standard"><h3>MapReduce 先分配，再汇总</h3><p>在一轮批量训练中，各机器拿同一组参数。Map 阶段各算自己负责数据的梯度和及样本数，Reduce 阶段汇总各机器的和，再除以总样本数，最后统一更新。</p><p>标准逐样本 SGD 的后一步需要前一步已经更新的参数，不能直接用同一次分片求和代替。并行的总耗时还包括网络传输和同步，因此加速往往小于机器数。</p></div>
+    <div class="concept" data-study="standard"><h3>检查实现与学习新数据</h3><p><strong>梯度检查</strong>把同一个参数分别略微加、减一点，比较两侧的代价来估算斜率。J 是代价，θ 是所查参数，h 是很小的步长：[J(θ+h)−J(θ−h)]/(2h)。对单样本梯度，用同一条样本的代价作差，检查推导或代码是否一致。</p><p><strong>在线学习</strong>指数据到达后持续更新，例如根据今天收到的点击数据调整模型。它可减少重新训练所需的等待，也可以跟随偏好变化，取决于更新速度和数据质量。</p></div>
+    <div class="concept" data-study="standard"><h3>MapReduce 先分配，再汇总</h3><p>在一轮批量训练中，各机器拿同一组参数。Map 阶段各算自己负责数据的梯度和及样本数，Reduce 阶段汇总各机器的和，再除以总样本数，最后统一更新。</p><p>标准逐样本 SGD 的后一步需要前一步已经更新的参数，不能直接用同一次分片求和代替。并行的总耗时还包括网络传输和同步（等各机器把这一轮结果汇齐），因此加速往往小于机器数。</p></div>
     <aside class="quick-reference" id="essential" aria-labelledby="essential-heading">
       <h3 id="essential-heading">必记</h3>
-      <p class="formula">BGD 每步平均全部样本梯度，小批量每步平均一小组梯度，SGD 每步用一条。并行汇总批量梯度时，用各分片梯度和除以总样本数。</p>
+      <p class="formula">批量梯度下降（BGD）每步平均全部样本梯度，小批量每步平均一小组梯度，SGD 每步用一条。并行汇总批量梯度时，用各分片梯度和除以总样本数。</p>
     </aside>
   </section>
   <section id="example" data-study="standard" class="example" aria-labelledby="example-heading">
