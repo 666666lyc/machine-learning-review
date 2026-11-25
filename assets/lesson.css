@@ -1,0 +1,200 @@
+:root {
+  color-scheme: light;
+  --paper: #f8f8f2;
+  --ink: #222b26;
+  --muted: #505d54;
+  --accent: #185342;
+  --line: #d5ded4;
+  --soft: #e9f0e8;
+  --white: #fff;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 1rem/1.75 "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", system-ui, sans-serif;
+}
+main {
+  max-width: 52rem;
+  margin: 0 auto;
+  padding: 2.15rem 1.25rem 3rem;
+  overflow-wrap: anywhere;
+}
+main.overview { max-width: 70rem; }
+.sitebar {
+  border-bottom: 1px solid var(--line);
+  background: var(--white);
+  padding-inline: max(1.25rem, calc((100vw - 68rem) / 2));
+}
+.sitebar nav {
+  align-items: center;
+  row-gap: .2rem;
+  min-height: 3.65rem;
+  padding: .4rem 0;
+}
+.sitebar a { text-decoration: none; }
+.sitebar a:hover, .sitebar a[aria-current] { text-decoration: underline; }
+.course-brand { font-weight: 750; margin-right: auto; }
+header { margin: 1.2rem 0 2rem; }
+.overview-intro { margin: 1.5rem 0 2.9rem; }
+.lesson-intro {
+  margin-top: .7rem;
+  padding-bottom: 1.1rem;
+  border-bottom: 1px solid var(--line);
+}
+section { margin: 1.8rem 0; }
+section, article[id] { scroll-margin-top: 1rem; }
+h1, h2, h3 { line-height: 1.38; }
+h1, h2 { color: var(--accent); }
+h1 {
+  font-family: "Noto Serif SC", "Songti SC", SimSun, serif;
+  font-weight: 700;
+  font-size: clamp(2.05rem, 5vw, 3.35rem);
+  margin: .25rem 0 .75rem;
+  text-wrap: balance;
+}
+h2 { font-size: 1.45rem; margin: 0 0 .65rem; }
+h3 { font-size: 1.08rem; margin: .65rem 0 .35rem; }
+p, ol, ul, dl { margin: .62rem 0; }
+a { color: var(--accent); text-underline-offset: .22em; }
+nav { display: flex; flex-wrap: wrap; gap: .35rem 1rem; }
+nav, .small, .meta, footer { color: var(--muted); font-size: .94rem; }
+.lede { font-size: 1.075rem; color: var(--muted); max-width: 45rem; }
+.day-label, .day-count { color: var(--accent); font-weight: 700; font-size: .91rem; }
+.day-count { margin: 0; }
+.lesson-nav { margin-top: 1rem; }
+button, input, summary { font: inherit; }
+a:focus-visible, button:focus-visible, input:focus-visible, summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.start, button {
+  display: inline-block;
+  border: 1px solid var(--accent);
+  border-radius: .38rem;
+  background: var(--accent);
+  color: var(--white);
+  padding: .38rem .85rem;
+  text-decoration: none;
+  cursor: pointer;
+}
+.start { margin-top: .55rem; }
+.start:hover, button:hover { background: #123f32; }
+.concept + .concept { margin-top: 1.25rem; }
+.concept h3 { font-size: 1.15rem; }
+.formula {
+  display: block;
+  background: var(--soft);
+  border-radius: .3rem;
+  padding: .35rem .7rem;
+  margin-bottom: .35rem;
+  font-family: "Cambria Math", "Microsoft YaHei", sans-serif;
+  font-size: 1.05em;
+}
+.example, .lesson-recall {
+  background: var(--soft);
+  border-inline-start: .22rem solid var(--accent);
+  padding: .85rem 1rem;
+}
+.example li + li, .recall-day li + li { margin-top: .45rem; }
+dt { font-weight: 700; margin-top: .55rem; }
+dd { margin: .1rem 0 .6rem; }
+.day-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .8rem; }
+.day-card, .question {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: .6rem;
+}
+.day-card { padding: .85rem 1rem 1rem; }
+.day-card h3 { margin: .2rem 0 .55rem; }
+.day-topic + .day-topic { margin-top: .6rem; }
+.day-topic > a { font-weight: 650; }
+.question-jump { gap: .3rem; margin: .45rem 0; }
+.question-jump a {
+  min-width: 2.25rem;
+  min-height: 2.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: .3rem;
+  padding-inline: .28rem;
+  text-decoration: none;
+  color: var(--accent);
+  background: var(--white);
+  font-variant-numeric: tabular-nums;
+}
+.question-jump a:hover { background: var(--soft); text-decoration: underline; }
+.question { margin: .8rem 0; padding: .85rem 1rem 1rem; }
+.question:target, .day-card:target { border-color: var(--accent); }
+.question h3 { margin-top: 0; color: var(--accent); }
+.question-stem { margin: 0 0 .7rem; }
+.question-image {
+  display: block;
+  max-inline-size: 100%;
+  block-size: auto;
+  margin: .55rem 0;
+}
+.exercise { margin: .75rem 0; }
+.exercise fieldset { padding: 0; margin: 0; border: 0; min-width: 0; }
+.exercise legend { font-weight: 650; padding: 0; }
+.exercise label {
+  display: grid;
+  grid-template-columns: 1rem 1.4rem minmax(0, 1fr);
+  align-items: start;
+  column-gap: .32rem;
+  min-height: 2.35rem;
+  padding: .25rem .35rem;
+  border-radius: .25rem;
+  cursor: pointer;
+}
+.exercise label:hover, .exercise label:focus-within { background: var(--soft); }
+.exercise input { accent-color: var(--accent); margin: .5rem 0 0; }
+.choice-letter { font-weight: 650; color: var(--muted); }
+.quiz-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: .25rem .65rem;
+  margin-top: .45rem;
+}
+.feedback { margin: 0; }
+.feedback[data-state="correct"] { color: #205d3e; }
+.feedback[data-state="retry"] { color: #863e24; }
+.feedback[data-state="context"] { color: #694b12; }
+.solution {
+  border: 1px solid var(--line);
+  border-radius: .38rem;
+  background: var(--paper);
+  margin: .55rem 0 0;
+}
+.solution summary {
+  padding: .4rem .65rem;
+  cursor: pointer;
+  color: var(--accent);
+  font-weight: 700;
+}
+.solution > div { padding: 0 .7rem .5rem; overflow-wrap: anywhere; }
+.solution-key { color: var(--accent); }
+.source-note {
+  border-inline-start: .16rem solid #8a692e;
+  padding-inline-start: .55rem;
+  color: #65471c;
+}
+footer { border-top: 1px solid var(--line); margin-top: 2rem; padding-top: .8rem; }
+@media (max-width: 39rem) {
+  main { padding: 1.5rem 1rem 2rem; }
+  .day-grid { grid-template-columns: minmax(0, 1fr); }
+  .sitebar { padding-inline: 1rem; }
+  .sitebar nav { column-gap: .7rem; }
+}
+@media print {
+  :root { --ink: #000; --accent: #000; --paper: #fff; }
+  main { max-width: none; padding: 0; }
+  header { margin: .5rem 0 1rem; }
+  h1 { font-size: 26pt; }
+  h2, h3 { break-after: avoid; }
+  .example, .exercise { break-inside: avoid; }
+  .sitebar, nav, .exercise button { display: none; }
+}

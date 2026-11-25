@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>正则化与过拟合 · 第 4 天</title>
+  <link rel="stylesheet" href="../assets/lesson.css">
+  <script defer src="../assets/quiz.js"></script>
+</head>
+<body>
+<div class="sitebar"><nav aria-label="课程导航">
+  <a class="course-brand" href="../index.html">机器学习复习</a>
+  <a href="../index.html#schedule">课程目录</a>
+  <a href="../reference/quick-review.html">考前速查</a>
+</nav></div>
+<main class="lesson">
+  <header class="lesson-intro">
+    <a class="day-label" href="../index.html#day-4">第 4 天</a>
+    <h1>正则化与过拟合</h1>
+    <p class="lede">一条曲线经过所有训练点，但在两个点之间转了好几个弯。把每个旧样本都猜准了，就一定能猜准新样本吗？</p>
+    <nav class="lesson-nav" aria-label="本课内容"><a href="#concepts">知识点</a><a href="#example">带做例题</a><a href="#practice">动手练习</a><a href="#original">原题 31–35</a></nav>
+  </header>
+  <section id="concepts" aria-labelledby="concepts-heading">
+    <h2 id="concepts-heading">知识点</h2>
+    <div class="concept"><h3>拟合是贴近数据的程度</h3><p><strong>欠拟合</strong>是模型连已有数据的主要趋势都表达不出来，例如用水平线描述持续上涨的价格。<strong>过拟合</strong>是模型太贴合训练数据里偶然的波动，新数据换一批就容易出错。</p><p>给模型增加平方项等特征，往往能提高表达能力。模型也有机会把噪声拟合进去。判断新数据表现需要验证集。</p></div>
+    <div class="concept"><h3>给过大的系数加上惩罚</h3><p><span class="formula">总训练目标 = 原训练损失 + [λ/(2m)] ∑<sub>j=1</sub><sup>n</sup> θⱼ²</span>这是 L2 正则化的一种写法。λ（lambda）控制惩罚强度，m 是样本数，θⱼ 是第 j 个特征的系数。求和从 j=1 开始，常见约定下截距 θ₀ 不参加。</p><p>λ=0 时没有惩罚。λ 增大时，被惩罚的系数总体更受约束。过大的 λ 可能让模型连主要趋势也拟合不上。训练损失可能略变差，而新数据误差可能变小，两者应分别评估。</p></div>
+    <div class="concept"><h3>看图时先找整体趋势</h3><p>先看红点大体往哪走。蓝线漏掉成片的趋势，可能欠拟合；蓝线为了穿过个别点反复弯折，可能过拟合。个别点离曲线远时，也可能只是离群点。用验证集确认图上的判断。</p></div>
+  </section>
+  <section id="example" class="example" aria-labelledby="example-heading">
+    <h2 id="example-heading">跟着算一遍</h2>
+    <ol><li>假设只有一个被惩罚系数，m=2、λ=1。方案甲训练损失 0.1、系数 4，惩罚是 4²÷4=4，总目标 4.1。</li><li>方案乙训练损失 0.5、系数 1，惩罚是 1²÷4=0.25，总目标 0.75。</li><li>按不带惩罚的训练损失，甲更贴合训练数据。加入惩罚后，乙的总目标更低。应再用验证误差判断对新数据哪个更好。</li></ol>
+  </section>
+  <section id="practice" class="try" aria-labelledby="practice-heading">
+    <h2 id="practice-heading">自己试一题</h2>
+    <p>从 λ=0 调到很大的 λ 后，训练误差和验证误差都变高。该怎么理解？</p>
+    <details class="solution"><summary>核对练习思路</summary><div><p>过强惩罚限制了模型拟合主要规律，符合欠拟合。可以在验证集上试更小的 λ。</p></div></details>
+  </section>
+  <section id="original" aria-labelledby="questions-heading">
+    <h2 id="questions-heading">原题练习</h2>
+    <nav class="question-jump" aria-label="跳到本课原题"><a href="#q31">31</a><a href="#q32">32</a><a href="#q33">33</a><a href="#q34">34</a><a href="#q35">35</a></nav>
+    <p class="small">先独立作答，再展开解析核对。计算题可以在纸上列式。</p>
+    <noscript><p>启用 JavaScript 可提交选项。也可以直接展开解析自查。</p></noscript>
+  <article class="question" id="q31" data-original-question="31">
+    <h3>第 31 题</h3>
+    <p class="question-stem">你正在训练一个分类逻辑回归模型。以下哪项陈述是正确的？选出所有正确项</p>
+    <form class="exercise choice-exercise" data-quiz data-answer="D">
+      <fieldset>
+        <legend>多选题 · 选全后检查</legend>
+        <label><input type="checkbox" name="q31-1" value="A"><span class="choice-letter">A.</span><span>将正则化引入到模型中，总是能在训练集上获得相同或更好的性能</span></label>
+        <label><input type="checkbox" name="q31-1" value="B"><span class="choice-letter">B.</span><span>在模型中添加许多新特性有助于防止训练集过度拟合</span></label>
+        <label><input type="checkbox" name="q31-1" value="C"><span class="choice-letter">C.</span><span>将正则化引入到模型中，对于训练集中没有的例子，总是可以获得相同或更好的性能</span></label>
+        <label><input type="checkbox" name="q31-1" value="D"><span class="choice-letter">D.</span><span>向模型中添加新特征总是会在训练集上获得相同或更好的性能</span></label>
+      </fieldset>
+      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+    </form>
+    <details class="solution">
+      <summary>查看答案与解析</summary>
+      <div><p class="solution-key"><strong>答案</strong> D</p><p>按题目沿用的无正则化训练目标解释，令新增特征的系数为 0 就能复现旧模型，因此最优训练损失不会变大。A 的惩罚可能牺牲训练拟合；B 的新增特征可能提高方差；C 的新样本效果需用验证集检查。</p><p class="source-note"><strong>题册勘误</strong> D 的“总是”适用于同一训练目标下的最优训练损失。它不保证分类准确率或实际优化过程的结果。</p></div>
+    </details>
+  </article>
+  <article class="question" id="q32" data-original-question="32">
+    <h3>第 32 题</h3>
+    <p class="question-stem">假设您进行了两次逻辑回归，一次是λ=0，一次是λ=1。其中一次，得到参数θ=[81.47 12.69]，另一次，得到θ=[13.0 10.91]。 但是，您忘记了哪个λ值对应于哪个θ值。你认为哪个对应于λ=1？</p>
+    <form class="exercise choice-exercise" data-quiz data-answer="A">
+      <fieldset>
+        <legend>单选题</legend>
+        <label><input type="radio" name="q32-1" value="A"><span class="choice-letter">A.</span><span>θ=[13.0, 10.91]</span></label>
+        <label><input type="radio" name="q32-1" value="B"><span class="choice-letter">B.</span><span>θ=[81.47, 12.69]</span></label>
+      </fieldset>
+      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+    </form>
+    <details class="solution">
+      <summary>查看答案与解析</summary>
+      <div><p class="solution-key"><strong>答案</strong> A</p><p>L2 正则化对较大的被罚系数收费。两组系数比较，A 的整体幅度更小，符合在同样的数据和特征上将 λ 从 0 增至 1 的预期。是否惩罚截距按题目模型约定。</p></div>
+    </details>
+  </article>
+  <article class="question" id="q33" data-original-question="33">
+    <h3>第 33 题</h3>
+    <p class="question-stem">以下关于正则化的陈述哪一个是正确的？选出所有正确项</p>
+    <form class="exercise choice-exercise" data-quiz data-answer="C">
+      <fieldset>
+        <legend>多选题 · 选全后检查</legend>
+        <label><input type="checkbox" name="q33-1" value="A"><span class="choice-letter">A.</span><span>使用太大的λ值可能会导致您的假设与数据过拟合；这可以通过减小λ来避免</span></label>
+        <label><input type="checkbox" name="q33-1" value="B"><span class="choice-letter">B.</span><span>使用非常大的值λ不会影响假设的性能；我们不将λ设置为太大的唯一原因是避免数值问题</span></label>
+        <label><input type="checkbox" name="q33-1" value="C"><span class="choice-letter">C.</span><span>考虑一个分类问题。添加正则化可能会导致分类器错误地分类某些训练示例（当不使用正则化时，即当λ=0时，它正确地分类了这些示例）</span></label>
+        <label><input type="checkbox" name="q33-1" value="D"><span class="choice-letter">D.</span><span>由于逻辑回归的输出值0≤hθ(x)≤1，其输出值的范围无论如何只能通过正则化来“缩小”一点，因此正则化通常对其没有帮助</span></label>
+      </fieldset>
+      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+    </form>
+    <details class="solution">
+      <summary>查看答案与解析</summary>
+      <div><p class="solution-key"><strong>答案</strong> C</p><p>正则化改变最优解，可能使原本训练集上的某些点被误判，C 正确。A 把过强正则化与过拟合说反；B 忽略过强惩罚会欠拟合；D 混淆了输出的取值范围和参数的大小。</p></div>
+    </details>
+  </article>
+  <article class="question" id="q34" data-original-question="34">
+    <h3>第 34 题</h3>
+    <p class="question-stem">下列哪一个图片的假设与训练集过拟合？</p>
+    <form class="exercise choice-exercise" data-quiz data-answer="A">
+      <fieldset>
+        <legend>单选题</legend>
+        <label><input type="radio" name="q34-1" value="A"><span class="choice-letter">A.</span><span><img class="question-image" src="../assets/questions/image14.jpeg" width="551" height="155" alt="蓝色曲线经过各红点，底部出现多个小转折。" loading="lazy" decoding="async"></span></label>
+        <label><input type="radio" name="q34-1" value="B"><span class="choice-letter">B.</span><span><img class="question-image" src="../assets/questions/image15.jpeg" width="551" height="155" alt="红点围绕一条向右上方倾斜的直线分布。" loading="lazy" decoding="async"></span></label>
+        <label><input type="radio" name="q34-1" value="C"><span class="choice-letter">C.</span><span><img class="question-image" src="../assets/questions/image16.jpeg" width="551" height="155" alt="蓝色曲线形成一个拱形，右下方有单个红点偏离曲线。" loading="lazy" decoding="async"></span></label>
+        <label><input type="radio" name="q34-1" value="D"><span class="choice-letter">D.</span><span><img class="question-image" src="../assets/questions/image17.png" width="551" height="155" alt="蓝色曲线形成浅弧，右侧两个红点明显高于曲线。" loading="lazy" decoding="async"></span></label>
+      </fieldset>
+      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+    </form>
+    <details class="solution">
+      <summary>查看答案与解析</summary>
+      <div><p class="solution-key"><strong>答案</strong> A</p><p>比较蓝线与红点的关系。A 的曲线为了贴合样本小幅来回摆动，这是拟合噪声的典型迹象。B 在整体趋势附近拟合，C 留了一个明显离群点，D 对主趋势拟合偏弱。</p></div>
+    </details>
+  </article>
+  <article class="question" id="q35" data-original-question="35">
+    <h3>第 35 题</h3>
+    <p class="question-stem">下列哪一个图片的假设与训练集欠拟合？</p>
+    <form class="exercise choice-exercise" data-quiz data-answer="A">
+      <fieldset>
+        <legend>单选题</legend>
+        <label><input type="radio" name="q35-1" value="A"><span class="choice-letter">A.</span><span><img class="question-image" src="../assets/questions/image17.png" width="551" height="155" alt="蓝色曲线形成浅弧，右侧两个红点明显高于曲线。" loading="lazy" decoding="async"></span></label>
+        <label><input type="radio" name="q35-1" value="B"><span class="choice-letter">B.</span><span><img class="question-image" src="../assets/questions/image18.jpeg" width="551" height="155" alt="蓝色曲线先上升后向右急转下落，贴近右侧的红点。" loading="lazy" decoding="async"></span></label>
+        <label><input type="radio" name="q35-1" value="C"><span class="choice-letter">C.</span><span><img class="question-image" src="../assets/questions/image15.jpeg" width="551" height="155" alt="红点围绕一条向右上方倾斜的直线分布。" loading="lazy" decoding="async"></span></label>
+        <label><input type="radio" name="q35-1" value="D"><span class="choice-letter">D.</span><span><img class="question-image" src="../assets/questions/image16.jpeg" width="551" height="155" alt="蓝色曲线形成一个拱形，右下方有单个红点偏离曲线。" loading="lazy" decoding="async"></span></label>
+      </fieldset>
+      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+    </form>
+    <details class="solution">
+      <summary>查看答案与解析</summary>
+      <div><p class="solution-key"><strong>答案</strong> A</p><p>A 中右侧两个明显上升的训练点与曲线差得较远，曲线弯曲程度不足。B 追随右侧单点猛降，C 描述大体线性趋势，D 描述大体弧形趋势。</p></div>
+    </details>
+  </article>
+  </section>
+  <section class="lesson-recall" aria-labelledby="recall-heading"><h2 id="recall-heading">考前回忆</h2><p>正则化限制被惩罚系数。λ 太大可能欠拟合，λ 的选择用验证集。</p></section>
+  <footer>
+    <p>遇到疑问，可以把题号和你卡住的步骤发给我。</p>
+    <p class="small">参考资料 <a href="https://developers.google.com/machine-learning/crash-course/overfitting/overfitting">Google 过拟合课程</a> · <a href="https://see.stanford.edu/materials/aimlcs229/cs229-notes1.pdf">斯坦福 CS229 监督学习讲义</a></p>
+    <nav aria-label="继续复习"><a href="0005-logistic-regression.html">上一课 逻辑回归从得分到类别</a><a href="0007-model-diagnostics.html">下一课 学习曲线与模型诊断</a></nav>
+  </footer>
+</main>
+</body>
+</html>

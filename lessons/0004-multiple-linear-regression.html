@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>多元线性回归与特征缩放 · 第 2 天</title>
+  <link rel="stylesheet" href="../assets/lesson.css">
+  <script defer src="../assets/quiz.js"></script>
+</head>
+<body>
+<div class="sitebar"><nav aria-label="课程导航">
+  <a class="course-brand" href="../index.html">机器学习复习</a>
+  <a href="../index.html#schedule">课程目录</a>
+  <a href="../reference/quick-review.html">考前速查</a>
+</nav></div>
+<main class="lesson">
+  <header class="lesson-intro">
+    <a class="day-label" href="../index.html#day-2">第 2 天</a>
+    <h1>多元线性回归与特征缩放</h1>
+    <p class="lede">如果要把房屋面积和房间数量一起用来估价，每套房需要存几个输入？面积与房间数的变化范围不一样，会怎样影响训练？</p>
+    <nav class="lesson-nav" aria-label="本课内容"><a href="#concepts">知识点</a><a href="#example">带做例题</a><a href="#practice">动手练习</a><a href="#original">原题 16–20</a></nav>
+  </header>
+  <section id="concepts" aria-labelledby="concepts-heading">
+    <h2 id="concepts-heading">知识点</h2>
+    <div class="concept"><h3>一条样本可以有多个特征</h3><p><span class="formula">h<sub>θ</sub>(x)=θ₀+θ₁x₁+⋯+θₙxₙ</span>x₁、x₂ 等是同一条样本的不同特征。θ₀ 是截距，θⱼ是第 j 个特征的系数。常把恒为 1 的输入列 x₀ 加到数据表里，让 θ₀ 也能参加矩阵乘法。</p><p>m 条样本、n 个原特征时，设计矩阵 X 含 m 行和 n+1 列。真实值列向量 y 是 m×1，系数列向量 θ 是 (n+1)×1，所以 Xθ 输出一列 m 个预测。</p></div>
+    <div class="concept"><h3>先造特征，再按列缩放</h3><p>用 x 和 x² 同时预测，属于<strong>多项式特征</strong>。曲线可以弯，但参数 θ 仍只是乘各列再相加。先计算所有样本的 x²，再把这一列单独缩放。</p><p>按本课题目常用的均值归一化，先减这一列均值，再除以该列的极差（最大值−最小值）。这与除以标准差的做法不同，考试按题干指定分母算。缩放通常让梯度下降更容易收敛；新样本使用训练集算出的同一组均值和尺度。</p></div>
+    <div class="concept"><h3>梯度下降与正规方程</h3><p>学习率合适时，梯度下降逐步找到较低代价。代价一直缓慢下降，可以试更大步长并观察；代价上升或反复跳动时，可检查步长是否过大。</p><p><span class="formula">θ = (XᵀX)⁻¹Xᵀy</span>当 X 的列线性无关时，这个式子给出普通最小二乘解。正规方程处理的是 (n+1)×(n+1) 的矩阵，n 很大时开销高。若有重复列等依赖，不能直接使用上式的逆。</p></div>
+  </section>
+  <section id="example" class="example" aria-labelledby="example-heading">
+    <h2 id="example-heading">跟着算一遍</h2>
+    <ol><li>以 3 个输入 x=1、2、3 为例，添加平方特征后该列为 1、4、9。</li><li>这一列的均值是 (1+4+9)/3=14/3，极差是 9−1=8。</li><li>第二行的平方特征缩放后为 (4−14/3)/8=−1/12。加一列 1 后，3 个样本、2 个原特征对应 X 的形状 3×3。</li></ol>
+  </section>
+  <section id="practice" class="try" aria-labelledby="practice-heading">
+    <h2 id="practice-heading">自己试一题</h2>
+    <p>5 条样本，2 个原特征，加上截距列后，X、θ、y 的形状各是什么？</p>
+    <details class="solution"><summary>核对练习思路</summary><div><p>X 是 5×3，θ 是 3×1，y 是 5×1，所以 Xθ 是 5×1。</p></div></details>
+  </section>
+  <section id="original" aria-labelledby="questions-heading">
+    <h2 id="questions-heading">原题练习</h2>
+    <nav class="question-jump" aria-label="跳到本课原题"><a href="#q16">16</a><a href="#q17">17</a><a href="#q18">18</a><a href="#q19">19</a><a href="#q20">20</a></nav>
+    <p class="small">先独立作答，再展开解析核对。计算题可以在纸上列式。</p>
+    <noscript><p>启用 JavaScript 可提交选项。也可以直接展开解析自查。</p></noscript>
+  <article class="question" id="q16" data-original-question="16">
+    <h3>第 16 题</h3>
+    <p class="question-stem">有 4 名学生，他们的期中和期末成绩如下。<img class="question-image" src="../assets/questions/image7.png" width="292" height="228" alt="四行的期中分、期中分的平方、期末分依次为 (89,7921,96)、(72,5184,74)、(94,8836,87)、(69,4761,78)。" loading="lazy" decoding="async">
+用 hθ(x)=θ₀+θ₁x₁+θ₂x₂ 预测期末成绩，其中 x₁ 是期中分数，x₂ 是期中分数的平方。对 x₂ 列做均值归一化，即减去本列均值，再除以本列的极差（最大值减最小值）。第 4 条样本变换后的 x₂ 值是多少？提示：第 1 条样本的期中分是 89，期末分是 96。</p>
+    <details class="solution">
+      <summary>查看计算步骤与答案</summary>
+      <div><ol><li>平方特征列为 7921、5184、8836、4761。先求本列均值：(7921+5184+8836+4761)÷4=6675.5。</li><li>按题意求本列极差：最大值 8836 减最小值 4761，结果是 4075。</li><li>第 4 行的平方特征是 4761。先减均值，再除以极差，结果为 (4761−6675.5)÷4075≈−0.4698。</li></ol><p class="source-note"><strong>题册勘误</strong> 题干的预测目标按表和特征列整理为期末成绩。原解析使用了离均差平方和的平方根作分母。题干明确要求极差，按极差计算，结果也约为 −0.47。</p></div>
+    </details>
+  </article>
+  <article class="question" id="q17" data-original-question="17">
+    <h3>第 17 题</h3>
+    <p class="question-stem">用α=0.3进行15次梯度下降迭代，每次迭代后计算J(θ)。你会发现J(θ)的值下降缓慢，并且在15次迭代后仍在下降。基于此，以下哪个结论似乎最可信？</p>
+    <form class="exercise choice-exercise" data-quiz data-answer="C">
+      <fieldset>
+        <legend>单选题</legend>
+        <label><input type="radio" name="q17-1" value="A"><span class="choice-letter">A.</span><span>α=0.3是学习率的有效选择。</span></label>
+        <label><input type="radio" name="q17-1" value="B"><span class="choice-letter">B.</span><span>与其使用α当前值，不如尝试更小的α值（比如α=0.1）</span></label>
+        <label><input type="radio" name="q17-1" value="C"><span class="choice-letter">C.</span><span>与其使用α当前值，不如尝试更大的α值（比如α=1.0）</span></label>
+      </fieldset>
+      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+    </form>
+    <details class="solution">
+      <summary>查看答案与解析</summary>
+      <div><p class="solution-key"><strong>答案</strong> C</p><p>曲线在下降，表示当前步长能使这段训练进展；下降很慢时值得试一个更大的学习率并观察。A 的说法过于笼统，C 给出题目期待的下一步。B 往往会进一步减慢。若试验发现震荡或上升，应回调。</p></div>
+    </details>
+  </article>
+  <article class="question" id="q18" data-original-question="18">
+    <h3>第 18 题</h3>
+    <p class="question-stem">假设您有m=14个训练示例，有n=3个特性（不包括需要另外添加的恒为1的截距项），正规方程是 θ = (XᵀX)⁻¹Xᵀy 。对于给定m和n的值，这个方程中θ,X,y的维数分别是多少？</p>
+    <form class="exercise choice-exercise" data-quiz data-answer="B">
+      <fieldset>
+        <legend>单选题</legend>
+        <label><input type="radio" name="q18-1" value="A"><span class="choice-letter">A.</span><span>X 14×3, y 14×1, θ 3×3</span></label>
+        <label><input type="radio" name="q18-1" value="B"><span class="choice-letter">B.</span><span>X 14×4, y 14×1, θ 4×1</span></label>
+        <label><input type="radio" name="q18-1" value="C"><span class="choice-letter">C.</span><span>X 14×3, y 14×1, θ 3×1</span></label>
+        <label><input type="radio" name="q18-1" value="D"><span class="choice-letter">D.</span><span>X 14×4, y 14×4, θ 4×4</span></label>
+      </fieldset>
+      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+    </form>
+    <details class="solution">
+      <summary>查看答案与解析</summary>
+      <div><p class="solution-key"><strong>答案</strong> B</p><p>14 个样本对应 14 行，3 个特征加一列常数 1，共 4 列。所以 X 是 14×4，y 的 14 个真实值排成 14×1，θ 的 4 个系数排成 4×1。</p><p class="source-note"><strong>题册勘误</strong> 原文正规方程有乱码。满列秩时可写为 θ = (XᵀX)⁻¹Xᵀy。</p></div>
+    </details>
+  </article>
+  <article class="question" id="q19" data-original-question="19">
+    <h3>第 19 题</h3>
+    <p class="question-stem">假设您有一个数据集，有 m=1000000 条样本，每条样本有 n=200000 个特征。你想用多元线性回归来拟合参数θ到我们的数据。你更应该用梯度下降还是正规方程？</p>
+    <form class="exercise choice-exercise" data-quiz data-answer="A">
+      <fieldset>
+        <legend>单选题</legend>
+        <label><input type="radio" name="q19-1" value="A"><span class="choice-letter">A.</span><span>梯度下降，因为正规方程中计算和处理 XᵀX 非常慢</span></label>
+        <label><input type="radio" name="q19-1" value="B"><span class="choice-letter">B.</span><span>正规方程，因为它提供了一种直接求解的有效方法</span></label>
+        <label><input type="radio" name="q19-1" value="C"><span class="choice-letter">C.</span><span>梯度下降，因为它总是收敛到最优θ</span></label>
+        <label><input type="radio" name="q19-1" value="D"><span class="choice-letter">D.</span><span>正规方程，因为梯度下降可能无法找到最优θ</span></label>
+      </fieldset>
+      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+    </form>
+    <details class="solution">
+      <summary>查看答案与解析</summary>
+      <div><p class="solution-key"><strong>答案</strong> A</p><p>加截距后 XᵀX 有 200001 行和 200001 列，形成和求解都很昂贵，题设优先选迭代办法。B、D 忽略规模；C 忽略学习率、算法设置等收敛条件。</p><p class="source-note"><strong>题册勘误</strong> 原题 A 中乱码按正规方程需处理 XᵀX 恢复。</p></div>
+    </details>
+  </article>
+  <article class="question" id="q20" data-original-question="20">
+    <h3>第 20 题</h3>
+    <p class="question-stem">以下哪些是使用特征缩放的原因？</p>
+    <form class="exercise choice-exercise" data-quiz data-answer="C">
+      <fieldset>
+        <legend>多选题 · 选全后检查</legend>
+        <label><input type="checkbox" name="q20-1" value="A"><span class="choice-letter">A.</span><span>它可以防止梯度下降陷入局部最优</span></label>
+        <label><input type="checkbox" name="q20-1" value="B"><span class="choice-letter">B.</span><span>它通过降低梯度下降的每次迭代的计算成本来加速梯度下降</span></label>
+        <label><input type="checkbox" name="q20-1" value="C"><span class="choice-letter">C.</span><span>它通过减少迭代次数来获得一个好的解，从而加快了梯度下降的速度</span></label>
+        <label><input type="checkbox" name="q20-1" value="D"><span class="choice-letter">D.</span><span>它防止矩阵 XᵀX （用于正规方程）不可逆（奇异/退化）</span></label>
+      </fieldset>
+      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+    </form>
+    <details class="solution">
+      <summary>查看答案与解析</summary>
+      <div><p class="solution-key"><strong>答案</strong> C</p><p>特征的数值尺度接近时，梯度下降通常更容易朝最低点前进，往往可减少迭代。A 误将凸问题当成会陷入坏的局部极小值；B 的单次运算规模基本相同；D 中按非零常数缩放列不能消除线性依赖。</p><p class="source-note"><strong>题册勘误</strong> 原题 D 的矩阵符号恢复为 XᵀX。</p></div>
+    </details>
+  </article>
+  </section>
+  <section class="lesson-recall" aria-labelledby="recall-heading"><h2 id="recall-heading">考前回忆</h2><p>加截距列后 X 有 n+1 列。先构造多项式特征，再逐列缩放。正规方程的直接逆要求满列秩。</p></section>
+  <footer>
+    <p>遇到疑问，可以把题号和你卡住的步骤发给我。</p>
+    <p class="small">参考资料 <a href="https://see.stanford.edu/materials/aimlcs229/cs229-notes1.pdf">斯坦福 CS229 监督学习讲义</a> · <a href="https://developers.google.com/machine-learning/crash-course/linear-regression">Google 线性回归课程</a></p>
+    <nav aria-label="继续复习"><a href="0003-simple-linear-regression.html">上一课 单变量线性回归与梯度下降</a><a href="0005-logistic-regression.html">下一课 逻辑回归从得分到类别</a></nav>
+  </footer>
+</main>
+</body>
+</html>

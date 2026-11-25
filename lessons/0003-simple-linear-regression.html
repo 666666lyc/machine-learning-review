@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>单变量线性回归与梯度下降 · 第 2 天</title>
+  <link rel="stylesheet" href="../assets/lesson.css">
+  <script defer src="../assets/quiz.js"></script>
+</head>
+<body>
+<div class="sitebar"><nav aria-label="课程导航">
+  <a class="course-brand" href="../index.html">机器学习复习</a>
+  <a href="../index.html#schedule">课程目录</a>
+  <a href="../reference/quick-review.html">考前速查</a>
+</nav></div>
+<main class="lesson">
+  <header class="lesson-intro">
+    <a class="day-label" href="../index.html#day-2">第 2 天</a>
+    <h1>单变量线性回归与梯度下降</h1>
+    <p class="lede">只知道一套房子的面积，怎样画一条直线估计价格？先写出怎样预测，再用历史数据给这条线打分。</p>
+    <nav class="lesson-nav" aria-label="本课内容"><a href="#concepts">知识点</a><a href="#example">带做例题</a><a href="#practice">动手练习</a><a href="#original">原题 6–10</a></nav>
+  </header>
+  <section id="concepts" aria-labelledby="concepts-heading">
+    <h2 id="concepts-heading">知识点</h2>
+    <div class="concept"><h3>从一个数字预测另一个数字</h3><p>「单变量」表示只有一个输入特征。<i>x</i> 是这个输入，<i>y</i> 是真实答案，<i>h</i><sub>θ</sub>(<i>x</i>) 是模型的预测值，读作「用这组参数对 x 的预测」。符号 θ（读 theta）表示模型里需要学习的系数。</p><p><span class="formula">h<sub>θ</sub>(x) = θ₀ + θ₁x</span>θ₀ 是截距，表示输入为 0 时的预测值。θ₁ 是斜率，表示输入每增加 1 单位，预测值会变化多少。x<sup>(i)</sup> 和 y<sup>(i)</sup> 中的 i 是样本编号。</p></div>
+    <div class="concept"><h3>用平方误差给直线打分</h3><p>单条样本误差为预测值减真实值。正负误差直接求和会互相抵消，平方后都变成非负数，较大误差也会得到更高代价。</p><p><span class="formula">J(θ₀, θ₁) = [1/(2m)] ∑<sub>i=1</sub><sup>m</sup> (h<sub>θ</sub>(x<sup>(i)</sup>) − y<sup>(i)</sup>)²</span>m 是训练样本数，∑ 表示对每条样本求和，除以 m 相当于取平均，再乘 1/2 使求导时的系数简洁。J 最小的位置不受常数 1/2 影响。</p></div>
+    <div class="concept"><h3>梯度下降和等高线</h3><p>把每一种 θ₀、θ₁ 对应的代价想成一张地形图的高度。等高线连接代价一样的参数点。平方误差的参数图是凸的，像一个碗或带平底的槽。</p><p>梯度描述代价增大最快的方向，梯度下降沿反方向走。学习率 α 控制步长，太小走得慢，太大可能越过谷底。如果 J=0，则所有训练误差平方都为 0。新样本的误差仍需单独检验。</p></div>
+  </section>
+  <section id="example" class="example" aria-labelledby="example-heading">
+    <h2 id="example-heading">跟着算一遍</h2>
+    <ol><li>用两个样本 (1, 2)、(3, 4)，试直线 h(x)=x。两个预测值分别为 1 和 3。</li><li>用预测减真实值，两次都是 −1。平方后都是 1，合计 2。</li><li>两条样本 m=2，J=2÷(2×2)=0.5。若改成 h(x)=x+1，两个预测都正好等于真实值，因此 J=0。</li></ol>
+  </section>
+  <section id="practice" class="try" aria-labelledby="practice-heading">
+    <h2 id="practice-heading">自己试一题</h2>
+    <p>两条样本是 (1, 4)、(2, 6)。若 h(x)=1+2x，预测值与代价分别是多少？</p>
+    <details class="solution"><summary>核对练习思路</summary><div><p>预测值为 3 和 5。误差都是 −1，平方和是 2，J=2÷4=0.5。</p></div></details>
+  </section>
+  <section id="original" aria-labelledby="questions-heading">
+    <h2 id="questions-heading">原题练习</h2>
+    <nav class="question-jump" aria-label="跳到本课原题"><a href="#q6">6</a><a href="#q7">7</a><a href="#q8">8</a><a href="#q9">9</a><a href="#q10">10</a></nav>
+    <p class="small">先独立作答，再展开解析核对。计算题可以在纸上列式。</p>
+    <noscript><p>启用 JavaScript 可提交选项。也可以直接展开解析自查。</p></noscript>
+  <article class="question" id="q6" data-original-question="6">
+    <h3>第 6 题</h3>
+    <p class="question-stem">根据一名学生大一获得 A 等成绩的科目数 x（包括 A−、A 和 A+），预测他大二获得 A 等成绩的科目数 y。表中每一行是一条训练样本。线性回归模型为 hθ(x) = θ₀ + θ₁x，m 表示样本数。<img class="question-image" src="../assets/questions/image1.png" width="171" height="185" alt="训练样本表，x 与 y 依次为 (3,2)、(1,2)、(0,1)、(4,3)。" loading="lazy" decoding="async">
+上表给出的训练样本数 m 是多少？</p>
+    <details class="solution">
+      <summary>查看计算步骤与答案</summary>
+      <div><ol><li>把表头与数据分开。表头的 x 和 y 只是列名。</li><li>实际数据是 (3, 2)、(1, 2)、(0, 1)、(4, 3)，每行是一条样本。</li><li>共有 4 行数据，因此 m = 4。</li></ol></div>
+    </details>
+  </article>
+  <article class="question" id="q7" data-original-question="7">
+    <h3>第 7 题</h3>
+    <p class="question-stem">使用<a href="#q6">第 6 题的训练集</a>。代价函数 J(θ₀, θ₁) = [1/(2m)] ∑ᵢ₌₁ᵐ (hθ(x⁽ⁱ⁾)−y⁽ⁱ⁾)²。求 J(0, 1)。</p>
+    <details class="solution">
+      <summary>查看计算步骤与答案</summary>
+      <div><ol><li>代入 θ₀=0、θ₁=1，模型变成 h(x)=x。第 6 题的四个预测值是 3、1、0、4。</li><li>依次减去真实值 2、2、1、3，误差是 1、−1、−1、1。平方后都是 1，平方和为 4。</li><li>m=4，所以分母 2m=8，J(0, 1)=4÷8=0.5。</li></ol></div>
+    </details>
+  </article>
+  <article class="question" id="q8" data-original-question="8">
+    <h3>第 8 题</h3>
+    <p class="question-stem">沿用<a href="#q6">第 6 题的线性回归模型</a>，令 θ₀=−1，θ₁=2。求 hθ(6)。</p>
+    <details class="solution">
+      <summary>查看计算步骤与答案</summary>
+      <div><ol><li>将系数放进 h(x)=θ₀+θ₁x，得到 h(x)=−1+2x。</li><li>把 x=6 代入，h(6)=−1+2×6=11。</li></ol></div>
+    </details>
+  </article>
+  <article class="question" id="q9" data-original-question="9">
+    <h3>第 9 题</h3>
+    <p class="question-stem">代价函数J(θ₀,θ₁)与θ₀,θ₁的关系如图2所示。“图1”中给出了相同代价函数的等高线图。根据图示，选择正确的选项（选出所有正确项）<img class="question-image" src="../assets/questions/image2.png" width="591" height="276" alt="左边为带 A、B、C 标记的代价等高线图，右边为标出 P 点的代价曲面。" loading="lazy" decoding="async"></p>
+    <form class="exercise choice-exercise" data-quiz data-answer="AE">
+      <fieldset>
+        <legend>多选题 · 选全后检查</legend>
+        <label><input type="checkbox" name="q9-1" value="A"><span class="choice-letter">A.</span><span>从B点开始，学习率合适的梯度下降算法会最终帮助我们到达或者接近A点，即代价函数J(θ₀,θ₁)在A点有最小值</span></label>
+        <label><input type="checkbox" name="q9-1" value="B"><span class="choice-letter">B.</span><span>点P（图2的全局最小值）对应于图1的点C</span></label>
+        <label><input type="checkbox" name="q9-1" value="C"><span class="choice-letter">C.</span><span>从B点开始，学习率合适的梯度下降算法会最终帮助我们到达或者接近C点，即代价函数J(θ₀,θ₁)在C点有最小值</span></label>
+        <label><input type="checkbox" name="q9-1" value="D"><span class="choice-letter">D.</span><span>从B点开始，学习率合适的梯度下降算法会最终帮助我们到达或者接近A点，即代价函数J(θ₀,θ₁)在A点有最大值</span></label>
+        <label><input type="checkbox" name="q9-1" value="E"><span class="choice-letter">E.</span><span>点P（图2的全局最小值）对应于图1的点A</span></label>
+      </fieldset>
+      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+    </form>
+    <details class="solution">
+      <summary>查看答案与解析</summary>
+      <div><p class="solution-key"><strong>答案</strong> A、E</p><p>等高线中心 A 对应曲面最低点 P。学习率合适时，从 B 做梯度下降会朝 A 移动，因此 A、E 正确。C 点离中心更远，D 误把 A 说成最大值。</p><p class="source-note"><strong>题册勘误</strong> 原答案字母 A、E 正确，其中一行旁注误把 P 对应到 C。</p></div>
+    </details>
+  </article>
+  <article class="question" id="q10" data-original-question="10">
+    <h3>第 10 题</h3>
+    <p class="question-stem">对于一个线性回归任务（例如预测房价），假设能找到一组参数 θ₀、θ₁，使训练集上的代价 J(θ₀, θ₁)=0。哪些陈述正确？（选出所有正确项）</p>
+    <form class="exercise choice-exercise" data-quiz data-answer="B">
+      <fieldset>
+        <legend>多选题 · 选全后检查</legend>
+        <label><input type="checkbox" name="q10-1" value="A"><span class="choice-letter">A.</span><span>必须有 θ₀=0、θ₁=0 才能使 J=0。</span></label>
+        <label><input type="checkbox" name="q10-1" value="B"><span class="choice-letter">B.</span><span>对于这组满足 J=0 的参数，每个训练样本都满足 hθ(x⁽ⁱ⁾)=y⁽ⁱ⁾。</span></label>
+        <label><input type="checkbox" name="q10-1" value="C"><span class="choice-letter">C.</span><span>按 J 的定义，不可能存在使 J=0 的参数。</span></label>
+        <label><input type="checkbox" name="q10-1" value="D"><span class="choice-letter">D.</span><span>对于任何未见过的样本也能完美预测 y。</span></label>
+      </fieldset>
+      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+    </form>
+    <details class="solution">
+      <summary>查看答案与解析</summary>
+      <div><p class="solution-key"><strong>答案</strong> B</p><p>代价是非负平方项的和，和为 0 说明每一项都为 0，因此每个训练样本的预测都等于真实值。A 的参数可以取其他值；C 否认了可能的完全拟合；D 把训练表现直接外推到新样本。</p></div>
+    </details>
+  </article>
+  </section>
+  <section class="lesson-recall" aria-labelledby="recall-heading"><h2 id="recall-heading">考前回忆</h2><p>预测值代公式。代价对所有误差平方求和，再除以 2m。J=0 仅说明训练样本全部拟合。</p></section>
+  <footer>
+    <p>遇到疑问，可以把题号和你卡住的步骤发给我。</p>
+    <p class="small">参考资料 <a href="https://see.stanford.edu/materials/aimlcs229/cs229-notes1.pdf">斯坦福 CS229 监督学习讲义</a></p>
+    <nav aria-label="继续复习"><a href="0002-matrix-operations.html">上一课 判断矩阵运算的维度</a><a href="0004-multiple-linear-regression.html">下一课 多元线性回归与特征缩放</a></nav>
+  </footer>
+</main>
+</body>
+</html>

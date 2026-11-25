@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>判断机器学习任务 · 第 1 天</title>
+  <link rel="stylesheet" href="../assets/lesson.css">
+  <script defer src="../assets/quiz.js"></script>
+</head>
+<body>
+<div class="sitebar"><nav aria-label="课程导航">
+  <a class="course-brand" href="../index.html">机器学习复习</a>
+  <a href="../index.html#schedule">课程目录</a>
+  <a href="../reference/quick-review.html">考前速查</a>
+</nav></div>
+<main class="lesson">
+  <header class="lesson-intro">
+    <a class="day-label" href="../index.html#day-1">第 1 天</a>
+    <h1>判断机器学习任务</h1>
+    <p class="lede">同样是一张天气表，为什么可以用来预测温度，也可以用来判断是否下雨？先明确你想让模型给出什么答案，再看过去有没有同类答案可供学习。</p>
+    <nav class="lesson-nav" aria-label="本课内容"><a href="#concepts">知识点</a><a href="#example">带做例题</a><a href="#practice">动手练习</a><a href="#original">原题 1–5</a></nav>
+  </header>
+  <section id="concepts" aria-labelledby="concepts-heading">
+    <h2 id="concepts-heading">知识点</h2>
+    <div class="concept"><h3>一条样本里有什么</h3><p>假设一行天气记录写着「湿度 80%，风速 3 米/秒，次日有雨」。湿度和风速是用来做判断的信息，称为<strong>特征</strong>，常写作 <i>x</i>。次日有雨是过去实际观察到的答案，称为<strong>标签</strong>或目标，常写作 <i>y</i>。这一行就是一个<strong>样本</strong>。</p><p>模型从许多已知 <i>x</i> 和 <i>y</i> 的样本中找规律，再为新样本预测 <i>y</i>，这是<strong>监督学习</strong>。只有 <i>x</i>，目的是发现数据里未知的结构，例如把相似天气分组，这类任务可以用<strong>无监督学习</strong>。其中按相似性自动分组叫<strong>聚类</strong>。</p></div>
+    <div class="concept"><h3>类别、数值和概率</h3><p>如果要预测的是「有雨」或「无雨」这样的类别，做<strong>分类</strong>。两类时叫二分类。把类别编码成 0 和 1 并不会改变任务性质。输出为 0.7 也可以是分类模型，它表示属于某个类别的估计概率。</p><p>如果要估计温度、降雨量或价格这一类数值，做<strong>回归</strong>。判断时看想预测的量能否按数值大小和距离来比较。例如 25 ℃和 26 ℃相差 1 ℃。</p></div>
+    <div class="concept"><h3>任务 T、经验 E 和指标 P</h3><p>T 是要完成的任务（Task），E 是用于学习的经验（Experience），P 是评价表现的指标（Performance measure）。判断 P 时问「这个量能告诉我模型做得多好吗？」</p><p>对于是否下雨的预测，E 是带有真实降雨记录的历史数据，P 可以是新日期上猜对的比例。预测气温时，P 可以换为平均绝对误差，也就是每次预测与真实温度相差多少，再求平均。</p></div>
+  </section>
+  <section id="example" class="example" aria-labelledby="example-heading">
+    <h2 id="example-heading">跟着算一遍</h2>
+    <ol><li>先明确任务。用过去的记录预测新一天是否下雨，目标只有两类，属于监督分类。</li><li>用 4 个未参与训练的日期评估。真实情况依次是「有雨、无雨、无雨、有雨」，预测是「有雨、有雨、无雨、有雨」。</li><li>第 1、3、4 天猜对，所以 P 可以用准确率表示，等于 3÷4=75%。T 是预测是否下雨，E 是用于训练的历史记录。</li></ol>
+  </section>
+  <section id="practice" class="try" aria-labelledby="practice-heading">
+    <h2 id="practice-heading">自己试一题</h2>
+    <p>有六个月的用户点击记录，但没有用户类型标签。现在要找出网站上有哪些类型的用户。任务怎么判断？</p>
+    <details class="solution"><summary>核对练习思路</summary><div><p>题目要发现未知人群，可以用无监督聚类。若已为用户标好类型，再用这些记录预测新用户的类型，就变成了监督分类。</p></div></details>
+  </section>
+  <section id="original" aria-labelledby="questions-heading">
+    <h2 id="questions-heading">原题练习</h2>
+    <nav class="question-jump" aria-label="跳到本课原题"><a href="#q1">1</a><a href="#q2">2</a><a href="#q3">3</a><a href="#q4">4</a><a href="#q5">5</a></nav>
+    <p class="small">先独立作答，再展开解析核对。计算题可以在纸上列式。</p>
+    <noscript><p>启用 JavaScript 可提交选项。也可以直接展开解析自查。</p></noscript>
+  <article class="question" id="q1" data-original-question="1">
+    <h3>第 1 题</h3>
+    <p class="question-stem">一个计算机程序从经验E中学习任务T，并用P来衡量表现。并且，T的表现P随着经验E的增加而提高。 假设我们给一个学习算法输入了很多历史天气的数据，让它学会预测天气。什么是P的合理选择？</p>
+    <form class="exercise choice-exercise" data-quiz data-answer="C">
+      <fieldset>
+        <legend>单选题</legend>
+        <label><input type="radio" name="q1-1" value="A"><span class="choice-letter">A.</span><span>计算大量历史气象数据的过程</span></label>
+        <label><input type="radio" name="q1-1" value="B"><span class="choice-letter">B.</span><span>以上都不</span></label>
+        <label><input type="radio" name="q1-1" value="C"><span class="choice-letter">C.</span><span>正确预测未来日期天气的概率</span></label>
+        <label><input type="radio" name="q1-1" value="D"><span class="choice-letter">D.</span><span>天气预报任务</span></label>
+      </fieldset>
+      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+    </form>
+    <details class="solution">
+      <summary>查看答案与解析</summary>
+      <div><p class="solution-key"><strong>答案</strong> C</p><p>先区分三件事：T 是预测未来天气，E 是用于学习的历史气象记录，P 是用来衡量好坏的指标。C 表示预测正确的比例或概率。A 描述处理过程，D 描述任务，B 因此不成立。</p></div>
+    </details>
+  </article>
+  <article class="question" id="q2" data-original-question="2">
+    <h3>第 2 题</h3>
+    <p class="question-stem">假设你正在做天气预报，并使用算法预测明天气温（摄氏度/华氏度），你会把这当作一个分类问题还是一个回归问题？</p>
+    <form class="exercise choice-exercise" data-quiz data-answer="B">
+      <fieldset>
+        <legend>单选题</legend>
+        <label><input type="radio" name="q2-1" value="A"><span class="choice-letter">A.</span><span>分类</span></label>
+        <label><input type="radio" name="q2-1" value="B"><span class="choice-letter">B.</span><span>回归</span></label>
+      </fieldset>
+      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+    </form>
+    <details class="solution">
+      <summary>查看答案与解析</summary>
+      <div><p class="solution-key"><strong>答案</strong> B</p><p>目标是温度这一数值，28.4 ℃ 和 28.5 ℃的差异有实际含义，所以是回归。如果目标改为低温、适中、高温三个类别，才是分类。</p></div>
+    </details>
+  </article>
+  <article class="question" id="q3" data-original-question="3">
+    <h3>第 3 题</h3>
+    <p class="question-stem">假设你在做股市预测。你想预测某家公司是否会在未来7天内宣布破产（通过对之前面临破产风险的类似公司的数据进行训练）。你会把这当作一个分类问题还是一个回归问题？</p>
+    <form class="exercise choice-exercise" data-quiz data-answer="A">
+      <fieldset>
+        <legend>单选题</legend>
+        <label><input type="radio" name="q3-1" value="A"><span class="choice-letter">A.</span><span>分类</span></label>
+        <label><input type="radio" name="q3-1" value="B"><span class="choice-letter">B.</span><span>回归</span></label>
+      </fieldset>
+      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+    </form>
+    <details class="solution">
+      <summary>查看答案与解析</summary>
+      <div><p class="solution-key"><strong>答案</strong> A</p><p>训练样本的目标是未来 7 天内破产或未破产，只有两个类别，所以是二分类。即使模型先给出破产概率，训练目标仍是这个二元结果。</p></div>
+    </details>
+  </article>
+  <article class="question" id="q4" data-original-question="4">
+    <h3>第 4 题</h3>
+    <p class="question-stem">下面的一些问题最好使用有监督的学习算法来解决，而其他问题则应该使用无监督的学习算法来解决。以下哪一项你会使用监督学习？（选择所有适用的选项）在每种情况下，假设有适当的数据集可供算法学习。</p>
+    <form class="exercise choice-exercise" data-quiz data-answer="AC">
+      <fieldset>
+        <legend>多选题 · 选全后检查</legend>
+        <label><input type="checkbox" name="q4-1" value="A"><span class="choice-letter">A.</span><span>根据一个人的基因（DNA）数据，预测他/她的未来10年患糖尿病的几率</span></label>
+        <label><input type="checkbox" name="q4-1" value="B"><span class="choice-letter">B.</span><span>根据心脏病患者的大量医疗记录数据集，尝试了解是否有不同类患者群，我们可以为其量身定制不同的治疗方案</span></label>
+        <label><input type="checkbox" name="q4-1" value="C"><span class="choice-letter">C.</span><span>让计算机检查一段音频，并对该音频中是否有人声（即人声歌唱）或是否只有乐器（而没有人声）进行分类</span></label>
+        <label><input type="checkbox" name="q4-1" value="D"><span class="choice-letter">D.</span><span>给出1000名医疗患者对实验药物的反应（如治疗效果、副作用等）的数据，发现患者对药物的反应是否有不同的类别或“类型”，如果有，这些类别是什么</span></label>
+      </fieldset>
+      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+    </form>
+    <details class="solution">
+      <summary>查看答案与解析</summary>
+      <div><p class="solution-key"><strong>答案</strong> A、C</p><p>A 可以用已知是否患病的历史记录学习患病概率，C 可以用已标注音频判断是否有人声。B 和 D 都在发现事先没有标签的群组，属于无监督学习。</p><p class="source-note"><strong>题册勘误</strong> 原解析把 D 当成监督分类。D 的目标是发现未知类别，因此这里只选 A、C。</p></div>
+    </details>
+  </article>
+  <article class="question" id="q5" data-original-question="5">
+    <h3>第 5 题</h3>
+    <p class="question-stem">哪一个是机器学习的合理定义？</p>
+    <form class="exercise choice-exercise" data-quiz data-answer="B">
+      <fieldset>
+        <legend>单选题</legend>
+        <label><input type="radio" name="q5-1" value="A"><span class="choice-letter">A.</span><span>机器学习从标记的数据中学习</span></label>
+        <label><input type="radio" name="q5-1" value="B"><span class="choice-letter">B.</span><span>机器学习能使计算机能够在没有明确编程的情况下学习</span></label>
+        <label><input type="radio" name="q5-1" value="C"><span class="choice-letter">C.</span><span>机器学习是计算机编程的科学</span></label>
+        <label><input type="radio" name="q5-1" value="D"><span class="choice-letter">D.</span><span>机器学习是允许机器人智能行动的领域</span></label>
+      </fieldset>
+      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+    </form>
+    <details class="solution">
+      <summary>查看答案与解析</summary>
+      <div><p class="solution-key"><strong>答案</strong> B</p><p>B 对应机器学习从经验或数据中改进表现的思想。A 只涵盖有标签的监督学习。C 的范围过广，D 把应用范围限在了机器人。</p></div>
+    </details>
+  </article>
+  </section>
+  <section class="lesson-recall" aria-labelledby="recall-heading"><h2 id="recall-heading">考前回忆</h2><p>有已知目标时按目标判断分类或回归。T 是任务，E 是学习经验，P 是评价指标。</p></section>
+  <footer>
+    <p>遇到疑问，可以把题号和你卡住的步骤发给我。</p>
+    <p class="small">参考资料 <a href="https://developers.google.com/machine-learning/intro-to-ml/what-is-ml?hl=zh-cn">Google 机器学习导论</a> · <a href="https://www.cs.cmu.edu/~mgormley/courses/10601-s25/slides/lecture1-overview.pdf#page=13">卡内基梅隆大学 10-601 课程导论</a></p>
+    <nav aria-label="继续复习"><a href="0002-matrix-operations.html">下一课 判断矩阵运算的维度</a></nav>
+  </footer>
+</main>
+</body>
+</html>

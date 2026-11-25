@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>考前速查 · 机器学习复习</title>
+  <link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body>
+<div class="sitebar"><nav aria-label="课程导航">
+  <a class="course-brand" href="../index.html">机器学习复习</a>
+  <a href="../index.html#schedule">课程目录</a>
+  <a href="../reference/quick-review.html" aria-current="page">考前速查</a>
+</nav></div>
+<main class="lesson">
+  <header><h1>考前速查</h1><p class="lede">看课名先复述，想不起来就回到例题。最后选 3 道错题，盖住解析独立重做。</p></header>
+  <section class="recall-day"><h2>第 1 天 · 机器学习入门与线性代数</h2><ul><li>有已知目标时按目标判断分类或回归。T 是任务，E 是学习经验，P 是评价指标。 <a href="../lessons/0001-learning-task-types.html">回顾本课</a></li><li>加减要求同形状。转置交换行列。矩阵乘法检查中间维数，结果取外侧维数。 <a href="../lessons/0002-matrix-operations.html">回顾本课</a></li></ul></section>
+  <section class="recall-day"><h2>第 2 天 · 一元与多元线性回归</h2><ul><li>预测值代公式。代价对所有误差平方求和，再除以 2m。J=0 仅说明训练样本全部拟合。 <a href="../lessons/0003-simple-linear-regression.html">回顾本课</a></li><li>加截距列后 X 有 n+1 列。先构造多项式特征，再逐列缩放。正规方程的直接逆要求满列秩。 <a href="../lessons/0004-multiple-linear-regression.html">回顾本课</a></li></ul></section>
+  <section class="recall-day"><h2>第 3 天 · 逻辑回归</h2><ul><li>Sigmoid 把得分映射为正类概率。阈值 0.5 时，解 θᵀx=0 得边界。 <a href="../lessons/0005-logistic-regression.html">回顾本课</a></li></ul></section>
+  <section class="recall-day"><h2>第 4 天 · 正则化与模型诊断</h2><ul><li>正则化限制被惩罚系数。λ 太大可能欠拟合，λ 的选择用验证集。 <a href="../lessons/0006-regularization.html">回顾本课</a></li><li>右侧两条学习曲线都高而接近，通常是高偏差。训练低验证高且持续有间距，通常是高方差。 <a href="../lessons/0007-model-diagnostics.html">回顾本课</a></li></ul></section>
+  <section class="recall-day"><h2>第 5 天 · 分类指标与阈值</h2><ul><li>精确率的分母是预测正类，召回率的分母是实际正类。提高阈值不能提高固定样本集上的召回率。 <a href="../lessons/0008-classification-metrics.html">回顾本课</a></li></ul></section>
+  <section class="recall-day"><h2>第 6 天 · 支持向量机</h2><ul><li>正类到 +1、负类到 −1 时对应损失归零。高斯核中心高度为 1，σ² 影响宽窄。 <a href="../lessons/0009-support-vector-machines.html">回顾本课</a></li></ul></section>
+  <section class="recall-day"><h2>第 7 天 · 聚类与主成分分析</h2><ul><li>先选最近中心，再把组内样本求均值。固定 K 比较多次运行时，选平均平方距离较小的方案。 <a href="../lessons/0010-k-means.html">回顾本课</a></li><li>主成分是方差最大的方向，正负都可。方差保留比例等于 1 减去残差平方占比。 <a href="../lessons/0011-pca.html">回顾本课</a></li></ul></section>
+  <section class="recall-day"><h2>第 8 天 · 异常检测</h2><ul><li>均值看中心，方差看分散。降低密度阈值会让报警更严格，可用组合特征表示单列看不出的异常。 <a href="../lessons/0012-anomaly-detection.html">回顾本课</a></li></ul></section>
+  <section class="recall-day"><h2>第 9 天 · 推荐系统</h2><ul><li>预测是用户和物品向量的内积。误差只在已评分处计入，缺评分不填成零。 <a href="../lessons/0013-recommender-systems.html">回顾本课</a></li></ul></section>
+  <section class="recall-day"><h2>第 10 天 · 大规模机器学习</h2><ul><li>批量梯度可在相同参数下分块求和。SGD 单步有噪声，观察滑动平均。 <a href="../lessons/0014-large-scale-learning.html">回顾本课</a></li></ul></section>
+  <section class="recall-day"><h2>第 11 天 · 图片文字识别</h2><ul><li>窗口计数先算单方向合法起点。上限分析比较相邻两次系统指标的差。 <a href="../lessons/0015-photo-ocr.html">回顾本课</a></li></ul></section>
+  <footer><nav><a href="../index.html#schedule">回到课程目录</a><a href="question-notes.html">题册勘误与存疑题</a></nav></footer>
+</main>
+</body>
+</html>

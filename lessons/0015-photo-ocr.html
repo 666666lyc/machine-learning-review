@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>图像文字识别与上限分析 · 第 11 天</title>
+  <link rel="stylesheet" href="../assets/lesson.css">
+  <script defer src="../assets/quiz.js"></script>
+</head>
+<body>
+<div class="sitebar"><nav aria-label="课程导航">
+  <a class="course-brand" href="../index.html">机器学习复习</a>
+  <a href="../index.html#schedule">课程目录</a>
+  <a href="../reference/quick-review.html">考前速查</a>
+</nav></div>
+<main class="lesson">
+  <header class="lesson-intro">
+    <a class="day-label" href="../index.html#day-11">第 11 天</a>
+    <h1>图像文字识别与上限分析</h1>
+    <p class="lede">一张拍下来的路牌需要变成可复制的文字。系统要先找到文字区域，再切分字符，最后逐个识别。整个系统经常出错，应该先修哪一环？</p>
+    <nav class="lesson-nav" aria-label="本课内容"><a href="#concepts">知识点</a><a href="#example">带做例题</a><a href="#practice">动手练习</a><a href="#original">原题 86–90</a></nav>
+  </header>
+  <section id="concepts" aria-labelledby="concepts-heading">
+    <h2 id="concepts-heading">知识点</h2>
+    <div class="concept"><h3>滑动窗口怎么计数</h3><p><strong>滑动窗口</strong>是把一个小方框放在图像的许多位置，每个位置都让分类器检查一次。窗口每移动多少像素叫步长。横向与纵向各有多个合法起点，总数是两者相乘。</p><p><span class="formula">单方向位置数 = ⌊(图长 − 窗口长) / 步长⌋ + 1</span>这个式子假设窗口不越界、从第一个合法位置开始，且图长不小于窗口长。⌊ ⌋ 表示向下取整，+1 是把起点也算上。多种窗口尺寸分别求次数后相加。</p></div>
+    <div class="concept"><h3>标注成本和数据增强</h3><p>每分钟可标多少条，是速度。总条数除以速度得到分钟数。若工资以小时计，换成小时再乘工资。每条数据成本和模型表现最好结合误差分析来评估。</p><p><strong>数据增强</strong>是从现有样本做合理的变化，例如小幅旋转或平移。变化后要保留原有标签。添加简单副本会增加数量，但没有增加变化。</p></div>
+    <div class="concept"><h3>一次给一个阶段正确答案</h3><p><strong>上限分析</strong>先记录原系统的端到端准确率，再按流程依次把当前阶段的输出换成正确结果，并保留此前已经替换的阶段。每次记录相同的端到端指标。</p><p>相邻两次结果的差是该步骤在这个替换顺序下的增益。表中最后的 100% 表示该假设设置下整个系统的分数。改变顺序或条件时，增益也可能不同。</p></div>
+  </section>
+  <section id="example" class="example" aria-labelledby="example-heading">
+    <h2 id="example-heading">跟着算一遍</h2>
+    <ol><li>对 10×10 图像用 4×4 窗口和步长 2。每个方向起点是 0、2、4、6，共 4 个。所以一共检查 4×4=16 次。</li><li>另一个例子中，文字流水线的原准确率为 65%，给第一阶段正确输出后为 70%，再给第二阶段正确输出后为 85%。</li><li>相邻增益分别是 5 和 15 个百分点。按这次分析，第二阶段更值得进一步排查。</li></ol>
+  </section>
+  <section id="practice" class="try" aria-labelledby="practice-heading">
+    <h2 id="practice-heading">自己试一题</h2>
+    <p>标 1200 张图片，每分钟 5 张，每小时 15 元。按用时比例计费，应付多少？</p>
+    <details class="solution"><summary>核对练习思路</summary><div><p>1200÷5=240 分钟，即 4 小时。一共 4×15=60 元。</p></div></details>
+  </section>
+  <section id="original" aria-labelledby="questions-heading">
+    <h2 id="questions-heading">原题练习</h2>
+    <nav class="question-jump" aria-label="跳到本课原题"><a href="#q86">86</a><a href="#q87">87</a><a href="#q88">88</a><a href="#q89">89</a><a href="#q90">90</a></nav>
+    <p class="small">先独立作答，再展开解析核对。计算题可以在纸上列式。</p>
+    <noscript><p>启用 JavaScript 可提交选项。也可以直接展开解析自查。</p></noscript>
+  <article class="question" id="q86" data-original-question="86">
+    <h3>第 86 题</h3>
+    <p class="question-stem">假设您正在运行一个滑动窗口检测器来查找图像中的文本。您的输入图像为1000x₁000像素。你将在两个尺寸下运行你的滑动窗口探测器，10x₁0和20x₂0（即，您将在大量10x₁0的窗口上运行分类器，以确定它们是否包含文本；同样的，也在20x₂0的窗口上），你将每次滑动你的探测器2像素。 那么，在单张1000x₁000的测试图像上，运行分类器的次数是多少？</p>
+    <form class="exercise choice-exercise" data-quiz data-answer="A">
+      <fieldset>
+        <legend>单选题</legend>
+        <label><input type="radio" name="q86-1" value="A"><span class="choice-letter">A.</span><span>500,000</span></label>
+        <label><input type="radio" name="q86-1" value="B"><span class="choice-letter">B.</span><span>1,000,000</span></label>
+        <label><input type="radio" name="q86-1" value="C"><span class="choice-letter">C.</span><span>100,000</span></label>
+        <label><input type="radio" name="q86-1" value="D"><span class="choice-letter">D.</span><span>250,000</span></label>
+      </fieldset>
+      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+    </form>
+    <details class="solution">
+      <summary>查看答案与解析</summary>
+      <div><p class="solution-key"><strong>答案</strong> A</p><p>若窗口完全在图内，每个方向位置数是 ⌊(图长−窗口长)/步长⌋+1。10×10 窗口有 496² 次，20×20 有 491² 次，合计 487097 次。按选项取最接近的 A，约 50 万次。</p><p class="source-note"><strong>题册勘误</strong> 选项给的是近似量级。按不越界、从第一个合法起点开始计算，精确次数为 487097。</p></div>
+    </details>
+  </article>
+  <article class="question" id="q87" data-original-question="87">
+    <h3>第 87 题</h3>
+    <p class="question-stem">假设您刚刚加入了一个产品团队，该团队使用训练数据开发了一个机器学习应用程序。您发现您可以选择雇用其他人员来帮助收集和标记数据。 你估计你得给每个标记工每小时10美元，每个标记工每分钟可以标记4个样本。 雇佣标记工给10000个新的训练数据打标签要花多少钱？</p>
+    <form class="exercise choice-exercise" data-quiz data-answer="A">
+      <fieldset>
+        <legend>单选题</legend>
+        <label><input type="radio" name="q87-1" value="A"><span class="choice-letter">A.</span><span>400</span></label>
+        <label><input type="radio" name="q87-1" value="B"><span class="choice-letter">B.</span><span>600</span></label>
+        <label><input type="radio" name="q87-1" value="C"><span class="choice-letter">C.</span><span>250</span></label>
+        <label><input type="radio" name="q87-1" value="D"><span class="choice-letter">D.</span><span>10,000</span></label>
+      </fieldset>
+      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+    </form>
+    <details class="solution">
+      <summary>查看答案与解析</summary>
+      <div><p class="solution-key"><strong>答案</strong> A</p><p>所需时间是 10000÷4=2500 分钟，即 41 又 2/3 小时。按每小时 10 美元计算，费用约 416.67 美元。没有精确选项，A 的 400 美元最接近。</p><p class="source-note"><strong>题册勘误</strong> 若按比例付费，精确金额约 416.67 美元。保留原选项并按最接近值判 A。</p></div>
+    </details>
+  </article>
+  <article class="question" id="q88" data-original-question="88">
+    <h3>第 88 题</h3>
+    <p class="question-stem">进行上限分析有什么好处？选出所有正确项</p>
+    <form class="exercise choice-exercise" data-quiz data-answer="BC" data-alternate="BCD" data-alternate-text="你找到了原题册的两个答案，也考虑了 D 的字面含义。展开解析可核对题目的表述差异。">
+      <fieldset>
+        <legend>多选题 · 选全后检查</legend>
+        <label><input type="checkbox" name="q88-1" value="A"><span class="choice-letter">A.</span><span>这是为算法提供额外训练数据的一种方法。</span></label>
+        <label><input type="checkbox" name="q88-1" value="B"><span class="choice-letter">B.</span><span>使用上限分析能帮助我们分析流水线的哪个部分对整个系统的提高最大。</span></label>
+        <label><input type="checkbox" name="q88-1" value="C"><span class="choice-letter">C.</span><span>使用上限分析能让我们知道到某个模块需不需要花精力做好;因为就算把这个模块精度提高到100%了,也无助于提高整个系统的精度。</span></label>
+        <label><input type="checkbox" name="q88-1" value="D"><span class="choice-letter">D.</span><span>使用上限分析并不会帮我们分析出哪个部分是high bias,哪个部分是high variance。</span></label>
+      </fieldset>
+      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+    </form>
+    <details class="solution">
+      <summary>查看答案与解析</summary>
+      <div><p class="solution-key"><strong>答案</strong> B、C</p><p>上限分析把某个阶段的输出换成正确答案，再看端到端指标变化，能找出提升最大的环节（B）。若某阶段替换后没有明显增益，暂时不优先投入（C）。A 错，因为这个过程用于诊断。D 按字面也合理，上限分析本身不能把问题进一步归因到高偏差或高方差。</p><p class="source-note"><strong>题册勘误</strong> 原答案 B、C 对应题干所问的好处。D 描述局限，按字面成立，选 B、C、D 也可结合解析自查。</p></div>
+    </details>
+  </article>
+  <article class="question" id="q89" data-original-question="89">
+    <h3>第 89 题</h3>
+    <p class="question-stem">假设您正在构建一个对象分类器，它将图像作为输入，并将该图像识别为包含汽车（y=1）或不包含汽车（y=0）。例如，这里有正例和一个负例：<img class="question-image" src="../assets/questions/image40.png" width="202" height="326" alt="上图是带汽车的正例照片，下图是不含汽车的负例照片。" loading="lazy" decoding="async">
+在仔细分析了算法的性能之后，你的结论是你需要更多正例（y=1）。下面哪一个可能是获得更多正面例子的好方法？</p>
+    <form class="exercise choice-exercise" data-quiz data-answer="A">
+      <fieldset>
+        <legend>单选题</legend>
+        <label><input type="radio" name="q89-1" value="A"><span class="choice-letter">A.</span><span>对现有训练集中的图像应用平移、扭曲和旋转。</span></label>
+        <label><input type="radio" name="q89-1" value="B"><span class="choice-letter">B.</span><span>选择两个汽车图像并对其进行平均以生成第三个示例。</span></label>
+        <label><input type="radio" name="q89-1" value="C"><span class="choice-letter">C.</span><span>从训练集中获取一些图像，并向每个像素添加随机高斯噪声。</span></label>
+        <label><input type="radio" name="q89-1" value="D"><span class="choice-letter">D.</span><span>为训练集中的每个图像制作两份副本；这会立即使训练集大小加倍。</span></label>
+      </fieldset>
+      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+    </form>
+    <details class="solution">
+      <summary>查看答案与解析</summary>
+      <div><p class="solution-key"><strong>答案</strong> A</p><p>适度平移、旋转或形变后，图片仍然含汽车，因此可增加有意义的正例。B 平均两张图片可能产生重影；C 随机噪声未必接近真实变化；D 重复原图没有增加样本多样性。</p></div>
+    </details>
+  </article>
+  <article class="question" id="q90" data-original-question="90">
+    <h3>第 90 题</h3>
+    <p class="question-stem">假设您有一个图片手写字符识别系统，其中有以下流水线：<img class="question-image" src="../assets/questions/image41.jpeg" width="644" height="90" alt="文字识别流水线依次为输入图片、文本检测、字符切分、字符识别。" loading="lazy" decoding="async">
+您已决定对此系统执行上限分析，并得到以下内容：<img class="question-image" src="../assets/questions/image42.png" width="252" height="106" alt="上限分析表列出原系统 70%、替换文本检测后 72%、继续替换字符切分后 82%、再替换字符识别后 100%。" loading="lazy" decoding="async">
+以下哪项陈述是正确的？</p>
+    <form class="exercise choice-exercise" data-quiz data-answer="AB">
+      <fieldset>
+        <legend>多选题 · 选全后检查</legend>
+        <label><input type="checkbox" name="q90-1" value="A"><span class="choice-letter">A.</span><span>提高字符识别系统的性能是可能的。</span></label>
+        <label><input type="checkbox" name="q90-1" value="B"><span class="choice-letter">B.</span><span>执行此处的上限分析，需要我们对其它的三个流程都加上标签来判断对错(ground-truth)。</span></label>
+        <label><input type="checkbox" name="q90-1" value="C"><span class="choice-letter">C.</span><span>最没有前途的部分是字符识别系统，因为它已经获得了100%的准确率。</span></label>
+        <label><input type="checkbox" name="q90-1" value="D"><span class="choice-letter">D.</span><span>最有前途的组件是文本检测系统，因为它的性能最低（72%），因此潜在增益最大。</span></label>
+      </fieldset>
+      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+    </form>
+    <details class="solution">
+      <summary>查看答案与解析</summary>
+      <div><p class="solution-key"><strong>答案</strong> A、B</p><p>从 70% 起，以正确输出逐步替换三个模块，整体指标依次变为 72%、82%、100%。边际增量为 2、10、18 个百分点，所以 A 正确，C、D 错。B 所说的中间结果标注用于获得各阶段的真实输出，并用最终标注评估端到端效果。</p><p class="source-note"><strong>题册勘误</strong> 表中 72%、82%、100% 是逐步使用正确输出后的系统准确率。100% 不是原字符识别模块本身的准确率。</p></div>
+    </details>
+  </article>
+  </section>
+  <section class="lesson-recall" aria-labelledby="recall-heading"><h2 id="recall-heading">考前回忆</h2><p>窗口计数先算单方向合法起点。上限分析比较相邻两次系统指标的差。</p></section>
+  <footer>
+    <p>遇到疑问，可以把题号和你卡住的步骤发给我。</p>
+    <p class="small">参考资料 <a href="https://home-wordpress.deeplearning.ai/wp-content/uploads/2022/03/andrew-ng-machine-learning-yearning.pdf">吴恩达《Machine Learning Yearning》</a> · <a href="https://cs229.stanford.edu/materials.html-withcomments">斯坦福 CS229 课程资料</a></p>
+    <nav aria-label="继续复习"><a href="0014-large-scale-learning.html">上一课 从梯度更新到大规模学习</a><a href="../reference/quick-review.html">考前速查与错题回顾</a></nav>
+  </footer>
+</main>
+</body>
+</html>

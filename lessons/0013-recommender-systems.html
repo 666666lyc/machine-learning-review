@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>协同过滤怎样预测未打分的物品 · 第 9 天</title>
+  <link rel="stylesheet" href="../assets/lesson.css">
+  <script defer src="../assets/quiz.js"></script>
+</head>
+<body>
+<div class="sitebar"><nav aria-label="课程导航">
+  <a class="course-brand" href="../index.html">机器学习复习</a>
+  <a href="../index.html#schedule">课程目录</a>
+  <a href="../reference/quick-review.html">考前速查</a>
+</nav></div>
+<main class="lesson">
+  <header class="lesson-intro">
+    <a class="day-label" href="../index.html#day-9">第 9 天</a>
+    <h1>协同过滤怎样预测未打分的物品</h1>
+    <p class="lede">你只给三部电影打过分，其他人也只看过其中一部分。网站怎样利用这些零零散散的评分推荐你没看过的电影？</p>
+    <nav class="lesson-nav" aria-label="本课内容"><a href="#concepts">知识点</a><a href="#example">带做例题</a><a href="#practice">动手练习</a><a href="#original">原题 76–80</a></nav>
+  </header>
+  <section id="concepts" aria-labelledby="concepts-heading">
+    <h2 id="concepts-heading">知识点</h2>
+    <div class="concept"><h3>把评分排成一张表</h3><p>行是物品 i，列是用户 j。y<sup>(i,j)</sup> 是实际评分，r(i,j)=1 表示这一格有评分，r(i,j)=0 表示没观察到。r 这张只含 0 和 1 的表叫<strong>掩码</strong>，用来指定哪些格参与计算。</p></div>
+    <div class="concept"><h3>用用户和物品的向量预测</h3><p>给物品 i 一个向量 x<sup>(i)</sup>，给用户 j 一个向量 θ<sup>(j)</sup>。每个向量可以理解为几种偏好方向上的数值。预测评分是内积 (θ<sup>(j)</sup>)ᵀx<sup>(i)</sup>。内容推荐可事先给物品选特征；协同过滤可以从各用户的共同评分中同时学出两组向量。</p><p>评分误差只在 r=1 的格子里计算。先把每格的预测减去实际评分，再平方，最后对已评分格子求平均。若训练目标另有正则化，它会惩罚过大的向量。两组向量同时从全零出发会使梯度为零，需要其他初始化。</p></div>
+    <div class="concept"><h3>处理不同量表与代码掩码</h3><p>1–5 星和 1–10 分应分别换到共同尺度，例如转成 0–1。「最低分」映成 0，「最高分」映成 1。再对齐用户和物品，未打分的格子可以空着。</p><p>在题库的 MATLAB / Octave 写法中，A*B 是矩阵乘法，C.*R 是对应位置相乘。R 为 0 的格子被抹掉，R 为 1 的原值保留。也可以用 C(R==1) 直接选出要加的格子。</p></div>
+  </section>
+  <section id="example" class="example" aria-labelledby="example-heading">
+    <h2 id="example-heading">跟着算一遍</h2>
+    <ol><li>给用户两个偏好系数 θ=(2,1)ᵀ，给电影两个特征 x=(1,0.5)ᵀ。预测分为 2×1+1×0.5=2.5。</li><li>该用户实际给了 4 分，这一格的平方误差是 (2.5−4)²=2.25。</li><li>另一个用户没有给这部电影评分。可以预测该格的值，但训练时这一格不参加评分误差。</li></ol>
+  </section>
+  <section id="practice" class="try" aria-labelledby="practice-heading">
+    <h2 id="practice-heading">自己试一题</h2>
+    <p>某平台最低 1 分、最高 10 分。7 分映射到 0–1 后是多少？</p>
+    <details class="solution"><summary>核对练习思路</summary><div><p>先减最低分，再除以全量程，(7−1)/(10−1)=2/3。</p></div></details>
+  </section>
+  <section id="original" aria-labelledby="questions-heading">
+    <h2 id="questions-heading">原题练习</h2>
+    <nav class="question-jump" aria-label="跳到本课原题"><a href="#q76">76</a><a href="#q77">77</a><a href="#q78">78</a><a href="#q79">79</a><a href="#q80">80</a></nav>
+    <p class="small">先独立作答，再展开解析核对。计算题可以在纸上列式。</p>
+    <noscript><p>启用 JavaScript 可提交选项。也可以直接展开解析自查。</p></noscript>
+  <article class="question" id="q76" data-original-question="76">
+    <h3>第 76 题</h3>
+    <p class="question-stem">一家书店收集 1 至 5 星的评分。协同过滤为用户 j 学到向量 θ⁽ʲ⁾，为每本书 i 学到向量 x⁽ⁱ⁾。r(i,j)=1 表示用户 j 实际给书 i 打过分，y⁽ⁱ,ʲ⁾ 是该分数，m 是所有已评分位置的总数。nᵤ 是用户数，n 是向量维度。以下哪些写法正确给出已评分位置上的均方误差？<img class="question-image" src="../assets/questions/image37.png" width="480" height="181" alt="第 76 题原求和公式选项图。下方提供文字版选项。" loading="lazy" decoding="async"></p>
+    <form class="exercise choice-exercise" data-quiz data-answer="BD">
+      <fieldset>
+        <legend>多选题 · 选全后检查</legend>
+        <label><input type="checkbox" name="q76-1" value="A"><span class="choice-letter">A.</span><span>(1/m)∑ⱼ∑ᵢ:r(i,j)=1 [(θ⁽ʲ⁾)ᵢxⱼ⁽ⁱ⁾−y⁽ⁱ,ʲ⁾]²。</span></label>
+        <label><input type="checkbox" name="q76-1" value="B"><span class="choice-letter">B.</span><span>(1/m)∑ⱼ∑ᵢ:r(i,j)=1 [∑ₖ (θ⁽ʲ⁾)ₖxₖ⁽ⁱ⁾−y⁽ⁱ,ʲ⁾]²。</span></label>
+        <label><input type="checkbox" name="q76-1" value="C"><span class="choice-letter">C.</span><span>(1/m)∑(ᵢ,ⱼ):r(i,j)=1 ∑ₖ [(θ⁽ʲ⁾)ₖxₖ⁽ⁱ⁾−y⁽ⁱ,ʲ⁾]²。</span></label>
+        <label><input type="checkbox" name="q76-1" value="D"><span class="choice-letter">D.</span><span>(1/m)∑(ᵢ,ⱼ):r(i,j)=1 [∑ₖ (θ⁽ʲ⁾)ₖxₖ⁽ⁱ⁾−y⁽ⁱ,ʲ⁾]²。</span></label>
+      </fieldset>
+      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+    </form>
+    <details class="solution">
+      <summary>查看答案与解析</summary>
+      <div><p class="solution-key"><strong>答案</strong> B、D</p><p>先对每个已评分位置算预测值 pᵢⱼ=∑ₖθⱼₖxᵢₖ，再算 (pᵢⱼ−yᵢⱼ)²，最后除以已评分数量 m。B 按用户遍历，D 直接遍历已评分的 (i,j)，范围相同。A 使用了错误的特征索引形式，C 把各维误差先分别平方。</p></div>
+    </details>
+  </article>
+  <article class="question" id="q77" data-original-question="77">
+    <h3>第 77 题</h3>
+    <p class="question-stem">在下列哪种情况下，协同过滤系统是最合适的学习算法（与线性或逻辑回归相比）？</p>
+    <form class="exercise choice-exercise" data-quiz data-answer="AD">
+      <fieldset>
+        <legend>多选题 · 选全后检查</legend>
+        <label><input type="checkbox" name="q77-1" value="A"><span class="choice-letter">A.</span><span>你经营一家在线书店，收集许多用户的评价。你想用它来识别哪些书彼此“相似”（即，如果一个用户喜欢某本书，那么她可能也喜欢哪些书？）</span></label>
+        <label><input type="checkbox" name="q77-1" value="B"><span class="choice-letter">B.</span><span>你管理一个在线书店，你有许多用户的书评。你想根据一本书的平均评分来预测预期的销售量（售出的书的数量）。</span></label>
+        <label><input type="checkbox" name="q77-1" value="C"><span class="choice-letter">C.</span><span>你是个艺术家，为你的客户手绘肖像。每个客户都会得到不同的肖像（他们自己）并给你1-5星级的评价反馈，每个客户最多购买1幅肖像。你想预测下一个客户会给你什么样的评分。</span></label>
+        <label><input type="checkbox" name="q77-1" value="D"><span class="choice-letter">D.</span><span>你开了一家服装店，出售许多款式和品牌的牛仔裤。你已经收集了经常购物者对不同款式和品牌的评论，你想用这些评论为那些购物者提供你认为他们最有可能购买的牛仔裤的折扣</span></label>
+      </fieldset>
+      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+    </form>
+    <details class="solution">
+      <summary>查看答案与解析</summary>
+      <div><p class="solution-key"><strong>答案</strong> A、D</p><p>A、D 都利用许多用户对许多物品的反馈推断相似物品或个人喜好。B 是由平均评分预测销量的回归；C 给每名顾客一个不同项目且只评一次，缺少判断相似偏好的交叉评分。</p></div>
+    </details>
+  </article>
+  <article class="question" id="q78" data-original-question="78">
+    <h3>第 78 题</h3>
+    <p class="question-stem">你经营着一个电影公司，想要建立一个基于协同过滤的电影推荐系统。有三个受欢迎的评论网站（我们称之为A、B和C），用户可以去给电影打分。你刚刚收购了三家经营这些网站的公司，希望将三个公司的数据集合并在一起，以构建一个单一/统一的系统。 在A网站上，用户将一部电影分为1到5颗星。在B网站上，用户的排名是1-10分，允许使用小数（如7.5）。在C网站，收视率从1到100。您还拥有足够的信息来识别一个网站上的用户/电影和另一个网站上的用户/电影。 以下哪个陈述是正确的？</p>
+    <form class="exercise choice-exercise" data-quiz data-answer="A">
+      <fieldset>
+        <legend>单选题</legend>
+        <label><input type="radio" name="q78-1" value="A"><span class="choice-letter">A.</span><span>您可以将三个数据集合并为一个数据集，但是您应该首先规范化每个数据集的评级（比如将每个数据集的评级重新调整为0-1范围）。</span></label>
+        <label><input type="radio" name="q78-1" value="B"><span class="choice-letter">B.</span><span>只要在合并数据后执行平均规格化和特征缩放，就可以将所有三个训练集合并为一个。</span></label>
+        <label><input type="radio" name="q78-1" value="C"><span class="choice-letter">C.</span><span>假设在一个数据库中至少有一个电影/用户没有出现在第二个数据库中，那么就没有合并这些数据集的合理方法，因为缺少数据。</span></label>
+        <label><input type="radio" name="q78-1" value="D"><span class="choice-letter">D.</span><span>无法合并这些网站的数据。你必须建立三个独立的推荐系统。</span></label>
+      </fieldset>
+      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+    </form>
+    <details class="solution">
+      <summary>查看答案与解析</summary>
+      <div><p class="solution-key"><strong>答案</strong> A</p><p>三个网站的同样数字含义不同，应先把各自评分映射到共同尺度。例如令 s′=(s−最低分)/(最高分−最低分)。之后对齐同一用户与电影；遗漏评分可以在协同过滤中跳过，故 C、D 不成立，B 的合并后统一缩放也不能先消除站点尺度差异。</p></div>
+    </details>
+  </article>
+  <article class="question" id="q79" data-original-question="79">
+    <h3>第 79 题</h3>
+    <p class="question-stem">以下哪项是协作过滤系统的正确选择？选出所有正确项</p>
+    <form class="exercise choice-exercise" data-quiz data-answer="AC">
+      <fieldset>
+        <legend>多选题 · 选全后检查</legend>
+        <label><input type="checkbox" name="q79-1" value="A"><span class="choice-letter">A.</span><span>基于内容的推荐算法的代价函数是<img class="question-image" src="../assets/questions/image38.png" width="551" height="41" alt="基于内容的推荐目标函数，包含已评分位置的平方误差和 L2 正则化。" loading="lazy" decoding="async">假设只有一个用户，他对训练集中的每一部电影都进行了分级。这意味着对于每个i,j，有nu=1和r(i,j)=1。在这种情况下，成本函数J(θ)等价于用于正则化线性回归的函数。</span></label>
+        <label><input type="checkbox" name="q79-1" value="B"><span class="choice-letter">B.</span><span>利用梯度下降训练协同过滤系统时，可以将所有参数（x⁽ⁱ⁾,θ(i)）初始化为零。</span></label>
+        <label><input type="checkbox" name="q79-1" value="C"><span class="choice-letter">C.</span><span>如果你有一个用户对某些产品的评级数据集，你可以使用这些数据来预测他对没有评级的产品的偏好。</span></label>
+        <label><input type="checkbox" name="q79-1" value="D"><span class="choice-letter">D.</span><span>要使用协作过滤，您需要为数据集中的每个项目（例如，电影）手动设计一个特征向量，该向量描述该项目最重要的属性。</span></label>
+      </fieldset>
+      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+    </form>
+    <details class="solution">
+      <summary>查看答案与解析</summary>
+      <div><p class="solution-key"><strong>答案</strong> A、C</p><p>A 只有一位用户且物品特征已知，目标是用这些特征做带 L2 惩罚的线性评分预测。C 可以预测未评分位置。B 中全部从 0 开始会使双方梯度都为 0；D 中特征向量可以从评分共同学出。</p></div>
+    </details>
+  </article>
+  <article class="question" id="q80" data-original-question="80">
+    <h3>第 80 题</h3>
+    <p class="question-stem">假设有两个矩阵A,B，其中A是5x₃，B是3x5。它们的乘积是C=AB，一个5x5矩阵。此外，还有一个5x5矩阵R，其中每个条目都是0或1。你想找到所有元素C(i,j)的和，对应的R(i,j)是1，忽略所有R(i,j)=0的元素C(i,j)。一种方法是使用以下代码：<img class="question-image" src="../assets/questions/image39.png" width="414" height="222" alt="MATLAB 或 Octave 示例代码，先计算 C=A*B，再遍历 R，若元素为 1 就累加 C 的对应值。" loading="lazy" decoding="async">
+下面哪一段代码也能正确计算出这个总数？选出所有正确项</p>
+    <form class="exercise choice-exercise" data-quiz data-answer="AB">
+      <fieldset>
+        <legend>多选题 · 选全后检查</legend>
+        <label><input type="checkbox" name="q80-1" value="A"><span class="choice-letter">A.</span><span>total = sum(sum((A * B) .* R))</span></label>
+        <label><input type="checkbox" name="q80-1" value="B"><span class="choice-letter">B.</span><span>C = A * B; total = sum(sum(C(R == 1)));</span></label>
+        <label><input type="checkbox" name="q80-1" value="C"><span class="choice-letter">C.</span><span>C = (A * B) * R; total = sum(C(:));</span></label>
+        <label><input type="checkbox" name="q80-1" value="D"><span class="choice-letter">D.</span><span>total = sum(sum(A(R == 1) * B(R == 1)));</span></label>
+      </fieldset>
+      <div class="quiz-actions"><button type="submit">检查答案</button><p class="feedback" role="status"></p></div>
+    </form>
+    <details class="solution">
+      <summary>查看答案与解析</summary>
+      <div><p class="solution-key"><strong>答案</strong> A、B</p><p>令 C=A·B。A 的 .* 逐元素乘，用二值掩码把不计入的位置变成 0，再求和；B 直接挑出 R=1 的位置求和。C 的普通矩阵乘法会混合元素，D 在乘法前以 5×5 掩码索引不同形状的矩阵。</p><p class="source-note"><strong>题册勘误</strong> 原题 D 少右括号。排版时补齐，仍保留其原有的索引思路。</p></div>
+    </details>
+  </article>
+  </section>
+  <section class="lesson-recall" aria-labelledby="recall-heading"><h2 id="recall-heading">考前回忆</h2><p>预测是用户和物品向量的内积。误差只在已评分处计入，缺评分不填成零。</p></section>
+  <footer>
+    <p>遇到疑问，可以把题号和你卡住的步骤发给我。</p>
+    <p class="small">参考资料 <a href="https://developers.google.com/machine-learning/recommendation/collaborative/basics">Google 协同过滤课程</a> · <a href="https://developers.google.com/machine-learning/recommendation/collaborative/matrix">Google 矩阵分解课程</a></p>
+    <nav aria-label="继续复习"><a href="0012-anomaly-detection.html">上一课 异常检测从常见模式找异常</a><a href="0014-large-scale-learning.html">下一课 从梯度更新到大规模学习</a></nav>
+  </footer>
+</main>
+</body>
+</html>
